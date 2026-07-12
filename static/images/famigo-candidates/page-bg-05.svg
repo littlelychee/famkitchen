@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1480" viewBox="0 0 720 1480" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗整页简笔背景候选 5</title>
+  <desc id="desc">透明底极简线稿风背景，中间偏下是法米狗轮廓、餐叉汤勺和少量低透明爪印。</desc>
+  <defs>
+    <g id="paw">
+      <ellipse cx="0" cy="13" rx="12" ry="16"/>
+      <circle cx="-18" cy="0" r="7.5"/>
+      <circle cx="0" cy="-9" r="7.5"/>
+      <circle cx="18" cy="0" r="7.5"/>
+    </g>
+  </defs>
+  <rect width="720" height="1480" fill="none"/>
+  <g fill="#d8b062" opacity="0.055">
+    <use href="#paw" x="164" y="792" transform="rotate(-18 164 792)"/>
+    <use href="#paw" x="565" y="891" transform="rotate(19 565 891)"/>
+    <use href="#paw" x="122" y="1212" transform="rotate(17 122 1212)"/>
+    <use href="#paw" x="574" y="1250" transform="rotate(-17 574 1250)"/>
+  </g>
+  <g transform="translate(120 800)" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.18">
+    <path d="M79 247c-41-55-36-138 24-174 58-35 134 11 134 11s77-48 137-3c56 42 48 126 3 169" stroke="#7a4324" stroke-width="11"/>
+    <path d="M112 83c-69 37-83 134-30 168 50 32 102-31 112-106" stroke="#e9aa59" stroke-width="27"/>
+    <path d="M366 88c66 43 75 141 20 171-51 28-98-37-104-112" stroke="#e9aa59" stroke-width="27"/>
+    <path d="M204 67c20-36 65-43 82-16 17 29-17 55-55 65" stroke="#7a4324" stroke-width="11"/>
+    <path d="M197 212h.1M285 212h.1" stroke="#5c2b14" stroke-width="17"/>
+    <path d="M241 248c-14 26-47 27-64 2M241 248c14 26 47 27 64 2" stroke="#5c2b14" stroke-width="9"/>
+    <path d="M241 232h2" stroke="#5c2b14" stroke-width="21"/>
+    <path d="M70 410c100 43 249 43 349 0" stroke="#d8b062" stroke-width="12"/>
+    <path d="M38 385c121 44 311 44 432 0" stroke="#96ad69" stroke-width="18"/>
+    <path d="M33 84c-25-39-25-75 0-107M444 88c24-40 23-76-3-108" stroke="#96ad69" stroke-width="11"/>
+    <path d="M444 88l30-24M444 88l34 12" stroke="#96ad69" stroke-width="9"/>
+  </g>
+  <path d="M205 705c102-50 208-50 310 0" fill="none" stroke="#ffd166" stroke-width="8" stroke-linecap="round" opacity="0.07"/>
+</svg>

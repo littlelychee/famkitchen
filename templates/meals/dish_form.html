@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-8">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <a href="{% url 'meals:dish_list' %}" class="btn btn-outline btn-sm">返回菜品库</a>
+    {% if not is_edit %}
+      <a href="{% url 'meals:category_create' %}?next=dish_create" class="btn btn-outline btn-sm">新增分类</a>
+    {% endif %}
+  </div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{{ page_title }}</h1>
+      {% if is_edit %}
+        <p class="text-sm text-stone-500">正在修改 {{ family.name }} 菜品库里的“{{ dish.name }}”。</p>
+      {% else %}
+        <p class="text-sm text-stone-500">菜品会保存到 {{ family.name }} 的共享菜品库。</p>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-error">
+            <span>{{ form.non_field_errors|striptags }}</span>
+          </div>
+        {% endif %}
+        {% if is_edit %}
+          <div class="rounded-lg border border-base-300 bg-base-200 p-3">
+            <div class="mb-2 text-sm font-medium">当前图片</div>
+            {% if dish.image %}
+              <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-44 w-full rounded-lg object-cover sm:h-64">
+              <button name="clear_image" value="1" class="btn btn-outline btn-sm mt-3">清除当前图片并保存</button>
+            {% else %}
+              <img src="{% static dish.default_image_path %}" alt="默认菜品图片" class="h-44 w-full rounded-lg object-cover sm:h-64">
+              <p class="mt-2 text-xs text-stone-500">当前没有上传图片，正在使用默认图。</p>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <div class="form-control w-full">
+          <label class="label" for="{{ form.name.id_for_label }}">
+            <span class="label-text">{{ form.name.label }}</span>
+            <span class="label-text-alt text-error">必填</span>
+          </label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="label">
+              <span class="label-text-alt text-error">{{ form.name.errors|striptags }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label" for="{{ form.calories.id_for_label }}">
+            <span class="label-text">{{ form.calories.label }}</span>
+          </label>
+          {{ form.calories }}
+          {% if form.calories.errors %}
+            <div class="label">
+              <span class="label-text-alt text-error">{{ form.calories.errors|striptags }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-control w-full" data-dish-category-picker>
+          <div class="label">
+            <span class="label-text">类别标签</span>
+          </div>
+
+          <div class="category-picker-hidden" aria-hidden="true">
+            {{ form.categories }}
+          </div>
+
+          <div class="category-picker">
+            <div class="flex flex-wrap gap-2">
+              {% for category in category_picker_categories %}
+                <button type="button" class="category-chip category-chip-secondary" data-category-chip data-category-id="{{ category.id }}" aria-pressed="false">{{ category.name }}</button>
+              {% empty %}
+                <span class="text-xs text-stone-500">还没有类别标签</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% if form.categories.errors %}
+            <div class="label">
+              <span class="label-text-alt text-error">
+                {{ form.categories.errors|striptags }}
+              </span>
+            </div>
+          {% endif %}
+        </div>
+
+        <details class="dish-detail-settings">
+          <summary>
+            <span class="inline-flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+              <span>详细设置</span>
+            </span>
+            <i data-lucide="chevron-down" aria-hidden="true"></i>
+          </summary>
+          <div class="setting-toggle-grid">
+            <label class="setting-toggle-card" data-setting-toggle>
+              {{ form.supports_spice }}
+              <img src="{% static 'images/meal-customization/spice-medium.svg' %}" alt="" aria-hidden="true">
+              <span class="min-w-0">
+                <span class="block text-sm font-bold">可调辣度</span>
+                <span class="block text-xs text-stone-500">排餐时可选不辣、微辣、中辣、爆辣。</span>
+              </span>
+            </label>
+            <label class="setting-toggle-card" data-setting-toggle>
+              {{ form.supports_ice }}
+              <img src="{% static 'images/meal-customization/ice-medium.svg' %}" alt="" aria-hidden="true">
+              <span class="min-w-0">
+                <span class="block text-sm font-bold">可调冰量</span>
+                <span class="block text-xs text-stone-500">排餐时可选去冰、少冰、中冰、多冰。</span>
+              </span>
+            </label>
+          </div>
+          {% if form.supports_spice.errors or form.supports_ice.errors %}
+            <div class="px-3 pb-3 text-xs text-error">
+              {{ form.supports_spice.errors|striptags }} {{ form.supports_ice.errors|striptags }}
+            </div>
+          {% endif %}
+        </details>
+
+        <div class="form-control w-full">
+          <label class="label" for="{{ form.image.id_for_label }}">
+            <span class="label-text">{{ form.image.label }}</span>
+          </label>
+          {{ form.image }}
+          {% if form.image.errors %}
+            <div class="label">
+              <span class="label-text-alt text-error">{{ form.image.errors|striptags }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label" for="{{ form.description.id_for_label }}">
+            <span class="label-text">{{ form.description.label }}</span>
+          </label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="label">
+              <span class="label-text-alt text-error">{{ form.description.errors|striptags }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 sm:flex">
+          <button class="btn btn-primary">{{ submit_label }}</button>
+          <a href="{% url 'meals:dish_list' %}" class="btn btn-outline">返回菜品库</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if is_edit %}
+    <div class="card mt-4 border border-error/30 bg-base-100 shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title text-lg text-error">删除菜品</h2>
+        <p class="text-sm text-stone-500">删除后，这个菜品的排餐记录和上传图片也会一起清理。</p>
+        <form method="post" action="{% url 'meals:dish_delete' dish.id %}" onsubmit="return confirm('确认删除 {{ dish.name|escapejs }}？');">
+          {% csrf_token %}
+          <button class="btn btn-error icon-btn" aria-label="删除 {{ dish.name }}" title="删除 {{ dish.name }}">
+            <i data-lucide="trash-2" aria-hidden="true"></i>
+            <span class="sr-only">删除 {{ dish.name }}</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</section>
+
+<script>
+  (() => {
+    const picker = document.querySelector("[data-dish-category-picker]");
+    if (!picker) return;
+
+    const categoryInputs = Array.from(picker.querySelectorAll('input[name="categories"]'));
+    const categoryInputByValue = new Map(categoryInputs.map((input) => [input.value, input]));
+    const categoryChips = Array.from(picker.querySelectorAll("[data-category-chip]"));
+
+    function setChecked(input, checked) {
+      if (!input || input.checked === checked) return;
+      input.checked = checked;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function refresh() {
+      const selectedChips = categoryChips.filter((chip) => {
+        const input = categoryInputByValue.get(chip.dataset.categoryId);
+        return Boolean(input?.checked);
+      });
+      const hasSelection = selectedChips.length > 0;
+      categoryChips.forEach((chip) => {
+        const input = categoryInputByValue.get(chip.dataset.categoryId);
+        const isSelected = Boolean(input?.checked);
+        chip.classList.toggle("is-selected", isSelected);
+        chip.disabled = hasSelection && !isSelected;
+        chip.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      });
+    }
+
+    categoryChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        if (chip.disabled) return;
+        const input = categoryInputByValue.get(chip.dataset.categoryId);
+        if (!input) return;
+        if (input.checked) {
+          setChecked(input, false);
+        } else {
+          categoryInputs.forEach((categoryInput) => setChecked(categoryInput, false));
+          setChecked(input, true);
+        }
+        refresh();
+      });
+    });
+
+    refresh();
+  })();
+
+  (() => {
+    document.querySelectorAll("[data-setting-toggle]").forEach((card) => {
+      const input = card.querySelector('input[type="checkbox"]');
+      if (!input) return;
+
+      const refresh = () => {
+        card.classList.toggle("is-selected", input.checked);
+      };
+
+      input.addEventListener("change", refresh);
+      refresh();
+    });
+  })();
+</script>
+{% endblock %}

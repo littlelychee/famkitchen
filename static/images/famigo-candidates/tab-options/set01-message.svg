@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">候选 1 消息</title>
+  <desc id="desc">温暖信封上有提醒铃和小餐盘，代表家庭排餐消息。</desc>
+  <rect width="96" height="96" fill="none"/>
+  <rect x="14" y="25" width="68" height="50" rx="14" fill="#fff8ea" stroke="#74401f" stroke-width="4"/>
+  <path d="M18 35l30 21 30-21" fill="none" stroke="#d7ad60" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 69l17-15M66 69L49 54" fill="none" stroke="#d7ad60" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M58 26c0-9 6-15 14-15s14 6 14 15c0 8 4 11 7 14H51c3-3 7-6 7-14Z" fill="#fffdf7" stroke="#74401f" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M66 44c1.2 4 3.2 6 6 6s4.8-2 6-6" fill="none" stroke="#8fac6b" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="72" cy="24" r="6" fill="#ffd166" stroke="#d7ad60" stroke-width="2.5"/>
+  <circle cx="35" cy="49" r="9" fill="#fffdf7" stroke="#8fac6b" stroke-width="3"/>
+  <circle cx="35" cy="49" r="3.5" fill="#f28f7c"/>
+</svg>

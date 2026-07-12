@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}分享排餐 - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6">
+  <div class="mb-4 flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-xl font-semibold">分享排餐</h1>
+      <p class="mt-1 text-sm text-stone-500">{{ family.name }} · {{ selected_date|date:"Y-m-d" }}</p>
+    </div>
+    <a href="{% url 'meals:meal_plan' %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-outline btn-sm shrink-0">
+      <i data-lucide="chevron-left" aria-hidden="true"></i>
+      <span>返回</span>
+    </a>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div class="grid gap-3">
+      {% for section in meal_sections %}
+        <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <h2 class="text-base font-bold">{{ section.label }}</h2>
+            <span class="badge badge-outline">{{ section.items|length }} 道</span>
+          </div>
+          <div class="grid gap-2">
+            {% for item in section.items %}
+              <div class="rounded-lg bg-base-200 px-3 py-2 text-sm">
+                <div class="font-semibold">{{ item.name }}{% if item.quantity > 1 %} x{{ item.quantity }}{% endif %}</div>
+                {% if item.spice_level_label or item.ice_level_label or item.note %}
+                  <div class="mt-1 text-xs text-stone-500">
+                    {% if item.spice_level_label %}{{ item.spice_level_label }}{% endif %}
+                    {% if item.ice_level_label %}{% if item.spice_level_label %} · {% endif %}{{ item.ice_level_label }}{% endif %}
+                    {% if item.note %}{% if item.spice_level_label or item.ice_level_label %} · {% endif %}{{ item.note }}{% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            {% empty %}
+              <div class="rounded-lg border border-dashed border-base-300 bg-base-100/70 px-3 py-4 text-center text-sm text-stone-500">
+                还没有安排。
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+
+    <form method="post" class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm lg:sticky lg:top-28 lg:self-start">
+      {% csrf_token %}
+      <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+      <div class="mb-3 flex items-center gap-2">
+        <span class="inline-grid h-9 w-9 place-items-center rounded-full bg-base-200 text-stone-700">
+          <i data-lucide="mail" aria-hidden="true"></i>
+        </span>
+        <div>
+          <h2 class="font-bold">发送给谁</h2>
+          <p class="text-xs text-stone-500">会生成站内提醒，并给有邮箱的成员发邮件</p>
+        </div>
+      </div>
+
+      <div class="grid gap-2">
+        {% for membership in recipients %}
+          <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
+            <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary">
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-bold">{{ membership.user.username }}</span>
+              <span class="block truncate text-xs text-stone-500">
+                {% if membership.user.email %}
+                  {{ membership.user.email }}
+                {% else %}
+                  未填写邮箱，仅站内提醒
+                {% endif %}
+              </span>
+            </span>
+          </label>
+        {% empty %}
+          <div class="rounded-lg border border-dashed border-base-300 p-4 text-center text-sm text-stone-500">
+            当前家庭还没有其他成员。
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="btn btn-primary mt-4 w-full" {% if not recipients %}disabled{% endif %}>
+        <i data-lucide="send" aria-hidden="true"></i>
+        <span>发送排餐提醒</span>
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

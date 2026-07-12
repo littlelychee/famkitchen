@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>法米狗候选素材包</title>
+  <style>
+    :root {
+      --page: #f7f5f1;
+      --card: #fffefa;
+      --ink: #211d19;
+      --muted: #6f6861;
+      --line: #ddd6cb;
+      --brand: #ffd166;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 30px 18px 56px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 254, 250, 0.94);
+      padding: 14px;
+      box-shadow: 0 12px 32px rgba(33, 29, 25, 0.08);
+    }
+
+    .label {
+      display: flex;
+      min-height: 28px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .path {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 154px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(221, 214, 203, 0.7);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.7), rgba(244,241,235,0.38)),
+        #f7f5f1;
+    }
+
+    .logo-stage img {
+      width: min(100%, 420px);
+      height: auto;
+    }
+
+    .slogan-stage {
+      min-height: 90px;
+      padding: 10px;
+    }
+
+    .slogan-stage img {
+      width: min(100%, 640px);
+      height: auto;
+    }
+
+    .business-sample {
+      display: grid;
+      width: 100%;
+      min-height: 168px;
+      align-content: start;
+      gap: 12px;
+      padding: 18px;
+      background-color: #fffefa;
+      background-size: 360px 240px;
+      background-repeat: repeat;
+    }
+
+    .business-sample h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .business-sample p {
+      max-width: 30ch;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .sample-button {
+      display: inline-flex;
+      width: fit-content;
+      min-height: 38px;
+      align-items: center;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #4a3100;
+      padding: 0 16px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .phone-grid {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .phone-frame {
+      width: min(100%, 230px);
+      height: 438px;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 8px solid #2d2924;
+      border-radius: 28px;
+      background-color: #f7f5f1;
+      background-position: center top;
+      background-size: cover;
+      box-shadow: 0 16px 38px rgba(33, 29, 25, 0.18);
+    }
+
+    .fake-top {
+      height: 86px;
+      border-bottom: 1px solid rgba(220, 215, 206, 0.8);
+      background: rgba(255, 254, 250, 0.88);
+    }
+
+    .fake-content {
+      display: grid;
+      gap: 10px;
+      padding: 16px 14px;
+    }
+
+    .fake-pill {
+      height: 42px;
+      border-radius: 8px;
+      background: rgba(255, 209, 102, 0.9);
+    }
+
+    .fake-panel {
+      height: 96px;
+      border: 1px solid rgba(220, 215, 206, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 254, 250, 0.82);
+    }
+
+    @media (min-width: 860px) {
+      .wide {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>法米狗候选素材包</h1>
+    <p class="intro">这一页只用于挑选素材，暂时没有接入真实页面。大 logo 为统一 420x132，标语横幅为统一 640x72，业务容器纹理是透明底，整页背景是 720x1480。</p>
+
+    <h2>1. 顶部大 logo</h2>
+    <div class="grid">
+      <section class="card wide">
+        <div class="label"><span>大 logo 01 · 暖碗小厨</span><span class="path">logo-01.svg</span></div>
+        <div class="stage logo-stage"><img src="../images/famigo-candidates/logo-01.svg" alt="大 logo 01"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>大 logo 02 · 米红御印</span><span class="path">logo-02.svg</span></div>
+        <div class="stage logo-stage"><img src="../images/famigo-candidates/logo-02.svg" alt="大 logo 02"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>大 logo 03 · 浅绿餐桌</span><span class="path">logo-03.svg</span></div>
+        <div class="stage logo-stage"><img src="../images/famigo-candidates/logo-03.svg" alt="大 logo 03"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>大 logo 04 · 料理屋招牌</span><span class="path">logo-04.svg</span></div>
+        <div class="stage logo-stage"><img src="../images/famigo-candidates/logo-04.svg" alt="大 logo 04"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>大 logo 05 · 极简线稿</span><span class="path">logo-05.svg</span></div>
+        <div class="stage logo-stage"><img src="../images/famigo-candidates/logo-05.svg" alt="大 logo 05"></div>
+      </section>
+    </div>
+
+    <h2>2. 顶部标语薄横幅</h2>
+    <div class="grid">
+      <section class="card wide">
+        <div class="label"><span>标语 01 · 暖米爪印</span><span class="path">slogan-01.svg</span></div>
+        <div class="stage slogan-stage"><img src="../images/famigo-candidates/slogan-01.svg" alt="标语 01"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>标语 02 · 浅绿饭桌</span><span class="path">slogan-02.svg</span></div>
+        <div class="stage slogan-stage"><img src="../images/famigo-candidates/slogan-02.svg" alt="标语 02"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>标语 03 · 米红小狗</span><span class="path">slogan-03.svg</span></div>
+        <div class="stage slogan-stage"><img src="../images/famigo-candidates/slogan-03.svg" alt="标语 03"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>标语 04 · 金色菜单</span><span class="path">slogan-04.svg</span></div>
+        <div class="stage slogan-stage"><img src="../images/famigo-candidates/slogan-04.svg" alt="标语 04"></div>
+      </section>
+      <section class="card wide">
+        <div class="label"><span>标语 05 · 极简线稿</span><span class="path">slogan-05.svg</span></div>
+        <div class="stage slogan-stage"><img src="../images/famigo-candidates/slogan-05.svg" alt="标语 05"></div>
+      </section>
+    </div>
+
+    <h2>3. 业务容器浅背景</h2>
+    <div class="grid">
+      <section class="card">
+        <div class="label"><span>容器背景 01</span><span class="path">card-paws-01.svg</span></div>
+        <div class="stage">
+          <div class="business-sample" style="background-image:url('../images/famigo-candidates/card-paws-01.svg')">
+            <h3>菜品库</h3>
+            <p>白色业务容器上能看到一点点法米狗小爪印，但文字和按钮仍然清楚。</p>
+            <span class="sample-button">新增菜品</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>容器背景 02</span><span class="path">card-paws-02.svg</span></div>
+        <div class="stage">
+          <div class="business-sample" style="background-image:url('../images/famigo-candidates/card-paws-02.svg')">
+            <h3>菜品库</h3>
+            <p>白色业务容器上能看到一点点法米狗小爪印，但文字和按钮仍然清楚。</p>
+            <span class="sample-button">新增菜品</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>容器背景 03</span><span class="path">card-paws-03.svg</span></div>
+        <div class="stage">
+          <div class="business-sample" style="background-image:url('../images/famigo-candidates/card-paws-03.svg')">
+            <h3>菜品库</h3>
+            <p>白色业务容器上能看到一点点法米狗小爪印，但文字和按钮仍然清楚。</p>
+            <span class="sample-button">新增菜品</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>容器背景 04</span><span class="path">card-paws-04.svg</span></div>
+        <div class="stage">
+          <div class="business-sample" style="background-image:url('../images/famigo-candidates/card-paws-04.svg')">
+            <h3>菜品库</h3>
+            <p>白色业务容器上能看到一点点法米狗小爪印，但文字和按钮仍然清楚。</p>
+            <span class="sample-button">新增菜品</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>容器背景 05</span><span class="path">card-paws-05.svg</span></div>
+        <div class="stage">
+          <div class="business-sample" style="background-image:url('../images/famigo-candidates/card-paws-05.svg')">
+            <h3>菜品库</h3>
+            <p>白色业务容器上能看到一点点法米狗小爪印，但文字和按钮仍然清楚。</p>
+            <span class="sample-button">新增菜品</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <h2>4. 整页简笔背景</h2>
+    <div class="grid phone-grid">
+      <section class="card">
+        <div class="label"><span>整页背景 01</span><span class="path">page-bg-01.svg</span></div>
+        <div class="phone-frame" style="background-image:url('../images/famigo-candidates/page-bg-01.svg')">
+          <div class="fake-top"></div>
+          <div class="fake-content"><div class="fake-pill"></div><div class="fake-panel"></div><div class="fake-panel"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>整页背景 02</span><span class="path">page-bg-02.svg</span></div>
+        <div class="phone-frame" style="background-image:url('../images/famigo-candidates/page-bg-02.svg')">
+          <div class="fake-top"></div>
+          <div class="fake-content"><div class="fake-pill"></div><div class="fake-panel"></div><div class="fake-panel"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>整页背景 03</span><span class="path">page-bg-03.svg</span></div>
+        <div class="phone-frame" style="background-image:url('../images/famigo-candidates/page-bg-03.svg')">
+          <div class="fake-top"></div>
+          <div class="fake-content"><div class="fake-pill"></div><div class="fake-panel"></div><div class="fake-panel"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>整页背景 04</span><span class="path">page-bg-04.svg</span></div>
+        <div class="phone-frame" style="background-image:url('../images/famigo-candidates/page-bg-04.svg')">
+          <div class="fake-top"></div>
+          <div class="fake-content"><div class="fake-pill"></div><div class="fake-panel"></div><div class="fake-panel"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="label"><span>整页背景 05</span><span class="path">page-bg-05.svg</span></div>
+        <div class="phone-frame" style="background-image:url('../images/famigo-candidates/page-bg-05.svg')">
+          <div class="fake-top"></div>
+          <div class="fake-content"><div class="fake-pill"></div><div class="fake-panel"></div><div class="fake-panel"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

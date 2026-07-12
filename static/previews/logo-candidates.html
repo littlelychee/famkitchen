@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私家御膳房 logo 候选</title>
+  <style>
+    :root {
+      --page: #f7f5f1;
+      --ink: #211d19;
+      --muted: #6f6861;
+      --line: #ddd6cb;
+      --card: #fffefa;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(33, 29, 25, 0.08);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 150px;
+      place-items: center;
+      border-radius: 12px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.6), rgba(244,241,235,0.3)),
+        var(--page);
+    }
+
+    img {
+      display: block;
+      width: min(100%, 420px);
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>私家御膳房 logo 候选</h1>
+    <p>都是长方形浅色调 SVG，边缘已经做了柔和渐变，适合放在网页顶部。</p>
+    <div class="grid">
+      <section class="card">
+        <h2>候选 1 · 绿金餐盖</h2>
+        <div class="stage"><img src="../images/logo-candidates/private-kitchen-01.svg" alt="候选 1"></div>
+      </section>
+      <section class="card">
+        <h2>候选 2 · 米红御印</h2>
+        <div class="stage"><img src="../images/logo-candidates/private-kitchen-02.svg" alt="候选 2"></div>
+      </section>
+      <section class="card">
+        <h2>候选 3 · 瓷蓝汤碗</h2>
+        <div class="stage"><img src="../images/logo-candidates/private-kitchen-03.svg" alt="候选 3"></div>
+      </section>
+      <section class="card">
+        <h2>候选 4 · 杏金筷叶</h2>
+        <div class="stage"><img src="../images/logo-candidates/private-kitchen-04.svg" alt="候选 4"></div>
+      </section>
+      <section class="card">
+        <h2>候选 5 · 浅墨庭窗</h2>
+        <div class="stage"><img src="../images/logo-candidates/private-kitchen-05.svg" alt="候选 5"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

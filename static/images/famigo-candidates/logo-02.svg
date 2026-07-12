@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗私厨大 logo 候选 2</title>
+  <desc id="desc">米红御印风横向招牌，左侧小狗印章，右侧写法米狗和私家御膳房。</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff5ea"/>
+      <stop offset="0.55" stop-color="#fffdf7"/>
+      <stop offset="1" stop-color="#f8f1e9"/>
+    </linearGradient>
+    <radialGradient id="sealGlow" cx="46%" cy="43%" r="64%">
+      <stop offset="0" stop-color="#ffe0d0" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#fff7ed" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-12%" y="-34%" width="124%" height="172%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#6b3124" flood-opacity="0.13"/>
+    </filter>
+  </defs>
+  <rect width="420" height="132" fill="none"/>
+  <rect x="15" y="14" width="390" height="104" rx="27" fill="url(#panel)" filter="url(#shadow)"/>
+  <circle cx="90" cy="67" r="47" fill="url(#sealGlow)"/>
+  <g transform="translate(46 29)">
+    <rect x="0" y="0" width="74" height="74" rx="20" fill="#fff7ed" stroke="#d95b45" stroke-width="2.4"/>
+    <path d="M11 14c13-8 38-8 52 0M11 59c15 7 37 7 52 0" fill="none" stroke="#d95b45" stroke-width="2.4" stroke-linecap="round" opacity="0.65"/>
+    <path d="M22 38c-9-7-10-22 1-28 8-5 19 4 19 4s12-8 22-1c9 7 5 21-2 27" fill="#fffdf5" stroke="#7a3d1e" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M24 14c-12 8-16 25-7 31 9 6 17-4 19-17" fill="#e9a75a" stroke="#7a3d1e" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M58 14c12 8 16 25 7 31-9 6-17-4-19-17" fill="#e9a75a" stroke="#7a3d1e" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="30" cy="35" r="3.2" fill="#5c2b14"/>
+    <circle cx="48" cy="35" r="3.2" fill="#5c2b14"/>
+    <ellipse cx="39" cy="45" rx="5.6" ry="4.2" fill="#5c2b14"/>
+    <path d="M39 49c-2 5-8 5-10 0M39 49c2 5 8 5 10 0" fill="none" stroke="#5c2b14" stroke-width="2.3" stroke-linecap="round"/>
+    <text x="37" y="69" text-anchor="middle" fill="#c74332" font-family="'Songti SC','STSong','Noto Serif CJK SC',serif" font-size="14" font-weight="900">御</text>
+  </g>
+  <path d="M144 34c8 6 14 15 17 26 3 13 9 23 20 31" fill="none" stroke="#dfb265" stroke-width="1.8" stroke-linecap="round" opacity="0.62"/>
+  <text x="176" y="56" fill="#3b2418" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="25" font-weight="900" letter-spacing="0.6">法米狗 · 私家御膳房</text>
+  <text x="178" y="82" fill="#9b5b44" font-family="'Avenir Next','Helvetica Neue',Arial,sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.65">PERSONALIZED HOME KITCHEN</text>
+  <g opacity="0.72">
+    <circle cx="350" cy="54" r="3.4" fill="#d95b45"/>
+    <path d="M336 91c7-4 15-4 23 0" fill="none" stroke="#8bab66" stroke-width="5" stroke-linecap="round"/>
+    <path d="M344 91c0-8 5-14 14-16" fill="none" stroke="#8bab66" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

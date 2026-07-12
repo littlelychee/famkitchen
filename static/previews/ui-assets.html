@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私家御膳房 UI 素材包</title>
+  <style>
+    :root {
+      --page: #f7f5f1;
+      --card: #fffefa;
+      --ink: #211d19;
+      --muted: #6f6861;
+      --line: #ddd6cb;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page) url("../images/paper-texture.svg");
+      background-size: 360px 360px;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 254, 250, 0.92);
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(33, 29, 25, 0.08);
+    }
+
+    .wide {
+      grid-column: span 2;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 170px;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(244,241,235,0.34));
+      overflow: hidden;
+    }
+
+    img {
+      display: block;
+      width: min(100%, 260px);
+      height: auto;
+    }
+
+    .wide img {
+      width: min(100%, 420px);
+    }
+
+    .icon img {
+      width: 132px;
+      border-radius: 28px;
+    }
+
+    @media (max-width: 640px) {
+      .wide {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>私家御膳房 UI 素材包</h1>
+    <p>第一轮统一视觉素材：应用图标、餐次默认图、空状态插画和页面浅纹理。</p>
+    <div class="grid">
+      <section class="card icon">
+        <h2>应用图标</h2>
+        <div class="stage"><img src="../images/app-icon.svg" alt="应用图标"></div>
+      </section>
+      <section class="card">
+        <h2>早餐默认图</h2>
+        <div class="stage"><img src="../images/default-dishes/breakfast.svg" alt="早餐默认图"></div>
+      </section>
+      <section class="card">
+        <h2>午餐默认图</h2>
+        <div class="stage"><img src="../images/default-dishes/lunch.svg" alt="午餐默认图"></div>
+      </section>
+      <section class="card">
+        <h2>晚餐默认图</h2>
+        <div class="stage"><img src="../images/default-dishes/dinner.svg" alt="晚餐默认图"></div>
+      </section>
+      <section class="card">
+        <h2>小零嘴默认图</h2>
+        <div class="stage"><img src="../images/default-dishes/snack.svg" alt="小零嘴默认图"></div>
+      </section>
+      <section class="card wide">
+        <h2>空菜品库</h2>
+        <div class="stage"><img src="../images/empty-states/empty-dishes.svg" alt="空菜品库"></div>
+      </section>
+      <section class="card wide">
+        <h2>空排餐</h2>
+        <div class="stage"><img src="../images/empty-states/empty-meal-plan.svg" alt="空排餐"></div>
+      </section>
+      <section class="card">
+        <h2>空分类</h2>
+        <div class="stage"><img src="../images/empty-states/empty-categories.svg" alt="空分类"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

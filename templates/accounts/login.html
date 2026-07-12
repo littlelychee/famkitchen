@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-start px-4 py-4 sm:py-6">
+  <div class="card w-full bg-base-100 shadow-md">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">登录</h1>
+      <p class="text-sm text-stone-500">进入家庭菜品库和每日排餐。</p>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">
+          <span>{{ form.non_field_errors|striptags }}</span>
+        </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include "partials/form_fields.html" %}
+        <button class="btn btn-primary w-full">登录</button>
+      </form>
+
+      <div class="text-center text-sm">
+        <span class="text-stone-500">还没有账号？</span>
+        <a href="{% url 'register' %}" class="link link-primary">立即注册</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Hot spice</title>
+  <desc id="desc">A chili pepper blowing a large flame.</desc>
+  <circle cx="32" cy="32" r="27" fill="#fff8ec"/>
+  <path d="M33 9c-2.2 4.7-.8 8.8 4.4 12.3" fill="none" stroke="#2f8c55" stroke-width="4" stroke-linecap="round"/>
+  <path d="M8.5 36c4.9-13 18.3-20.1 29.6-14.3 9 4.6 7.2 16.5-1.4 21.4-10.8 6.1-24 3.2-28.2-7.1Z" fill="#ef476f" stroke="#9a243f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M22 33l4 4m0-4-4 4M34 33l4 4m0-4-4 4" fill="none" stroke="#4a2027" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M42 28c8 1.1 13.6 7.3 13.3 15-.2 5.7-4.7 10.8-11.8 12.3 2.7-4.4.8-7-2.3-10.1-4.5-4.4-4.4-10.3.8-17.2Z" fill="#ff6b00" stroke="#b93d00" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M46.7 35c3.8 2.5 4.8 6.5 2.8 10" fill="#ffe169" stroke="#ffe169" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

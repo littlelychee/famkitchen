@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私家御膳房 - 前端风格方案预览</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --page: #f8f3ed;
+      --ink: #211d19;
+      --muted: #756f68;
+      --line: #ded6cc;
+      --card: #fffdf9;
+      --soft: #f1ebe3;
+      --brand: #48b8b8;
+      --brand-dark: #188484;
+      --danger: #ee4f5e;
+      --radius: 10px;
+      --shadow: 0 6px 18px rgba(42, 33, 24, 0.08);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      border-bottom: 1px solid rgba(222, 214, 204, 0.8);
+      background: rgba(248, 243, 237, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .switcher button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fffdf9;
+      color: var(--ink);
+      cursor: pointer;
+      padding: 0 14px;
+      font-weight: 700;
+    }
+
+    .switcher button.active {
+      border-color: transparent;
+      background: var(--brand);
+      color: #072f30;
+    }
+
+    .page {
+      display: none;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 16px 40px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .preview-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .preview-head h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .preview-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-pad {
+      padding: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .title-cluster {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .section-title h2,
+    .section-title h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .count-pill,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 0 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.fill {
+      border-color: transparent;
+      background: var(--brand);
+      color: #063536;
+    }
+
+    .tag.soft {
+      border-color: transparent;
+      background: var(--soft);
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .icon-btn.primary {
+      border-color: transparent;
+      background: var(--brand);
+      color: #052f30;
+    }
+
+    .icon-btn.danger {
+      border-color: transparent;
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .icon-btn.ghost {
+      background: transparent;
+    }
+
+    .icon-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+    }
+
+    .dish-row {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .dish-row + .dish-row {
+      margin-top: 8px;
+    }
+
+    .dish-img {
+      width: 78px;
+      min-height: 78px;
+      background: #efe6dc;
+      object-fit: cover;
+    }
+
+    .dish-info {
+      min-width: 0;
+      padding: 10px 0;
+    }
+
+    .dish-name {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .meta {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .desc {
+      margin: 6px 0 0;
+      overflow: hidden;
+      color: #5c5650;
+      display: -webkit-box;
+      font-size: 12px;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 10px;
+    }
+
+    .meal-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+      padding: 12px;
+    }
+
+    .meal-card + .meal-card {
+      margin-top: 12px;
+    }
+
+    .planned-item {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 8px;
+    }
+
+    .planned-item + .planned-item {
+      margin-top: 8px;
+    }
+
+    .planned-item img {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius);
+      object-fit: cover;
+    }
+
+    .note {
+      display: inline-flex;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: var(--soft);
+      padding: 4px 8px;
+      color: #5d5650;
+      font-size: 12px;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pick-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 34px;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pick-form.snack {
+      grid-template-columns: 74px minmax(0, 1fr) 34px;
+    }
+
+    .input {
+      min-width: 0;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 0 10px;
+      color: var(--ink);
+    }
+
+    .option-b .panel,
+    .option-b .dish-row,
+    .option-b .meal-card,
+    .option-b .planned-item,
+    .option-b .input {
+      --radius: 8px;
+    }
+
+    .option-b {
+      --page: #f6f7f4;
+      --card: #ffffff;
+      --soft: #eef4ea;
+      --brand: #8fd17c;
+      --brand-dark: #3b7f2e;
+      --line: #d6decf;
+      --shadow: 0 2px 10px rgba(32, 46, 24, 0.07);
+    }
+
+    .option-b .meal-card {
+      border-left: 4px solid var(--brand);
+      background: linear-gradient(90deg, rgba(143, 209, 124, 0.12), #fff 52%);
+    }
+
+    .option-b .dish-row {
+      grid-template-columns: 72px minmax(0, 1fr) auto;
+    }
+
+    .option-b .dish-img {
+      width: 72px;
+      min-height: 72px;
+    }
+
+    .option-c {
+      --page: #f7f5f1;
+      --card: #fff;
+      --soft: #f4f1eb;
+      --brand: #ffd166;
+      --brand-dark: #95690e;
+      --line: #dcd7ce;
+      --shadow: none;
+    }
+
+    .option-c .layout {
+      grid-template-columns: minmax(0, 1fr) 380px;
+    }
+
+    .option-c .panel {
+      border-radius: 8px;
+    }
+
+    .option-c .dish-row {
+      grid-template-columns: 56px 1.1fr 0.8fr auto;
+      gap: 10px;
+      min-height: 64px;
+      border-width: 0 0 1px;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .option-c .dish-row:first-child {
+      border-top: 1px solid var(--line);
+    }
+
+    .option-c .dish-img {
+      width: 56px;
+      min-height: 56px;
+      margin: 4px 0 4px 8px;
+      border-radius: 8px;
+    }
+
+    .option-c .dish-info {
+      padding: 8px 0;
+    }
+
+    .option-c .desc {
+      -webkit-line-clamp: 2;
+    }
+
+    .option-c .table-extra {
+      display: block;
+      min-width: 0;
+      padding: 8px 0;
+    }
+
+    .table-extra {
+      display: none;
+    }
+
+    .option-c .actions {
+      padding-right: 8px;
+    }
+
+    .option-c .meal-card {
+      background: #fff;
+      box-shadow: none;
+    }
+
+    .option-c .planned-item {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .option-c .planned-item img {
+      display: none;
+    }
+
+    .mobile-preview {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .phone {
+      max-width: 390px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--page);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .phone .layout,
+    .phone .panel {
+      display: block;
+      box-shadow: none;
+    }
+
+    .phone .dish-row {
+      grid-template-columns: 62px minmax(0, 1fr) auto;
+    }
+
+    .phone .dish-img {
+      width: 62px;
+      min-height: 62px;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-head {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .mobile-preview {
+        display: block;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        align-items: start;
+        flex-direction: column;
+        padding: 12px;
+      }
+
+      .page {
+        padding: 16px 10px 28px;
+      }
+
+      .dish-row,
+      .option-b .dish-row,
+      .option-c .dish-row {
+        grid-template-columns: 62px minmax(0, 1fr) auto;
+      }
+
+      .dish-img,
+      .option-b .dish-img,
+      .option-c .dish-img {
+        width: 62px;
+        min-height: 62px;
+        margin: 0;
+        border-radius: 0;
+      }
+
+      .option-c .table-extra {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">私家御膳房 · 前端方案</div>
+      <div class="switcher" role="tablist" aria-label="风格方案">
+        <button class="active" data-target="option-a">方案 A 紧凑清晰</button>
+        <button data-target="option-b">方案 B 清爽分组</button>
+        <button data-target="option-c">方案 C 高密列表</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="option-a" class="page option-a active">
+        <div class="preview-head">
+          <div>
+            <h1>方案 A：紧凑清晰</h1>
+            <p>保留现在的温暖底色，卡片更短，圆形图标按钮，适合家庭日常使用。</p>
+          </div>
+          <button class="icon-btn primary" aria-label="新增菜品"><i data-lucide="plus"></i></button>
+        </div>
+        <div class="layout">
+          <section>
+            <div class="section-title">
+              <div class="title-cluster">
+                <h2>菜品选择</h2>
+                <span class="count-pill">午餐 3 道</span>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="大米饭">
+              <div class="dish-info">
+                <p class="dish-name">大米饭</p>
+                <div class="meta">260 千卡</div>
+                <div class="tags">
+                  <span class="tag fill">午餐</span>
+                  <span class="tag fill">晚餐</span>
+                  <span class="tag">主食</span>
+                  <span class="tag">米饭</span>
+                </div>
+                <p class="desc">一份基础主食，同时属于午餐和晚餐，不需要重复建菜。</p>
+                <div class="pick-form">
+                  <input class="input" placeholder="备注">
+                  <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="农夫山泉">
+              <div class="dish-info">
+                <p class="dish-name">农夫山泉</p>
+                <div class="meta">0 千卡</div>
+                <div class="tags">
+                  <span class="tag fill">零食</span>
+                  <span class="tag">饮品</span>
+                  <span class="tag">常备</span>
+                </div>
+                <p class="desc">没有备注时再次选择会更新已有普通项；有备注时新增一条独立记录。</p>
+                <div class="pick-form snack">
+                  <input class="input" value="2" aria-label="数量">
+                  <input class="input" placeholder="备注">
+                  <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+          </section>
+
+          <aside>
+            <div class="section-title">
+              <div class="title-cluster">
+                <h2>2026-07-11 菜单</h2>
+              </div>
+            </div>
+            <div class="meal-card">
+              <div class="section-title">
+                <div class="title-cluster">
+                  <h3>午餐</h3>
+                  <span class="count-pill">2 道</span>
+                </div>
+                <button class="icon-btn primary" aria-label="添加午餐"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="大米饭">
+                <div>
+                  <p class="dish-name">大米饭</p>
+                  <div class="meta">260 千卡 · 主食 / 米饭</div>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑排餐"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="番茄牛腩饭">
+                <div>
+                  <p class="dish-name">番茄牛腩饭</p>
+                  <div class="meta">620 千卡 · 家常</div>
+                  <span class="note">少盐，饭半份</span>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑排餐"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="meal-card">
+              <div class="section-title">
+                <div class="title-cluster">
+                  <h3>许愿·小零嘴</h3>
+                  <span class="count-pill">2 种</span>
+                </div>
+                <button class="icon-btn primary" aria-label="添加零食"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="农夫山泉">
+                <div>
+                  <p class="dish-name">农夫山泉 × 2</p>
+                  <div class="meta">饮品 / 常备</div>
+                  <span class="note">冰镇</span>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑排餐"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="农夫山泉">
+                <div>
+                  <p class="dish-name">农夫山泉 × 1</p>
+                  <div class="meta">普通项</div>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑排餐"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="option-b" class="page option-b">
+        <div class="preview-head">
+          <div>
+            <h1>方案 B：清爽分组</h1>
+            <p>每个餐次用轻微色带分组，结构更柔和，适合手机端扫一眼知道现在在哪个餐次。</p>
+          </div>
+          <button class="icon-btn primary" aria-label="新增菜品"><i data-lucide="plus"></i></button>
+        </div>
+        <div class="layout">
+          <section class="panel panel-pad">
+            <div class="section-title">
+              <div class="title-cluster">
+                <h2>午餐候选</h2>
+                <span class="count-pill">3 道</span>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="大米饭">
+              <div class="dish-info">
+                <p class="dish-name">大米饭</p>
+                <div class="meta">260 千卡</div>
+                <div class="tags">
+                  <span class="tag fill">午餐</span>
+                  <span class="tag fill">晚餐</span>
+                  <span class="tag soft">主食</span>
+                  <span class="tag soft">米饭</span>
+                </div>
+                <p class="desc">更强调分类标签，图片稍小，正文更靠前。</p>
+              </div>
+              <div class="actions">
+                <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="菌菇豆腐汤">
+              <div class="dish-info">
+                <p class="dish-name">菌菇豆腐汤</p>
+                <div class="meta">210 千卡</div>
+                <div class="tags">
+                  <span class="tag fill">晚餐</span>
+                  <span class="tag soft">清淡</span>
+                  <span class="tag soft">汤</span>
+                </div>
+                <p class="desc">晚餐轻负担，汤味鲜。</p>
+              </div>
+              <div class="actions">
+                <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+          </section>
+          <aside>
+            <div class="meal-card">
+              <div class="section-title">
+                <div class="title-cluster">
+                  <h3>午餐</h3>
+                  <span class="count-pill">2 道</span>
+                </div>
+                <button class="icon-btn primary" aria-label="添加"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="番茄牛腩饭">
+                <div>
+                  <p class="dish-name">番茄牛腩饭</p>
+                  <div class="meta">家常 · 620 千卡</div>
+                  <span class="note">少盐，饭半份</span>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="meal-card">
+              <div class="section-title">
+                <div class="title-cluster">
+                  <h3>零食</h3>
+                  <span class="count-pill">2 种</span>
+                </div>
+                <button class="icon-btn primary" aria-label="添加"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="农夫山泉">
+                <div>
+                  <p class="dish-name">农夫山泉 × 2</p>
+                  <div class="meta">饮品</div>
+                  <span class="note">冰镇</span>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+              <div class="planned-item">
+                <img src="/static/images/default-dish.png" alt="农夫山泉">
+                <div>
+                  <p class="dish-name">农夫山泉 × 1</p>
+                  <div class="meta">普通项</div>
+                </div>
+                <div class="inline-actions">
+                  <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="option-c" class="page option-c">
+        <div class="preview-head">
+          <div>
+            <h1>方案 C：高密列表</h1>
+            <p>更像管理台，信息密度最高，适合菜很多、经常批量排餐的家庭。</p>
+          </div>
+          <button class="icon-btn primary" aria-label="新增菜品"><i data-lucide="plus"></i></button>
+        </div>
+        <div class="layout">
+          <section class="panel panel-pad">
+            <div class="section-title">
+              <div class="title-cluster">
+                <h2>菜品库</h2>
+                <span class="count-pill">全部 128 道</span>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="大米饭">
+              <div class="dish-info">
+                <p class="dish-name">大米饭</p>
+                <div class="meta">260 千卡</div>
+              </div>
+              <div class="table-extra">
+                <div class="tags">
+                  <span class="tag fill">午餐</span>
+                  <span class="tag fill">晚餐</span>
+                  <span class="tag">主食</span>
+                  <span class="tag">米饭</span>
+                </div>
+                <p class="desc">同一菜品支持多个大类和小类。</p>
+              </div>
+              <div class="actions">
+                <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+            <div class="dish-row">
+              <img class="dish-img" src="/static/images/default-dish.png" alt="农夫山泉">
+              <div class="dish-info">
+                <p class="dish-name">农夫山泉</p>
+                <div class="meta">0 千卡</div>
+              </div>
+              <div class="table-extra">
+                <div class="tags">
+                  <span class="tag fill">零食</span>
+                  <span class="tag">饮品</span>
+                  <span class="tag">常备</span>
+                </div>
+                <p class="desc">备注不同的排餐项可并存。</p>
+              </div>
+              <div class="actions">
+                <button class="icon-btn primary" aria-label="加入"><i data-lucide="plus"></i></button>
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+              </div>
+            </div>
+          </section>
+          <aside class="panel panel-pad">
+            <div class="section-title">
+              <div class="title-cluster">
+                <h3>午餐</h3>
+                <span class="count-pill">2 道</span>
+              </div>
+              <button class="icon-btn primary" aria-label="添加午餐"><i data-lucide="plus"></i></button>
+            </div>
+            <div class="planned-item">
+              <div>
+                <p class="dish-name">大米饭</p>
+                <div class="meta">主食 / 米饭 · 260 千卡</div>
+              </div>
+              <div class="inline-actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+              </div>
+            </div>
+            <div class="planned-item">
+              <div>
+                <p class="dish-name">番茄牛腩饭</p>
+                <div class="meta">家常 · 620 千卡</div>
+                <span class="note">少盐，饭半份</span>
+              </div>
+              <div class="inline-actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+              </div>
+            </div>
+            <div class="section-title" style="margin-top:16px;">
+              <div class="title-cluster">
+                <h3>零食</h3>
+                <span class="count-pill">2 种</span>
+              </div>
+              <button class="icon-btn primary" aria-label="添加零食"><i data-lucide="plus"></i></button>
+            </div>
+            <div class="planned-item">
+              <div>
+                <p class="dish-name">农夫山泉 × 2</p>
+                <div class="meta">饮品</div>
+                <span class="note">冰镇</span>
+              </div>
+              <div class="inline-actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+              </div>
+            </div>
+            <div class="planned-item">
+              <div>
+                <p class="dish-name">农夫山泉 × 1</p>
+                <div class="meta">普通项</div>
+              </div>
+              <div class="inline-actions">
+                <button class="icon-btn" aria-label="编辑"><i data-lucide="pencil"></i></button>
+                <button class="icon-btn danger" aria-label="删除"><i data-lucide="trash-2"></i></button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll("[data-target]"));
+    const pages = Array.from(document.querySelectorAll(".page"));
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        buttons.forEach((item) => item.classList.toggle("active", item === button));
+        pages.forEach((page) => page.classList.toggle("active", page.id === button.dataset.target));
+      });
+    });
+
+    window.lucide?.createIcons();
+  </script>
+</body>
+</html>

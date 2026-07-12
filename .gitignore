@@ -1,0 +1,11 @@
+.venv/
+.uv-cache/
+.env
+__pycache__/
+*.py[cod]
+db.sqlite3
+staticfiles/
+backups/
+media/*
+!media/.gitkeep
+.DS_Store

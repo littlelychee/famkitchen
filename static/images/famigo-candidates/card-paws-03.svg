@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+  <title id="title">业务容器浅爪印背景候选 3</title>
+  <desc id="desc">透明底浅绿爪印和叶片纹理，氛围更清新。</desc>
+  <defs>
+    <g id="paw">
+      <ellipse cx="0" cy="8" rx="8" ry="10"/>
+      <circle cx="-12" cy="-1" r="5"/>
+      <circle cx="0" cy="-6" r="5"/>
+      <circle cx="12" cy="-1" r="5"/>
+    </g>
+  </defs>
+  <rect width="360" height="240" fill="none"/>
+  <g fill="#8faf6c" opacity="0.115">
+    <use href="#paw" x="60" y="68" transform="rotate(15 60 68)"/>
+    <use href="#paw" x="170" y="110" transform="rotate(-18 170 110)"/>
+    <use href="#paw" x="295" y="78" transform="rotate(22 295 78)"/>
+    <use href="#paw" x="282" y="194" transform="rotate(-14 282 194)"/>
+  </g>
+  <g fill="none" stroke="#d6ad61" stroke-width="3" stroke-linecap="round" opacity="0.1">
+    <path d="M35 189c14-10 31-10 45 0"/>
+    <path d="M322 36c-15 9-30 9-45 0"/>
+  </g>
+  <g fill="#f18d76" opacity="0.075">
+    <circle cx="110" cy="35" r="19"/>
+    <circle cx="214" cy="206" r="17"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">候选 4 采购</title>
+  <desc id="desc">购物推车里放着蔬菜和清单，代表采购。</desc>
+  <rect width="96" height="96" fill="none"/>
+  <path d="M18 25h10l8 38h35l8-28H34" fill="#fff8ea" stroke="#74401f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="75" r="6" fill="#8fac6b" stroke="#74401f" stroke-width="3"/>
+  <circle cx="68" cy="75" r="6" fill="#8fac6b" stroke="#74401f" stroke-width="3"/>
+  <circle cx="55" cy="43" r="8" fill="#f28f7c"/>
+  <path d="M39 43c7-7 15-7 23 0" stroke="#8fac6b" stroke-width="5" stroke-linecap="round"/>
+  <path d="M44 55h24" stroke="#d7ad60" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 24l-5-7" stroke="#74401f" stroke-width="4" stroke-linecap="round"/>
+</svg>

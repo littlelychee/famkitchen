@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="72" viewBox="0 0 640 72" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗标语横幅候选 3</title>
+  <desc id="desc">米红爱心风薄横幅，含小狗耳朵线稿和幸福就是一起吃饭，吃好多好多顿饭的艺术字。</desc>
+  <defs>
+    <linearGradient id="panel" x1="18" y1="9" x2="622" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff6ee"/>
+      <stop offset="0.55" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#f9f1ea"/>
+    </linearGradient>
+    <filter id="shadow" x="-8%" y="-60%" width="116%" height="220%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#7c3e2c" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect x="13" y="9" width="614" height="54" rx="18" fill="url(#panel)" filter="url(#shadow)"/>
+  <path d="M41 43c-8-9-8-22 2-28 9-5 19 3 19 3s12-8 22-1c9 7 7 20-1 27" fill="none" stroke="#7a4324" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.86"/>
+  <circle cx="57" cy="40" r="2.8" fill="#6a351b"/>
+  <circle cx="71" cy="40" r="2.8" fill="#6a351b"/>
+  <text x="320" y="44" text-anchor="middle" fill="#6a3424" stroke="#fff5e7" stroke-width="2.3" paint-order="stroke fill" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="22" font-weight="900" letter-spacing="1.05">幸福就是一起吃饭，吃好多好多顿饭</text>
+  <path d="M578 26c5-6 15-3 15 5 0 9-12 14-15 17-3-3-15-8-15-17 0-8 10-11 15-5Z" fill="#ff8a77" opacity="0.88"/>
+</svg>

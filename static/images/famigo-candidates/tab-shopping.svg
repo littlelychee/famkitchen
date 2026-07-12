@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗采购图标</title>
+  <desc id="desc">小狗趴在采购篮后面，篮子里有蔬菜和清单。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#5c351d" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="96" height="96" fill="none"/>
+  <g filter="url(#shadow)">
+    <path d="M25 43c-7-7-7-19 1-24 8-5 18 8 19 21" fill="#eba958" stroke="#74401f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M71 43c7-7 7-19-1-24-8-5-18 8-19 21" fill="#eba958" stroke="#74401f" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="48" cy="42" r="23" fill="#fffaf1" stroke="#74401f" stroke-width="4"/>
+    <path d="M40 28c5-8 16-9 20-1 3 7-4 13-12 16" fill="#fffaf1" stroke="#74401f" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="40" cy="43" r="3.2" fill="#5b2b14"/>
+    <circle cx="56" cy="43" r="3.2" fill="#5b2b14"/>
+    <ellipse cx="48" cy="51" rx="5.2" ry="3.8" fill="#5b2b14"/>
+    <path d="M18 53h60l-7 30H25Z" fill="#fff5dc" stroke="#74401f" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M29 53c3-14 11-21 19-21s16 7 19 21" fill="none" stroke="#8fac6b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M27 64h42M30 74h36" stroke="#d7ad60" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="70" cy="40" r="6" fill="#f28f7c"/>
+    <path d="M22 44c8-3 15-2 20 4" stroke="#8fac6b" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

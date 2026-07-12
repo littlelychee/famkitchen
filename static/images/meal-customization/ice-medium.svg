@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Medium ice</title>
+  <desc id="desc">Two stacked ice cubes.</desc>
+  <circle cx="32" cy="32" r="27" fill="#f6fbff"/>
+  <path d="M16 26h21l5 20-6 8H16l-6-8 6-20Z" fill="#a9def7" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M30 14h20l5 21-6 8H29l-5-8 6-21Z" fill="#d1f2ff" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M34 19l14 1M32 35h16M19 31l14 1M18 46h15" fill="none" stroke="#f5fdff" stroke-width="3" stroke-linecap="round"/>
+</svg>

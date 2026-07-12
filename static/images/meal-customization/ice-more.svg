@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">More ice</title>
+  <desc id="desc">Three ice cubes with a little melted water.</desc>
+  <circle cx="32" cy="32" r="27" fill="#f6fbff"/>
+  <path d="M14 28h18l4 17-5 7H14l-5-7 5-17Z" fill="#a9def7" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M26 16h18l4 17-5 7H25l-4-7 5-17Z" fill="#d1f2ff" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M36 29h18l4 17-5 7H35l-4-7 5-17Z" fill="#b9e8ff" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M17 33l12 1M29 21l12 1M39 35l12 1M13 45h14M35 47h14" fill="none" stroke="#f5fdff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 56c4 2.2 8.3 2.2 12.3 0 3.6-1.9 7.2-1.9 10.8 0" fill="none" stroke="#6bbfe5" stroke-width="3" stroke-linecap="round"/>
+</svg>

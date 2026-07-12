@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}创建家庭 - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-2xl px-4 py-8">
+  <div class="mb-4">
+    <a href="{% url 'meals:profile' %}" class="btn btn-outline btn-sm icon-btn-sm" aria-label="回到我的" title="回到我的">
+      <i data-lucide="arrow-left" aria-hidden="true"></i>
+      <span class="sr-only">回到我的</span>
+    </a>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">创建家庭</h1>
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" %}
+        <button class="btn btn-primary">创建家庭</button>
+        <a href="{% url 'meals:family_join' %}" class="btn btn-ghost">加入已有家庭</a>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

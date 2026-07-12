@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}排餐 - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6">
+  <form method="get" class="mb-5 rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+    <div class="grid w-full gap-2">
+      <div class="grid grid-cols-[minmax(0,1fr)_5.75rem] gap-2">
+        <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="input input-bordered input-sm w-full">
+        <button class="btn btn-primary btn-sm w-full">查看</button>
+      </div>
+      <div class="grid grid-cols-5 gap-2">
+        <a href="{% url 'meals:meal_plan' %}?date={{ date_shortcuts.previous_week|date:'Y-m-d' }}" class="btn btn-outline btn-sm w-full px-0" aria-label="前七天" title="前七天">
+          <i data-lucide="chevrons-left" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'meals:meal_plan' %}?date={{ date_shortcuts.previous_day|date:'Y-m-d' }}" class="btn btn-outline btn-sm w-full px-0" aria-label="前一天" title="前一天">
+          <i data-lucide="chevron-left" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'meals:meal_plan' %}?date={{ date_shortcuts.today|date:'Y-m-d' }}" class="btn btn-sm w-full px-2 text-sm {% if date_shortcuts.is_today %}btn-primary{% else %}btn-outline{% endif %}" aria-label="今天" title="今天">今天</a>
+        <a href="{% url 'meals:meal_plan' %}?date={{ date_shortcuts.next_day|date:'Y-m-d' }}" class="btn btn-outline btn-sm w-full px-0" aria-label="后一天" title="后一天">
+          <i data-lucide="chevron-right" aria-hidden="true"></i>
+        </a>
+        <a href="{% url 'meals:meal_plan' %}?date={{ date_shortcuts.next_week|date:'Y-m-d' }}" class="btn btn-outline btn-sm w-full px-0" aria-label="后七天" title="后七天">
+          <i data-lucide="chevrons-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+  </form>
+
+  <div class="mb-4 flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-xl font-semibold">{{ selected_date|date:"Y-m-d" }} 菜单</h1>
+    </div>
+    <div class="flex shrink-0 items-center gap-2">
+      <a href="{% url 'meals:meal_plan_share' %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-primary btn-sm">
+        <i data-lucide="send" aria-hidden="true"></i>
+        <span>分享</span>
+      </a>
+      <form method="post" action="{% url 'meals:meal_plan_clear_day' %}">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+        <button class="btn btn-outline btn-sm" onclick="return confirm('确定清空 {{ selected_date|date:"Y-m-d" }} 的早餐、午餐、晚餐吗？')">
+          <i data-lucide="trash-2" aria-hidden="true"></i>
+          <span>清空</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid gap-3">
+    {% include "meals/partials/meal_section.html" with title="早餐" plan=breakfast_plan %}
+    {% include "meals/partials/meal_section.html" with title="午餐" plan=lunch_plan %}
+    {% include "meals/partials/meal_section.html" with title="晚餐" plan=dinner_plan %}
+  </div>
+</section>
+{% endblock %}

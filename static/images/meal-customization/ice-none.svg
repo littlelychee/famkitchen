@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">No ice</title>
+  <desc id="desc">A melting ice cube inside a prohibition symbol.</desc>
+  <circle cx="32" cy="32" r="25" fill="#f6fbff" stroke="#557086" stroke-width="4"/>
+  <path d="M23 22h19l4 18-5 8H22l-5-8 6-18Z" fill="#b9e8ff" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M26 26l15 1M23 41h18" fill="none" stroke="#effbff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M25 51c3.5 2.1 8.7 2.1 12 0 3.2-2 6.1-2 9.2 0" fill="none" stroke="#6bbfe5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M15 15l34 34" fill="none" stroke="#557086" stroke-width="5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+  <title id="title">业务容器浅爪印背景候选 4</title>
+  <desc id="desc">透明底大留白角落爪印和餐桌圆弧，适合信息密集的卡片。</desc>
+  <defs>
+    <g id="paw">
+      <ellipse cx="0" cy="8" rx="10" ry="13"/>
+      <circle cx="-15" cy="-2" r="6"/>
+      <circle cx="0" cy="-9" r="6"/>
+      <circle cx="15" cy="-2" r="6"/>
+    </g>
+  </defs>
+  <rect width="360" height="240" fill="none"/>
+  <g fill="#d9b264" opacity="0.09">
+    <use href="#paw" x="42" y="42" transform="rotate(-18 42 42)"/>
+    <use href="#paw" x="321" y="207" transform="rotate(17 321 207)"/>
+  </g>
+  <g fill="none" stroke="#8faf6c" stroke-width="4" stroke-linecap="round" opacity="0.09">
+    <path d="M80 203c43-28 100-28 143 0"/>
+    <path d="M244 43c20 12 42 12 65 0"/>
+  </g>
+  <path d="M302 56c5-6 14-4 14 4 0 9-11 14-14 16-3-2-14-7-14-16 0-8 9-10 14-4Z" fill="#f28f7c" opacity="0.09"/>
+</svg>

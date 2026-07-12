@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1480" viewBox="0 0 720 1480" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗整页简笔背景候选 3</title>
+  <desc id="desc">透明底简笔风背景，中间偏下是家庭餐桌圆弧、小狗头像和浅色餐盘元素。</desc>
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="72%" r="46%">
+      <stop offset="0" stop-color="#f6fbef" stop-opacity="0.72"/>
+      <stop offset="0.55" stop-color="#fff6e4" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#fff6e4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="720" height="1480" fill="none"/>
+  <circle cx="360" cy="1000" r="430" fill="url(#halo)"/>
+  <g transform="translate(92 815)" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.17">
+    <path d="M54 445c80-127 348-127 428 0" stroke="#d8b062" stroke-width="15"/>
+    <path d="M95 434c68-70 278-70 346 0" stroke="#8faf6c" stroke-width="10"/>
+    <circle cx="268" cy="216" r="104" fill="#fffaf0" stroke="#77401f" stroke-width="10"/>
+    <path d="M174 191c-39-24-48-75-19-101 28-25 77 6 77 6" stroke="#e9aa59" stroke-width="25"/>
+    <path d="M362 191c39-24 48-75 19-101-28-25-77 6-77 6" stroke="#e9aa59" stroke-width="25"/>
+    <path d="M236 88c17-31 52-35 65-11 12 23-14 42-43 51" stroke="#77401f" stroke-width="10"/>
+    <path d="M232 211h.1M304 211h.1" stroke="#5a2a12" stroke-width="15"/>
+    <path d="M268 242c-11 20-37 21-50 2M268 242c11 20 37 21 50 2" stroke="#5a2a12" stroke-width="8"/>
+    <path d="M268 228h2" stroke="#5a2a12" stroke-width="18"/>
+    <path d="M149 348c32 14 72 14 104 0M286 348c32 14 72 14 104 0" stroke="#d8b062" stroke-width="8"/>
+    <path d="M172 336c-8-21 3-38 28-52M333 336c8-21-3-38-28-52" stroke="#ef9a82" stroke-width="7" opacity="0.62"/>
+  </g>
+  <path d="M134 724c30 16 66 16 96 0M496 765c30 16 66 16 96 0" fill="none" stroke="#d8b062" stroke-width="7" stroke-linecap="round" opacity="0.08"/>
+</svg>

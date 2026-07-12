@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗私厨大 logo 候选 1</title>
+  <desc id="desc">暖米色横向招牌，左侧是拿餐具的小狗头像，右侧是法米狗私厨艺术字。</desc>
+  <defs>
+    <linearGradient id="panel" x1="22" y1="22" x2="390" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff8ed"/>
+      <stop offset="0.52" stop-color="#fffdf5"/>
+      <stop offset="1" stop-color="#f4f8eb"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="48" y1="88" x2="114" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd36f"/>
+      <stop offset="1" stop-color="#f3a94e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-30%" width="120%" height="170%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#6b3d22" flood-opacity="0.12"/>
+    </filter>
+    <filter id="textGlow" x="-8%" y="-40%" width="116%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#fff7df" flood-opacity="0.95"/>
+    </filter>
+  </defs>
+  <rect width="420" height="132" fill="none"/>
+  <rect x="14" y="14" width="392" height="104" rx="29" fill="url(#panel)" filter="url(#shadow)"/>
+  <path d="M186 28c-13 13-13 58 0 75" fill="none" stroke="#dfb66b" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <g transform="translate(36 20)">
+    <ellipse cx="61" cy="69" rx="51" ry="22" fill="#d8e5b0" opacity="0.38"/>
+    <path d="M24 69c7 19 20 29 39 30 21 0 36-10 43-30" fill="url(#gold)" opacity="0.95"/>
+    <path d="M24 69c16 8 64 8 82 0" fill="none" stroke="#875125" stroke-width="5" stroke-linecap="round"/>
+    <path d="M34 50c-13-8-20-28-7-41 13-13 39 4 39 4s25-16 43-2c14 10 8 33-7 40" fill="#fffaf0" stroke="#7b421f" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M36 18c-20 12-25 42-10 52 14 9 27-6 30-27" fill="#efb35d" stroke="#7b421f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M97 18c20 12 25 42 10 52-14 9-27-6-30-27" fill="#efb35d" stroke="#7b421f" stroke-width="4" stroke-linecap="round"/>
+    <path d="M53 13c7-10 18-12 24-4 6 9-2 18-11 22" fill="#fffaf0" stroke="#7b421f" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="50" cy="45" rx="5" ry="3.6" fill="#6b371d" transform="rotate(-13 50 45)"/>
+    <ellipse cx="82" cy="45" rx="5" ry="3.6" fill="#6b371d" transform="rotate(13 82 45)"/>
+    <ellipse cx="66" cy="59" rx="8" ry="6" fill="#5a2a12"/>
+    <path d="M66 64c-3 7-13 8-17 1M66 64c3 7 13 8 17 1" fill="none" stroke="#5a2a12" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="43" cy="61" r="8" fill="#ff9d88" opacity="0.62"/>
+    <circle cx="89" cy="61" r="8" fill="#ff9d88" opacity="0.62"/>
+    <path d="M17 27c-3-11-2-21 3-29" fill="none" stroke="#8bac66" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="16" cy="29" r="7" fill="#fffdf5" stroke="#8a8070" stroke-width="2"/>
+    <path d="M114 27c3-11 2-21-3-29M106 27l10-10M111 28l11-8" fill="none" stroke="#8bac66" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g filter="url(#textGlow)">
+    <text x="180" y="59" fill="#5b321d" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="29" font-weight="900" letter-spacing="1.2">法米狗私厨</text>
+    <text x="183" y="84" fill="#8b6c47" font-family="'Avenir Next','Helvetica Neue',Arial,sans-serif" font-size="10.5" font-weight="700" letter-spacing="2.4">FAMIGO PRIVATE KITCHEN</text>
+    <path d="M184 95h128" stroke="#f1c768" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="326" cy="94" r="4" fill="#f18874"/>
+    <path d="M345 43c7-8 21-4 21 7 0 12-17 20-21 23-4-3-21-11-21-23 0-11 14-15 21-7Z" fill="#ff8b78" opacity="0.88"/>
+  </g>
+</svg>

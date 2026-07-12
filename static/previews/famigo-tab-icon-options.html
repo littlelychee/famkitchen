@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>法米狗底部导航图标候选</title>
+  <style>
+    :root {
+      --page: #f7f5f1;
+      --card: #fffefa;
+      --ink: #211d19;
+      --muted: #6f6861;
+      --line: #ddd6cb;
+      --brand: #ffd166;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 30px 18px 56px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .option-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .option-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 254, 250, 0.94);
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(33, 29, 25, 0.08);
+    }
+
+    .option-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tabbar-preview {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      width: min(100%, 420px);
+      margin: 0 auto 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 254, 250, 0.96);
+      padding: 9px;
+      box-shadow: 0 -8px 22px rgba(33, 29, 25, 0.08);
+    }
+
+    .tab-item {
+      display: grid;
+      min-height: 66px;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .tab-item.active {
+      background: var(--brand);
+      box-shadow: 0 10px 20px rgba(255, 209, 102, 0.28);
+    }
+
+    .tab-item img {
+      display: block;
+      width: 48px;
+      height: 48px;
+    }
+
+    .icon-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .icon-row span {
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>法米狗底部导航图标候选</h1>
+    <p class="intro">每组从左到右都是：菜品库、排餐、采购。上方模拟底部导航的小尺寸显示，默认把“菜品库”置为当前选中态，方便看高亮后的辨识度。</p>
+
+    <div class="option-grid">
+      <section class="option-card">
+        <div class="option-title">
+          <h2>候选 1 · 功能物件最直观</h2>
+          <span class="note">菜谱书 / 三餐日历 / 采购篮</span>
+        </div>
+        <div class="tabbar-preview">
+          <div class="tab-item active"><img src="../images/famigo-candidates/tab-options/set01-library.svg" alt="候选 1 菜品库"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set01-plan.svg" alt="候选 1 排餐"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set01-shopping.svg" alt="候选 1 采购"></div>
+        </div>
+        <div class="icon-row"><span>set01-library.svg</span><span>set01-plan.svg</span><span>set01-shopping.svg</span></div>
+      </section>
+
+      <section class="option-card">
+        <div class="option-title">
+          <h2>候选 2 · 法米狗角色版</h2>
+          <span class="note">狗抱菜谱 / 狗看日历 / 狗背采购篮</span>
+        </div>
+        <div class="tabbar-preview">
+          <div class="tab-item active"><img src="../images/famigo-candidates/tab-options/set02-library.svg" alt="候选 2 菜品库"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set02-plan.svg" alt="候选 2 排餐"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set02-shopping.svg" alt="候选 2 采购"></div>
+        </div>
+        <div class="icon-row"><span>set02-library.svg</span><span>set02-plan.svg</span><span>set02-shopping.svg</span></div>
+      </section>
+
+      <section class="option-card">
+        <div class="option-title">
+          <h2>候选 3 · App 功能卡片版</h2>
+          <span class="note">菜品卡 / 排程格 / 清单叠篮</span>
+        </div>
+        <div class="tabbar-preview">
+          <div class="tab-item active"><img src="../images/famigo-candidates/tab-options/set03-library.svg" alt="候选 3 菜品库"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set03-plan.svg" alt="候选 3 排餐"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set03-shopping.svg" alt="候选 3 采购"></div>
+        </div>
+        <div class="icon-row"><span>set03-library.svg</span><span>set03-plan.svg</span><span>set03-shopping.svg</span></div>
+      </section>
+
+      <section class="option-card">
+        <div class="option-title">
+          <h2>候选 4 · 厨房流程版</h2>
+          <span class="note">菜架 / 三餐时间轴 / 购物推车</span>
+        </div>
+        <div class="tabbar-preview">
+          <div class="tab-item active"><img src="../images/famigo-candidates/tab-options/set04-library.svg" alt="候选 4 菜品库"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set04-plan.svg" alt="候选 4 排餐"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set04-shopping.svg" alt="候选 4 采购"></div>
+        </div>
+        <div class="icon-row"><span>set04-library.svg</span><span>set04-plan.svg</span><span>set04-shopping.svg</span></div>
+      </section>
+
+      <section class="option-card">
+        <div class="option-title">
+          <h2>候选 5 · 小尺寸强轮廓版</h2>
+          <span class="note">餐盖索引 / 日历餐叉 / 购物袋收据</span>
+        </div>
+        <div class="tabbar-preview">
+          <div class="tab-item active"><img src="../images/famigo-candidates/tab-options/set05-library.svg" alt="候选 5 菜品库"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set05-plan.svg" alt="候选 5 排餐"></div>
+          <div class="tab-item"><img src="../images/famigo-candidates/tab-options/set05-shopping.svg" alt="候选 5 采购"></div>
+        </div>
+        <div class="icon-row"><span>set05-library.svg</span><span>set05-plan.svg</span><span>set05-shopping.svg</span></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

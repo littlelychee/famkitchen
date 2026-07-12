@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">候选 3 菜品库</title>
+  <desc id="desc">三张菜品卡片和餐盘，代表菜品库。</desc>
+  <rect width="96" height="96" fill="none"/>
+  <rect x="24" y="14" width="47" height="58" rx="12" fill="#fff3df" stroke="#74401f" stroke-width="4" transform="rotate(-9 24 14)"/>
+  <rect x="28" y="18" width="47" height="58" rx="12" fill="#fffdf7" stroke="#74401f" stroke-width="4"/>
+  <rect x="21" y="28" width="47" height="58" rx="12" fill="#fff8ea" stroke="#74401f" stroke-width="4" transform="rotate(8 21 28)"/>
+  <circle cx="45" cy="55" r="13" fill="#fffdf7" stroke="#8fac6b" stroke-width="3.5"/>
+  <circle cx="45" cy="55" r="5.5" fill="#ffd166"/>
+  <path d="M32 38h27M33 74h23" stroke="#d7ad60" stroke-width="4" stroke-linecap="round"/>
+  <path d="M68 28v36M75 28v36M75 28l-7 8M75 28l7 8" stroke="#8fac6b" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

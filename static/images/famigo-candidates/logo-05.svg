@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗私厨大 logo 候选 5</title>
+  <desc id="desc">简笔线稿风横向 logo，用小狗轮廓、餐叉汤勺和柔和留白表达轻巧亲和感。</desc>
+  <defs>
+    <linearGradient id="panel" x1="10" y1="18" x2="402" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffdf7"/>
+      <stop offset="0.58" stop-color="#fbfaf4"/>
+      <stop offset="1" stop-color="#eef8f3"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-34%" width="124%" height="172%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#2e241b" flood-opacity="0.09"/>
+    </filter>
+  </defs>
+  <rect width="420" height="132" fill="none"/>
+  <rect x="14" y="14" width="392" height="104" rx="30" fill="url(#panel)" filter="url(#shadow)"/>
+  <g transform="translate(39 28)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 54c-10-13-9-33 5-42 13-8 31 2 37 12 8-11 26-17 39-6 12 11 8 31-2 41" stroke="#77401f" stroke-width="5"/>
+    <path d="M35 21c-16 8-20 29-9 37 10 7 22-5 24-21" stroke="#e8a95b" stroke-width="9"/>
+    <path d="M98 24c14 10 16 29 5 36-10 6-20-5-22-20" stroke="#e8a95b" stroke-width="9"/>
+    <path d="M56 13c6-9 17-11 22-4 4 7-2 15-12 19" stroke="#77401f" stroke-width="5"/>
+    <path d="M53 45h.1M81 45h.1" stroke="#5c2c15" stroke-width="6"/>
+    <path d="M67 56c-3 5-11 6-15 0M67 56c3 5 11 6 15 0" stroke="#5c2c15" stroke-width="3"/>
+    <path d="M67 52c1 0 1 0 2 0" stroke="#5c2c15" stroke-width="7"/>
+    <path d="M25 72c25 12 61 12 86 0" stroke="#d6b061" stroke-width="5"/>
+    <path d="M13 21c-6-8-6-16-2-23M120 22c5-9 5-17 0-24" stroke="#94ad68" stroke-width="5"/>
+    <path d="M120 22l10-7M120 22l12 2" stroke="#94ad68" stroke-width="4"/>
+  </g>
+  <text x="177" y="58" fill="#2d2822" font-family="'Songti SC','STSong','Noto Serif CJK SC',serif" font-size="30" font-weight="900" letter-spacing="1.6">法米狗私厨</text>
+  <text x="180" y="84" fill="#746e64" font-family="'Avenir Next','Helvetica Neue',Arial,sans-serif" font-size="10.5" font-weight="800" letter-spacing="2.5">SOFT LITTLE FAMILY KITCHEN</text>
+  <path d="M178 96c24-8 65-8 96 0 23 6 48 5 75-3" fill="none" stroke="#ffd166" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

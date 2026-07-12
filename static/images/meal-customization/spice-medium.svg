@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Medium spice</title>
+  <desc id="desc">A chili pepper blowing a small flame.</desc>
+  <circle cx="32" cy="32" r="27" fill="#fff8ec"/>
+  <path d="M35 10c-2 4.5-.8 8.3 3.9 11.4" fill="none" stroke="#2f8c55" stroke-width="4" stroke-linecap="round"/>
+  <path d="M11 35.6c4.6-12.4 17.3-19.3 28.2-13.9 8.7 4.3 7.6 15.6-.8 20.6-10.4 6.1-23.2 3.4-27.4-6.7Z" fill="#ef476f" stroke="#9a243f" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="25" cy="33" r="2.1" fill="#4a2027"/>
+  <path d="M33 34c1.6 1.7 3.7 2.3 6.1 1.5" fill="none" stroke="#4a2027" stroke-width="3" stroke-linecap="round"/>
+  <path d="M45 31c5.5 1.4 8.4 4.9 8 9.2-.2 2.6-2.1 5.1-5.3 6.1 1.4-2.9.4-4.5-1.9-6.5-2.5-2.2-3.2-5-.8-8.8Z" fill="#ff9f1c" stroke="#d65f00" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M47.4 38c1.8 1.2 2.3 2.6 1.6 4" fill="none" stroke="#ffe169" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

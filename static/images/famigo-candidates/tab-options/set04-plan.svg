@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">候选 4 排餐</title>
+  <desc id="desc">从早到晚的三餐时间轴，代表排餐。</desc>
+  <rect width="96" height="96" fill="none"/>
+  <path d="M48 17v62" stroke="#74401f" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="48" cy="24" r="11" fill="#ffd166" stroke="#74401f" stroke-width="3.5"/>
+  <circle cx="48" cy="49" r="11" fill="#fff8ea" stroke="#d7ad60" stroke-width="3.5"/>
+  <circle cx="48" cy="74" r="11" fill="#8fac6b" stroke="#74401f" stroke-width="3.5"/>
+  <path d="M20 25h17M20 49h17M20 74h17M59 25h17M59 49h17M59 74h17" stroke="#d7ad60" stroke-width="4" stroke-linecap="round"/>
+  <path d="M44 49h8M43 74h10" stroke="#74401f" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="48" cy="24" r="4" fill="#fffdf7"/>
+</svg>

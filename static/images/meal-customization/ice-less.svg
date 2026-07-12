@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Less ice</title>
+  <desc id="desc">One ice cube.</desc>
+  <circle cx="32" cy="32" r="27" fill="#f6fbff"/>
+  <path d="M21 18h25l5 24-7 10H20l-7-10 8-24Z" fill="#b9e8ff" stroke="#4f9dc4" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M25 23l17 1M22 42h22M28 30l15 1" fill="none" stroke="#effbff" stroke-width="3" stroke-linecap="round"/>
+</svg>

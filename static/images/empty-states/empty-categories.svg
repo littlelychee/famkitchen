@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">空分类插画</title>
+  <desc id="desc">浅色标签和小抽屉的空分类插画。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffaf1"/>
+      <stop offset="1" stop-color="#f7fbf1"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#4b3a28" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  <rect width="320" height="220" rx="24" fill="url(#bg)"/>
+  <circle cx="253" cy="55" r="54" fill="#ffe1d1" opacity="0.5"/>
+  <rect x="82" y="72" width="156" height="86" rx="18" fill="#fff7ea" stroke="#d9b775" stroke-width="6" filter="url(#shadow)"/>
+  <path d="M105 99h110M105 130h72" stroke="#c8aa75" stroke-width="7" stroke-linecap="round"/>
+  <path d="M118 55h72l28 28-18 28h-72l-28-28Z" fill="#f4fbf1" stroke="#78a064" stroke-width="6"/>
+  <circle cx="123" cy="83" r="7" fill="#78a064"/>
+</svg>

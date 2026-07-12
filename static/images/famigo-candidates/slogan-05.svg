@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="72" viewBox="0 0 640 72" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗标语横幅候选 5</title>
+  <desc id="desc">极简线稿风薄横幅，含细线餐桌、狗爪和幸福就是一起吃饭，吃好多好多顿饭的艺术字。</desc>
+  <defs>
+    <linearGradient id="panel" x1="16" y1="10" x2="624" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="0.55" stop-color="#fbfaf4"/>
+      <stop offset="1" stop-color="#f0f8f4"/>
+    </linearGradient>
+    <filter id="shadow" x="-8%" y="-60%" width="116%" height="220%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#2e241b" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+  <rect x="13" y="10" width="614" height="52" rx="16" fill="url(#panel)" filter="url(#shadow)"/>
+  <path d="M39 43c14-12 33-12 47 0M45 30c5-8 14-12 22-12s17 4 22 12" fill="none" stroke="#d9af62" stroke-width="3.4" stroke-linecap="round" opacity="0.86"/>
+  <text x="320" y="44" text-anchor="middle" fill="#302a23" stroke="#fff9ee" stroke-width="2.4" paint-order="stroke fill" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="21" font-weight="900" letter-spacing="1.25">幸福就是一起吃饭，吃好多好多顿饭</text>
+  <g transform="translate(577 38)" fill="none" stroke="#f28f7c" stroke-width="3.2" stroke-linecap="round" opacity="0.9">
+    <path d="M0 8c5 6 16 6 22 0"/>
+    <path d="M4 0h.1M11-4h.1M18 0h.1"/>
+  </g>
+</svg>

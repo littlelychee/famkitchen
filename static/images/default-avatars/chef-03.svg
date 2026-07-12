@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Avatar 3">
+  <circle cx="60" cy="60" r="56" fill="#F2F7FF"/>
+  <circle cx="60" cy="62" r="30" fill="#FFDCC1"/>
+  <path d="M35 39h50v17c-11 8-39 8-50 0z" fill="#FFFFFF" stroke="#24496B" stroke-width="4"/>
+  <path d="M42 90c8-10 28-13 36 0v14H42z" fill="#8FB7D8" stroke="#24496B" stroke-width="4"/>
+  <circle cx="50" cy="63" r="3" fill="#24496B"/><circle cx="70" cy="63" r="3" fill="#24496B"/>
+  <path d="M53 74c4 4 10 4 14 0" fill="none" stroke="#24496B" stroke-width="4" stroke-linecap="round"/>
+</svg>

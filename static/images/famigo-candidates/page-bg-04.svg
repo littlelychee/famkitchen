@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1480" viewBox="0 0 720 1480" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗整页简笔背景候选 4</title>
+  <desc id="desc">透明底简笔风背景，中间偏下是长餐盘、小狗侧脸和轻薄心形元素。</desc>
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffaf2" stop-opacity="0"/>
+      <stop offset="0.58" stop-color="#fff2df" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#f7f5ee" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="1480" fill="url(#wash)"/>
+  <g transform="translate(78 795)" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.17">
+    <path d="M70 383c113 54 323 54 436 0" stroke="#d8b062" stroke-width="14"/>
+    <path d="M36 348c130 51 375 51 505 0" stroke="#96ad69" stroke-width="18"/>
+    <path d="M210 244c-34-34-37-94 0-120 34-24 78 10 78 10s43-34 80-7c35 26 30 86-2 118" stroke="#77401f" stroke-width="10"/>
+    <path d="M221 135c-46 25-57 89-22 111 34 22 73-17 79-69" stroke="#e9aa59" stroke-width="26"/>
+    <path d="M357 135c46 25 57 89 22 111-34 22-73-17-79-69" stroke="#e9aa59" stroke-width="26"/>
+    <path d="M262 116c18-28 53-33 66-12 13 22-11 42-42 50" stroke="#77401f" stroke-width="10"/>
+    <path d="M254 209h.1M323 209h.1" stroke="#5b2a14" stroke-width="14"/>
+    <path d="M289 236c-11 19-35 20-47 2M289 236c11 19 35 20 47 2" stroke="#5b2a14" stroke-width="8"/>
+    <path d="M112 285c-12-38-1-71 33-96M450 285c12-38 1-71-33-96" stroke="#8faf6c" stroke-width="9"/>
+    <path d="M452 192l24-18M452 192l27 8" stroke="#8faf6c" stroke-width="8"/>
+  </g>
+  <path d="M584 837c18-23 54-12 54 18 0 31-43 50-54 61-11-11-54-30-54-61 0-30 36-41 54-18Z" fill="#f28f7c" opacity="0.055"/>
+  <path d="M142 1118c17-22 51-11 51 17 0 29-40 47-51 57-11-10-51-28-51-57 0-28 34-39 51-17Z" fill="#f28f7c" opacity="0.055"/>
+</svg>

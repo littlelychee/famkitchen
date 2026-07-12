@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}菜品库 - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+  <div class="mb-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <div class="library-mode-switch" aria-label="菜品库视图">
+      <a href="{% url 'meals:dish_list' %}" class="library-mode-link {% if not is_discarded_view %}is-active{% endif %}">
+        <i data-lucide="book-open-text" aria-hidden="true"></i>
+        <span>菜品库</span>
+      </a>
+      <a href="{% url 'meals:dish_list' %}?section=discarded" class="library-mode-link {% if is_discarded_view %}is-active{% endif %}">
+        <i data-lucide="archive-x" aria-hidden="true"></i>
+        <span>废弃菜品</span>
+      </a>
+    </div>
+
+    {% if can_create_library_content %}
+      <div class="library-actions" aria-label="菜品库操作">
+        <a href="{% url 'meals:category_create' %}?next=dish_list" class="library-action library-action-primary">
+          <i data-lucide="folder-plus" aria-hidden="true"></i>
+          <span>新增分类</span>
+        </a>
+        <a href="{% url 'meals:dish_create' %}" class="library-action library-action-primary">
+          <i data-lucide="circle-plus" aria-hidden="true"></i>
+          <span>新增菜品</span>
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="dish-library-grid grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-5" {% if can_manage_categories %}x-data="{ editingCategories: false }"{% endif %}>
+    <aside class="category-panel rounded-lg border border-base-300 bg-base-100 p-2 shadow-sm">
+      <div class="mb-2 flex items-center justify-between gap-2 px-2">
+        <div class="text-xs font-medium text-stone-500">分类</div>
+        {% if can_manage_categories and can_create_library_content %}
+          <button type="button" class="btn btn-ghost btn-xs category-edit-pill" @click="editingCategories = !editingCategories" :class="{ 'btn-primary': editingCategories }" :aria-pressed="editingCategories.toString()" :aria-label="editingCategories ? '完成编辑分类' : '编辑分类'" :title="editingCategories ? '完成编辑分类' : '编辑分类'">
+            <i data-lucide="pencil" aria-hidden="true"></i>
+            <span class="sr-only">编辑分类</span>
+          </button>
+        {% endif %}
+      </div>
+
+      <nav class="category-nav-list" aria-label="菜品分类">
+        <a href="{% url 'meals:dish_list' %}{% if is_discarded_view %}?section=discarded{% endif %}" class="category-nav-link {% if not selected_category %}is-active{% endif %}">
+          <span>全部</span>
+        </a>
+
+        {% for category in categories %}
+          <div class="category-nav-row">
+            <a href="{% url 'meals:dish_list' %}?{% if is_discarded_view %}section=discarded&{% endif %}category={{ category.id }}" class="category-nav-link {% if selected_category_name == category.name %}is-active{% endif %}" {% if can_manage_categories and can_create_library_content %}:aria-disabled="editingCategories.toString()" @click="if (editingCategories) $event.preventDefault()"{% endif %}>
+              <span>{{ category.name }}</span>
+            </a>
+            {% if can_manage_categories and can_create_library_content %}
+              <div x-cloak x-show="editingCategories" class="category-row-actions">
+                <a href="{% url 'meals:category_edit' category.id %}" class="btn btn-outline btn-xs icon-btn-sm shrink-0" aria-label="编辑 {{ category.name }}" title="编辑 {{ category.name }}">
+                  <i data-lucide="pencil" aria-hidden="true"></i>
+                  <span class="sr-only">编辑</span>
+                </a>
+                <form method="post" action="{% url 'meals:category_delete' category.id %}" class="contents" onsubmit="return confirm('确认删除分类 {{ category.name|escapejs }}？没有其他归属的菜品会移入废弃。');">
+                  {% csrf_token %}
+                  <button class="btn btn-error btn-xs icon-btn-sm shrink-0" aria-label="删除 {{ category.name }}" title="删除 {{ category.name }}">
+                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                    <span class="sr-only">删除</span>
+                  </button>
+                </form>
+              </div>
+            {% endif %}
+          </div>
+        {% empty %}
+          <div class="empty-state-card px-2 py-3 text-center text-xs text-stone-400">
+            <img src="{% static 'images/empty-states/empty-categories.svg' %}" alt="" class="empty-state-image empty-state-image-sm">
+            <p>还没有类别标签</p>
+          </div>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <div class="grid grid-cols-1 content-start gap-2 xl:grid-cols-2">
+      {% for dish in dishes %}
+        <article class="dish-preview-card rounded-lg border border-base-300 bg-base-100 shadow-sm">
+          <div class="dish-card-category-corner" aria-label="类别标签">
+            {% for label in dish.category_labels %}
+              <span class="badge badge-outline text-[0.68rem]">{{ label }}</span>
+            {% empty %}
+              <span class="badge badge-outline text-[0.68rem]">未分类</span>
+            {% endfor %}
+          </div>
+          <div class="grid grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-3">
+            <div class="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-lg bg-base-200 sm:h-20 sm:w-20">
+              {% if dish.image %}
+                <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-full w-full object-cover">
+              {% else %}
+                <img src="{% static dish.default_image_path %}" alt="默认菜品图片" class="h-full w-full object-cover">
+              {% endif %}
+            </div>
+            <div class="min-w-0 pt-0.5">
+              <h2 class="dish-card-title truncate text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
+              {% if dish.calories or dish.supports_spice or dish.supports_ice %}
+                <div class="capability-line mt-0.5">
+                  {% if dish.calories %}
+                    <span>{{ dish.calories }} 千卡</span>
+                  {% endif %}
+                  {% if dish.supports_spice %}
+                    <span class="capability-pill is-icon-only" title="可调辣度">
+                      <img src="{% static dish.spice_capability_icon_path %}" alt="" aria-hidden="true">
+                      <span class="sr-only">可调辣度</span>
+                    </span>
+                  {% endif %}
+                  {% if dish.supports_ice %}
+                    <span class="capability-pill is-icon-only" title="可调冰量">
+                      <img src="{% static dish.ice_capability_icon_path %}" alt="" aria-hidden="true">
+                      <span class="sr-only">可调冰量</span>
+                    </span>
+                  {% endif %}
+                </div>
+              {% endif %}
+              {% if dish.description %}
+                <p class="mt-1 truncate text-xs leading-snug text-stone-600">{{ dish.description }}</p>
+              {% else %}
+                <p class="mt-1 truncate text-xs leading-snug text-stone-400">还没有描述。</p>
+              {% endif %}
+            </div>
+          </div>
+          <a href="{% url 'meals:dish_edit' dish.id %}" class="btn btn-outline btn-xs dish-inline-edit shrink-0" aria-label="编辑 {{ dish.name }}" title="编辑 {{ dish.name }}">
+            <i data-lucide="pencil" aria-hidden="true"></i>
+            <span class="sr-only">编辑</span>
+          </a>
+        </article>
+      {% empty %}
+        <div class="empty-state-card rounded-lg border border-dashed border-stone-300 bg-base-100 p-8 text-center xl:col-span-2">
+          <img src="{% static 'images/empty-states/empty-dishes.svg' %}" alt="" class="empty-state-image">
+          <p class="mb-4 text-stone-500">这里还没有菜品。</p>
+          {% if can_create_library_content %}
+            <a href="{% url 'meals:dish_create' %}" class="btn btn-primary">新增菜品</a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}添加{{ meal_meta.dish_title }} - 私家御膳房{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+  <form method="post" class="space-y-4 pb-28 sm:pb-20" data-meal-select-form>
+    {% csrf_token %}
+    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+    <input type="hidden" name="meal_type" value="{{ meal_type }}">
+    {% if selected_category %}
+      <input type="hidden" name="category" value="{{ selected_category.id }}">
+    {% endif %}
+
+    <div class="mb-4 flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="truncate text-xl font-bold">添加到{{ meal_meta.dish_title }}</h1>
+        <p class="text-sm text-stone-500">{{ selected_date|date:"Y-m-d" }}</p>
+      </div>
+      <div class="flex shrink-0 gap-2">
+        <button class="btn btn-primary btn-sm" type="submit">保存选择</button>
+        <a href="{% url 'meals:meal_plan' %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-outline btn-sm">返回菜单</a>
+      </div>
+    </div>
+
+    {% if notification_recipients %}
+      <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+        <div class="mb-3 flex items-center gap-2">
+          <span class="inline-grid h-9 w-9 place-items-center rounded-full bg-base-200 text-stone-700">
+            <i data-lucide="bell-ring" aria-hidden="true"></i>
+          </span>
+          <div class="min-w-0">
+            <div class="font-bold">提醒家人</div>
+            <div class="text-xs text-stone-500">保存后发送给选中的家庭成员</div>
+          </div>
+        </div>
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {% for membership in notification_recipients %}
+            <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
+              <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary">
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-bold">{{ membership.user.username }}</span>
+                <span class="block truncate text-xs text-stone-500">
+                  {% if membership.user.email %}邮箱通知{% else %}站内消息{% endif %}
+                </span>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="dish-library-grid grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-5">
+      <aside class="category-panel rounded-lg border border-base-300 bg-base-100 p-2 shadow-sm">
+        <div class="mb-2 px-2 text-xs font-medium text-stone-500">分类</div>
+        <nav class="category-nav-list" aria-label="菜品分类">
+          <a href="{% url 'meals:meal_plan_select' %}?date={{ selected_date|date:'Y-m-d' }}&meal_type={{ meal_type }}" class="category-nav-link {% if not selected_category %}is-active{% endif %}">
+            <span>全部</span>
+          </a>
+
+          {% for category in categories %}
+            <a href="{% url 'meals:meal_plan_select' %}?date={{ selected_date|date:'Y-m-d' }}&meal_type={{ meal_type }}&category={{ category.id }}" class="category-nav-link {% if selected_category_name == category.name %}is-active{% endif %}">
+              <span>{{ category.name }}</span>
+            </a>
+          {% empty %}
+            <div class="empty-state-card px-2 py-3 text-center text-xs text-stone-400">
+              <img src="{% static 'images/empty-states/empty-categories.svg' %}" alt="" class="empty-state-image empty-state-image-sm">
+              <p>还没有类别标签</p>
+            </div>
+          {% endfor %}
+        </nav>
+      </aside>
+
+      <div class="grid grid-cols-1 content-start gap-2 xl:grid-cols-2">
+        {% for row in dish_rows %}
+          {% with dish=row.dish item=row.item %}
+            <article
+              class="meal-select-card rounded-lg border border-base-300 bg-base-100 shadow-sm"
+              data-dish-row
+              data-dish-id="{{ dish.id }}"
+              data-initial-selected="{% if row.is_selected %}1{% else %}0{% endif %}"
+              data-initial-quantity="{{ row.quantity }}"
+              data-initial-spice="{{ row.spice_level }}"
+              data-initial-ice="{{ row.ice_level }}"
+              x-data="{ selected: {% if row.is_selected %}true{% else %}false{% endif %} }"
+              :class="{ 'is-selected': selected }"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+              <input type="hidden" name="meal_type" value="{{ meal_type }}">
+              <input type="hidden" name="dish_id" value="{{ dish.id }}">
+
+              <div class="dish-card-category-corner" aria-label="类别标签">
+                {% for label in dish.category_labels %}
+                  <span class="badge badge-outline text-[0.68rem]">{{ label }}</span>
+                {% empty %}
+                  <span class="badge badge-outline text-[0.68rem]">未分类</span>
+                {% endfor %}
+              </div>
+
+              <div class="grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-3">
+                <input
+                  type="checkbox"
+                  name="dish_ids"
+                  value="{{ dish.id }}"
+                  class="meal-select-checkbox"
+                  data-dish-checkbox
+                  x-model="selected"
+                  {% if row.is_selected %}checked{% endif %}
+                  aria-label="选择 {{ dish.name }}"
+                >
+                <div class="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-lg bg-base-200 sm:h-20 sm:w-20">
+                  {% if dish.image %}
+                    <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-full w-full object-cover">
+                  {% else %}
+                    <img src="{% static dish.default_image_path %}" alt="默认菜品图片" class="h-full w-full object-cover">
+                  {% endif %}
+                </div>
+                <div class="min-w-0">
+                  <h2 class="dish-card-title truncate text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
+                  {% if dish.calories or dish.supports_spice or dish.supports_ice %}
+                    <div class="capability-line mt-0.5">
+                      {% if dish.calories %}
+                        <span>{{ dish.calories }} 千卡</span>
+                      {% endif %}
+                      {% if dish.supports_spice %}
+                        <span class="capability-pill is-icon-only" title="可调辣度">
+                          <img src="{% static dish.spice_capability_icon_path %}" alt="" aria-hidden="true">
+                          <span class="sr-only">可调辣度</span>
+                        </span>
+                      {% endif %}
+                      {% if dish.supports_ice %}
+                        <span class="capability-pill is-icon-only" title="可调冰量">
+                          <img src="{% static dish.ice_capability_icon_path %}" alt="" aria-hidden="true">
+                          <span class="sr-only">可调冰量</span>
+                        </span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  {% if dish.description %}
+                    <p class="mt-1 truncate text-xs leading-snug text-stone-600">{{ dish.description }}</p>
+                  {% else %}
+                    <p class="mt-1 truncate text-xs leading-snug text-stone-400">还没有描述。</p>
+                  {% endif %}
+                </div>
+              </div>
+
+              <details class="meal-select-details">
+                <summary class="meal-select-detail-toggle">
+                  <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+                  <span class="sr-only">详细设置</span>
+                </summary>
+                <div class="detail-setting-stack">
+                  <div class="detail-setting-row">
+                    <div class="detail-setting-label">数量</div>
+                    <div class="quantity-stepper" data-quantity-stepper>
+                      <button type="button" data-quantity-step="-1" :disabled="!selected" aria-label="减少 {{ dish.name }} 数量">-</button>
+                      <input
+                        type="number"
+                        name="quantity_{{ dish.id }}"
+                        min="1"
+                        step="1"
+                        value="{{ row.quantity }}"
+                        data-row-quantity-input
+                        :disabled="!selected"
+                        aria-label="{{ dish.name }} 数量"
+                      >
+                      <button type="button" data-quantity-step="1" :disabled="!selected" aria-label="增加 {{ dish.name }} 数量">+</button>
+                    </div>
+                  </div>
+
+                  {% if dish.supports_spice %}
+                    <div class="detail-setting-row">
+                      <div class="detail-setting-label">辣度</div>
+                      <div class="level-choice-row" aria-label="{{ dish.name }} 辣度">
+                        {% for option in spice_level_options %}
+                          <label class="level-choice" title="{{ option.label }}">
+                            <input
+                              type="radio"
+                              name="spice_level_{{ dish.id }}"
+                              value="{{ option.value }}"
+                              class="sr-only"
+                              :disabled="!selected"
+                              {% if row.spice_level == option.value %}checked{% endif %}
+                            >
+                            <span class="level-choice-shell">
+                              <img src="{% static option.icon_path %}" alt="" aria-hidden="true">
+                            </span>
+                            <span class="sr-only">{{ option.label }}</span>
+                          </label>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if dish.supports_ice %}
+                    <div class="detail-setting-row">
+                      <div class="detail-setting-label">冰量</div>
+                      <div class="level-choice-row" aria-label="{{ dish.name }} 冰量">
+                        {% for option in ice_level_options %}
+                          <label class="level-choice" title="{{ option.label }}">
+                            <input
+                              type="radio"
+                              name="ice_level_{{ dish.id }}"
+                              value="{{ option.value }}"
+                              class="sr-only"
+                              :disabled="!selected"
+                              {% if row.ice_level == option.value %}checked{% endif %}
+                            >
+                            <span class="level-choice-shell">
+                              <img src="{% static option.icon_path %}" alt="" aria-hidden="true">
+                            </span>
+                            <span class="sr-only">{{ option.label }}</span>
+                          </label>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <label class="block">
+                    <span class="sr-only">备注</span>
+                    <textarea
+                      name="note_{{ dish.id }}"
+                      class="textarea textarea-bordered min-h-14 w-full text-sm"
+                      placeholder="备注"
+                      :disabled="!selected"
+                      data-note-input
+                    >{% if item %}{{ item.note }}{% endif %}</textarea>
+                  </label>
+                </div>
+              </details>
+            </article>
+          {% endwith %}
+        {% empty %}
+          <div class="empty-state-card rounded-lg border border-dashed border-stone-300 bg-base-100 p-8 text-center xl:col-span-2">
+            <img src="{% static 'images/empty-states/empty-dishes.svg' %}" alt="" class="empty-state-image">
+            <p class="mb-4 text-stone-500">菜品库还没有菜品。</p>
+            <a href="{% url 'meals:dish_create' %}" class="btn btn-primary">新增菜品</a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if dishes %}
+      <div class="selection-dock" data-selection-dock>
+        <div class="selection-dock-summary" aria-live="polite">
+          <span data-selection-summary>已选 0 道</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm selection-cart-button" data-selection-sheet-toggle>
+          <img src="{% static 'images/meal-customization/selection-cart.svg' %}" alt="" aria-hidden="true">
+          <span>查看已选</span>
+          <span class="badge badge-primary" data-selection-count>0</span>
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" data-selection-reset>重置</button>
+        <button type="button" class="btn btn-error btn-sm" data-selection-clear>清空</button>
+      </div>
+
+      <div class="selection-sheet" data-selection-sheet aria-label="已选菜品">
+        <button type="button" class="selection-sheet-handle" data-selection-sheet-close aria-label="收起已选菜品"></button>
+        <div class="selection-sheet-body">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <div class="font-bold">已选菜品</div>
+            <div class="text-xs font-medium text-stone-500" data-selection-summary>已选 0 道</div>
+          </div>
+          <div class="grid gap-2" data-cart-list>
+            {% for row in dish_rows %}
+              {% with dish=row.dish %}
+                <div class="cart-item-swipe hidden" data-cart-item data-dish-id="{{ dish.id }}">
+                  <div class="cart-item-track">
+                    <div class="cart-item-card">
+                      {% if dish.image %}
+                        <img src="{{ dish.image.url }}" alt="{{ dish.name }}">
+                      {% else %}
+                        <img src="{% static dish.default_image_path %}" alt="默认菜品图片">
+                      {% endif %}
+                      <div class="min-w-0">
+                        <div class="truncate text-sm font-bold">{{ dish.name }}</div>
+                        <div class="capability-line mt-1">
+                          {% if dish.supports_spice %}
+                            <span class="capability-pill is-icon-only" title="可调辣度">
+                              <img src="{% static dish.spice_capability_icon_path %}" alt="" aria-hidden="true">
+                              <span class="sr-only">可调辣度</span>
+                            </span>
+                          {% endif %}
+                          {% if dish.supports_ice %}
+                            <span class="capability-pill is-icon-only" title="可调冰量">
+                              <img src="{% static dish.ice_capability_icon_path %}" alt="" aria-hidden="true">
+                              <span class="sr-only">可调冰量</span>
+                            </span>
+                          {% endif %}
+                          {% if not dish.supports_spice and not dish.supports_ice %}
+                            <span class="text-xs text-stone-500">无详细设置</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <input type="number" min="1" step="1" value="{{ row.quantity }}" class="input input-bordered input-sm w-full text-center" data-cart-quantity-input aria-label="{{ dish.name }} 数量">
+                    </div>
+                    <button type="button" class="cart-item-delete" data-cart-delete aria-label="删除 {{ dish.name }}">删除</button>
+                  </div>
+                </div>
+              {% endwith %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </form>
+</section>
+
+<script>
+  (() => {
+    const form = document.querySelector("[data-meal-select-form]");
+    if (!form) return;
+
+    const rows = Array.from(form.querySelectorAll("[data-dish-row]"));
+    const sheet = form.querySelector("[data-selection-sheet]");
+    const countBadge = form.querySelector("[data-selection-count]");
+    const summaryNodes = Array.from(form.querySelectorAll("[data-selection-summary]"));
+
+    function rowForDishId(dishId) {
+      return rows.find((row) => row.dataset.dishId === dishId);
+    }
+
+    function checkboxForRow(row) {
+      return row.querySelector("[data-dish-checkbox]");
+    }
+
+    function rowQuantityInput(row) {
+      return row.querySelector("[data-row-quantity-input]");
+    }
+
+    function rowNoteInput(row) {
+      return row.querySelector("[data-note-input]");
+    }
+
+    function normalizedQuantity(value) {
+      const parsed = Number.parseInt(value, 10);
+      if (Number.isNaN(parsed) || parsed < 1) return 1;
+      return parsed;
+    }
+
+    function dispatchChange(input) {
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function setRowSelected(row, selected) {
+      const checkbox = checkboxForRow(row);
+      if (!checkbox || checkbox.checked === selected) return;
+      checkbox.checked = selected;
+      dispatchChange(checkbox);
+    }
+
+    function setRadioValue(row, nameFragment, value) {
+      const radios = Array.from(row.querySelectorAll(`input[type="radio"][name*="${nameFragment}"]`));
+      radios.forEach((radio) => {
+        radio.checked = radio.value === value;
+      });
+    }
+
+    function resetRow(row) {
+      const quantity = rowQuantityInput(row);
+      const note = rowNoteInput(row);
+      setRowSelected(row, row.dataset.initialSelected === "1");
+      if (quantity) {
+        quantity.value = normalizedQuantity(row.dataset.initialQuantity);
+      }
+      if (row.dataset.initialSpice) {
+        setRadioValue(row, "spice_level_", row.dataset.initialSpice);
+      }
+      if (row.dataset.initialIce) {
+        setRadioValue(row, "ice_level_", row.dataset.initialIce);
+      }
+      if (note) {
+        note.value = note.defaultValue;
+      }
+    }
+
+    function updateSelectionUi() {
+      let count = 0;
+      rows.forEach((row) => {
+        const dishId = row.dataset.dishId;
+        const checkbox = checkboxForRow(row);
+        const isSelected = Boolean(checkbox?.checked);
+        if (isSelected) count += 1;
+        row.classList.toggle("is-selected", isSelected);
+
+        form.querySelectorAll(`[data-cart-item][data-dish-id="${dishId}"]`).forEach((item) => {
+          item.classList.toggle("hidden", !isSelected);
+          const cartQuantity = item.querySelector("[data-cart-quantity-input]");
+          const sourceQuantity = rowQuantityInput(row);
+          if (cartQuantity && sourceQuantity && document.activeElement !== cartQuantity) {
+            cartQuantity.value = sourceQuantity.value;
+          }
+        });
+      });
+
+      if (countBadge) countBadge.textContent = count;
+      summaryNodes.forEach((node) => {
+        node.textContent = count ? `已选 ${count} 道` : "还没有选择菜品";
+      });
+      if (count === 0) {
+        sheet?.classList.remove("is-open");
+      }
+    }
+
+    form.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.matches("[data-dish-checkbox], [data-row-quantity-input]")) {
+        updateSelectionUi();
+      }
+    });
+
+    form.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-dish-row]");
+      if (
+        card
+        && !event.target.closest("a, button, input, textarea, select, label, summary, details")
+      ) {
+        const checkbox = checkboxForRow(card);
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          dispatchChange(checkbox);
+          updateSelectionUi();
+        }
+        return;
+      }
+
+      const stepButton = event.target.closest("[data-quantity-step]");
+      if (stepButton) {
+        const stepper = stepButton.closest("[data-quantity-stepper]");
+        const input = stepper?.querySelector("[data-row-quantity-input]");
+        if (!input || input.disabled) return;
+        const nextValue = normalizedQuantity(input.value) + Number.parseInt(stepButton.dataset.quantityStep, 10);
+        input.value = Math.max(1, nextValue);
+        dispatchChange(input);
+        updateSelectionUi();
+        return;
+      }
+
+      const toggleButton = event.target.closest("[data-selection-sheet-toggle]");
+      if (toggleButton) {
+        sheet?.classList.toggle("is-open");
+        return;
+      }
+
+      if (event.target.closest("[data-selection-sheet-close]")) {
+        sheet?.classList.remove("is-open");
+        return;
+      }
+
+      const deleteButton = event.target.closest("[data-cart-delete]");
+      if (deleteButton) {
+        const cartItem = deleteButton.closest("[data-cart-item]");
+        const row = rowForDishId(cartItem?.dataset.dishId);
+        const checkbox = row ? checkboxForRow(row) : null;
+        if (checkbox) {
+          checkbox.checked = false;
+          dispatchChange(checkbox);
+          updateSelectionUi();
+        }
+        return;
+      }
+
+      if (event.target.closest("[data-selection-reset]")) {
+        rows.forEach(resetRow);
+        updateSelectionUi();
+        return;
+      }
+
+      if (event.target.closest("[data-selection-clear]")) {
+        rows.forEach((row) => {
+          setRowSelected(row, false);
+        });
+        updateSelectionUi();
+      }
+    });
+
+    form.querySelectorAll("[data-cart-quantity-input]").forEach((input) => {
+      input.addEventListener("change", () => {
+        input.value = normalizedQuantity(input.value);
+        const cartItem = input.closest("[data-cart-item]");
+        const row = rowForDishId(cartItem?.dataset.dishId);
+        const sourceQuantity = row ? rowQuantityInput(row) : null;
+        if (sourceQuantity) {
+          sourceQuantity.value = input.value;
+          dispatchChange(sourceQuantity);
+        }
+        updateSelectionUi();
+      });
+    });
+
+    const handle = form.querySelector("[data-selection-sheet-close]");
+    let startY = null;
+    handle?.addEventListener("pointerdown", (event) => {
+      startY = event.clientY;
+      handle.setPointerCapture?.(event.pointerId);
+    });
+    handle?.addEventListener("pointerup", (event) => {
+      if (startY !== null && event.clientY - startY > 24) {
+        sheet?.classList.remove("is-open");
+      }
+      startY = null;
+    });
+
+    updateSelectionUi();
+  })();
+</script>
+{% endblock %}

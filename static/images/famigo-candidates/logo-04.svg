@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗私厨大 logo 候选 4</title>
+  <desc id="desc">料理屋招牌风横向 logo，屋檐线条、狗爪和餐盘融合，整体干净现代。</desc>
+  <defs>
+    <linearGradient id="panel" x1="14" y1="12" x2="404" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffaf2"/>
+      <stop offset="0.5" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#f3fbf6"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-34%" width="124%" height="172%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#5b3a22" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  <rect width="420" height="132" fill="none"/>
+  <rect x="14" y="14" width="392" height="104" rx="24" fill="url(#panel)" filter="url(#shadow)"/>
+  <path d="M37 72c32-36 64-53 101-53s69 17 101 53" fill="none" stroke="#e9b65d" stroke-width="3.2" stroke-linecap="round" opacity="0.72"/>
+  <g transform="translate(54 30)">
+    <rect x="0" y="13" width="92" height="64" rx="20" fill="#fff8ea" stroke="#dfb265" stroke-width="2"/>
+    <path d="M18 24c8-8 19-8 27 0 8-8 21-8 30 0" fill="none" stroke="#7a4324" stroke-width="4" stroke-linecap="round"/>
+    <path d="M25 48c-5-7-5-16 0-21 5-5 13-1 13-1s9-5 16 0c6 5 5 15 0 22" fill="#fffdf7" stroke="#7a4324" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M26 28c-10 7-12 21-4 26 8 5 14-3 16-14" fill="#efb05a" stroke="#7a4324" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M54 28c10 7 12 21 4 26-8 5-14-3-16-14" fill="#efb05a" stroke="#7a4324" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="34" cy="43" r="2.9" fill="#5b2a14"/>
+    <circle cx="49" cy="43" r="2.9" fill="#5b2a14"/>
+    <ellipse cx="42" cy="52" rx="4.8" ry="3.5" fill="#5b2a14"/>
+    <path d="M17 66c20 5 42 5 63 0" fill="none" stroke="#95ad68" stroke-width="5" stroke-linecap="round"/>
+    <path d="M71 33c7-3 15-3 24 0M73 42c6-2 13-2 20 0" fill="none" stroke="#95ad68" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <text x="177" y="53" fill="#4a2c1d" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="28" font-weight="900" letter-spacing="0.8">法米狗</text>
+  <text x="276" y="52" fill="#987044" font-family="'Songti SC','STSong','Noto Serif CJK SC',serif" font-size="20" font-weight="800">私家御膳房</text>
+  <text x="179" y="79" fill="#817365" font-family="'Avenir Next','Helvetica Neue',Arial,sans-serif" font-size="10.5" font-weight="800" letter-spacing="2.1">FAMIGO HOME DINING</text>
+  <g transform="translate(330 86)" fill="#f48977" opacity="0.82">
+    <ellipse cx="0" cy="0" rx="5" ry="7"/>
+    <circle cx="-7" cy="-6" r="3.3"/>
+    <circle cx="0" cy="-8" r="3.3"/>
+    <circle cx="7" cy="-6" r="3.3"/>
+  </g>
+</svg>

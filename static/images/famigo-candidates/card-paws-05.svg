@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+  <title id="title">业务容器浅爪印背景候选 5</title>
+  <desc id="desc">透明底极浅线稿小狗爪和餐具纹理，最克制的一版。</desc>
+  <defs>
+    <g id="paw" fill="none" stroke="#7a4324" stroke-width="3" stroke-linecap="round">
+      <path d="M-8 8c4 6 12 6 16 0"/>
+      <path d="M-10-1h.1M0-6h.1M10-1h.1"/>
+    </g>
+  </defs>
+  <rect width="360" height="240" fill="none"/>
+  <g opacity="0.125">
+    <use href="#paw" x="49" y="59" transform="rotate(-18 49 59)"/>
+    <use href="#paw" x="158" y="48" transform="rotate(16 158 48)"/>
+    <use href="#paw" x="292" y="81" transform="rotate(-18 292 81)"/>
+    <use href="#paw" x="96" y="174" transform="rotate(18 96 174)"/>
+    <use href="#paw" x="251" y="192" transform="rotate(-16 251 192)"/>
+  </g>
+  <g fill="none" stroke="#d8b062" stroke-width="3" stroke-linecap="round" opacity="0.1">
+    <path d="M220 36v34M237 36v34M237 36l-10 11M237 36l10 11"/>
+    <circle cx="220" cy="33" r="6"/>
+  </g>
+</svg>
