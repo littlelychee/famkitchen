@@ -1,4 +1,4 @@
-# 私家御膳房项目 Bug 扫描报告
+# 法米狗私厨项目 Bug 扫描报告
 
 扫描日期：2026-07-11  
 项目路径：`/Users/zepeng/zepeng/feeding`

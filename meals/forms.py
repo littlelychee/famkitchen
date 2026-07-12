@@ -33,6 +33,7 @@ FAMILY_NAME_MAX_HAN_LENGTH = 7
 DISH_NAME_MAX_DISPLAY_WIDTH = 16
 DISH_NAME_MAX_HAN_LENGTH = 8
 HEIF_BRANDS = {
+    b"heif",
     b"heic",
     b"heix",
     b"hevc",
@@ -452,6 +453,7 @@ class DishForm(StyledFormMixin, forms.ModelForm):
             "categories",
             "supports_spice",
             "supports_ice",
+            "supports_warm",
             "image",
             "description",
         ]
@@ -459,6 +461,7 @@ class DishForm(StyledFormMixin, forms.ModelForm):
             "categories": forms.CheckboxSelectMultiple(),
             "supports_spice": forms.CheckboxInput(attrs={"class": "sr-only"}),
             "supports_ice": forms.CheckboxInput(attrs={"class": "sr-only"}),
+            "supports_warm": forms.CheckboxInput(attrs={"class": "sr-only"}),
             "image": forms.FileInput(),
             "description": forms.Textarea(attrs={"rows": 3}),
         }
@@ -489,6 +492,7 @@ class DishForm(StyledFormMixin, forms.ModelForm):
 
         self.fields["supports_spice"].label = "可调辣度"
         self.fields["supports_ice"].label = "可调冰量"
+        self.fields["supports_warm"].label = "可温热"
 
         self.order_fields(
             [
@@ -497,6 +501,7 @@ class DishForm(StyledFormMixin, forms.ModelForm):
                 "categories",
                 "supports_spice",
                 "supports_ice",
+                "supports_warm",
                 "image",
                 "description",
             ]

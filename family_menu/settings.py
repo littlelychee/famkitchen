@@ -153,7 +153,7 @@ EMAIL_TIMEOUT = int(os.environ.get("DJANGO_EMAIL_TIMEOUT", "15"))
 EMAIL_FAIL_SILENTLY = env_bool("DJANGO_EMAIL_FAIL_SILENTLY")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DJANGO_DEFAULT_FROM_EMAIL",
-    "私家御膳房 <noreply@example.com>",
+    "法米狗私厨 <noreply@example.com>",
 )
 
 LOGIN_URL = "/accounts/login/"

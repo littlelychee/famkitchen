@@ -33,6 +33,16 @@ urlpatterns = [
     ),
     path("notifications/", views.family_notifications_view, name="notifications"),
     path(
+        "notifications/new/",
+        views.family_message_create_view,
+        name="notification_create",
+    ),
+    path(
+        "notifications/thread/<uuid:thread_id>/",
+        views.family_message_thread_view,
+        name="notification_thread",
+    ),
+    path(
         "notifications/clear/",
         views.family_notifications_clear_view,
         name="notifications_clear",
@@ -48,6 +58,16 @@ urlpatterns = [
     path("dishes/<int:dish_id>/edit/", views.dish_edit_view, name="dish_edit"),
     path("dishes/<int:dish_id>/delete/", views.dish_delete_view, name="dish_delete"),
     path("categories/create/", views.category_create_view, name="category_create"),
+    path(
+        "categories/sort-mode/",
+        views.category_sort_mode_view,
+        name="category_sort_mode",
+    ),
+    path(
+        "categories/reorder/",
+        views.category_reorder_view,
+        name="category_reorder",
+    ),
     path(
         "categories/<int:category_id>/edit/",
         views.category_edit_view,

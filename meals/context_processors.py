@@ -1,3 +1,5 @@
+from family_menu.app_meta import APP_VERSION, current_logo_path
+
 from .utils import get_current_family, get_user_profile
 
 
@@ -17,7 +19,11 @@ def is_mobile_browser(request):
 
 
 def current_family(request):
-    context = {"is_mobile_device": is_mobile_browser(request)}
+    context = {
+        "app_version": APP_VERSION,
+        "active_logo_path": current_logo_path(),
+        "is_mobile_device": is_mobile_browser(request),
+    }
     if not request.user.is_authenticated:
         context["current_family"] = None
         context["current_family_memberships"] = []

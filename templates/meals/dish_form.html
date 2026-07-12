@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - 私家御膳房{% endblock %}
+{% block title %}{{ page_title }} - 法米狗私厨{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-3xl px-4 py-8">
@@ -94,6 +94,14 @@
               <span class="min-w-0">
                 <span class="block text-sm font-bold">可调冰量</span>
                 <span class="block text-xs text-stone-500">排餐时可选去冰、少冰、中冰、多冰。</span>
+              </span>
+            </label>
+            <label class="setting-toggle-card" data-setting-toggle>
+              {{ form.supports_warm }}
+              <img src="{% static 'images/meal-customization/warm.svg' %}" alt="" aria-hidden="true">
+              <span class="min-w-0">
+                <span class="block text-sm font-bold">可温热</span>
+                <span class="block text-xs text-stone-500">排餐时可选择是否温热。</span>
               </span>
             </label>
           </div>

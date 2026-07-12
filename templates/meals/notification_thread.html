@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}留言 - 法米狗私厨{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-6">
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-3">
+      <span class="inline-grid h-12 w-12 place-items-center rounded-full bg-base-100 text-stone-700 shadow-sm">
+        <i data-lucide="messages-square" aria-hidden="true"></i>
+      </span>
+      <div class="min-w-0">
+        <h1 class="text-xl font-semibold">留言</h1>
+        <p class="truncate text-sm text-stone-500">{{ family.name }}</p>
+      </div>
+    </div>
+    <a href="{% url 'meals:notifications' %}" class="btn btn-outline btn-sm">
+      <i data-lucide="arrow-left" aria-hidden="true"></i>
+      <span>返回</span>
+    </a>
+  </div>
+
+  <div class="mb-4 grid gap-3">
+    {% for notification in thread_messages %}
+      <article class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+        <div class="mb-2 flex min-w-0 flex-wrap items-center gap-2">
+          {% if notification.recipient_id == user.id %}
+            <span class="badge badge-primary">给你</span>
+          {% endif %}
+          {% if notification.recipient %}
+            <span class="badge badge-outline">给 {{ notification.recipient.username }}</span>
+          {% endif %}
+          <span class="badge badge-outline">
+            {% if notification.actor %}{{ notification.actor.username }}{% else %}某位家人{% endif %}
+          </span>
+          <time class="text-xs font-medium text-stone-500" datetime="{{ notification.created_at|date:'c' }}">
+            {{ notification.created_at|date:"Y-m-d H:i" }}
+          </time>
+        </div>
+        <p class="whitespace-pre-wrap text-sm leading-relaxed text-stone-700">{{ notification.message_body }}</p>
+      </article>
+    {% endfor %}
+  </div>
+
+  <form method="post" class="grid gap-4 rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
+    {% csrf_token %}
+    <div>
+      <div class="mb-2 text-sm font-bold">回复给谁</div>
+      <div class="grid gap-2 sm:grid-cols-2">
+        {% for membership in recipients %}
+          <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
+            <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary">
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-bold">{{ membership.user.username }}</span>
+              <span class="block truncate text-xs text-stone-500">
+                {% if membership.user.email %}邮箱通知{% else %}站内消息{% endif %}
+              </span>
+            </span>
+          </label>
+        {% empty %}
+          <div class="rounded-lg border border-dashed border-base-300 bg-base-200 p-4 text-center text-sm text-stone-500">
+            当前家庭还没有其他成员。
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <label class="block">
+      <span class="mb-2 block text-sm font-bold">回复内容</span>
+      <textarea name="message_body" class="textarea textarea-bordered min-h-28 w-full text-base" maxlength="800" required placeholder="继续留言"></textarea>
+    </label>
+
+    <div class="flex flex-wrap gap-2">
+      <button class="btn btn-primary" {% if not recipients %}disabled{% endif %}>
+        <i data-lucide="send" aria-hidden="true"></i>
+        <span>发送回复</span>
+      </button>
+      <a href="{% url 'meals:notifications' %}" class="btn btn-outline">返回消息</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

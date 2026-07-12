@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Warm notebook</title>
+  <desc id="desc">A small recipe notebook with warm steam rising above it.</desc>
+  <circle cx="32" cy="32" r="28" fill="#fff8e7"/>
+  <path d="M21 23h25c4 0 7 3 7 7v18c0 4-3 7-7 7H21c-4 0-7-3-7-7V30c0-4 3-7 7-7Z" fill="#ffe3a3" stroke="#9b6b22" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M22 23v32" stroke="#9b6b22" stroke-width="3" stroke-linecap="round"/>
+  <path d="M29 34h14M29 42h11" stroke="#fffaf0" stroke-width="3" stroke-linecap="round"/>
+  <path d="M29 16c-4-5 4-7 0-12M39 16c-4-5 4-7 0-12M49 18c-3-4 3-6 0-10" fill="none" stroke="#d86f45" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 31c5 2 10 2 15 0" fill="none" stroke="#c79535" stroke-width="2" stroke-linecap="round" opacity=".65"/>
+</svg>

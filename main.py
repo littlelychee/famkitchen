@@ -1,5 +1,5 @@
 def main():
-    print("私家御膳房 MVP")
+    print("法米狗私厨 MVP")
     print("运行方式：uv run python manage.py runserver 0.0.0.0:8015")
 
 

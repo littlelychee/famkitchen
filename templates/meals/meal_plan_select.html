@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}添加{{ meal_meta.dish_title }} - 私家御膳房{% endblock %}
+{% block title %}添加{{ meal_meta.dish_title }} - 法米狗私厨{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
@@ -53,7 +53,17 @@
 
     <div class="dish-library-grid grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-5">
       <aside class="category-panel rounded-lg border border-base-300 bg-base-100 p-2 shadow-sm">
-        <div class="mb-2 px-2 text-xs font-medium text-stone-500">分类</div>
+        <div class="category-panel-heading mb-2 px-2">
+          <div class="text-xs font-medium text-stone-500">分类</div>
+          <form method="post" action="{% url 'meals:category_sort_mode' %}" class="category-sort-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-ghost btn-xs category-sort-button" aria-label="切换分类排序，当前{{ category_sort_label }}，下次{{ next_category_sort_label }}" title="当前：{{ category_sort_label }}。点击切换到{{ next_category_sort_label }}">
+              <i data-lucide="{{ category_sort_icon }}" aria-hidden="true"></i>
+              <span class="sr-only">切换排序</span>
+            </button>
+          </form>
+        </div>
         <nav class="category-nav-list" aria-label="菜品分类">
           <a href="{% url 'meals:meal_plan_select' %}?date={{ selected_date|date:'Y-m-d' }}&meal_type={{ meal_type }}" class="category-nav-link {% if not selected_category %}is-active{% endif %}">
             <span>全部</span>
@@ -83,7 +93,8 @@
               data-initial-quantity="{{ row.quantity }}"
               data-initial-spice="{{ row.spice_level }}"
               data-initial-ice="{{ row.ice_level }}"
-              x-data="{ selected: {% if row.is_selected %}true{% else %}false{% endif %} }"
+              data-initial-warm="{% if row.serve_warm %}1{% else %}0{% endif %}"
+              x-data="{ selected: {% if row.is_selected %}true{% else %}false{% endif %}, warm: {% if row.serve_warm %}true{% else %}false{% endif %} }"
               :class="{ 'is-selected': selected }"
             >
               {% csrf_token %}
@@ -119,7 +130,7 @@
                 </div>
                 <div class="dish-card-copy min-w-0">
                   <h2 class="dish-card-title text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
-                  {% if dish.supports_spice or dish.supports_ice %}
+                  {% if dish.supports_spice or dish.supports_ice or dish.supports_warm %}
                     <div class="capability-line mt-0.5">
                       {% if dish.supports_spice %}
                         <span class="capability-pill is-icon-only" title="可调辣度">
@@ -131,6 +142,12 @@
                         <span class="capability-pill is-icon-only" title="可调冰量">
                           <img src="{% static dish.ice_capability_icon_path %}" alt="" aria-hidden="true">
                           <span class="sr-only">可调冰量</span>
+                        </span>
+                      {% endif %}
+                      {% if dish.supports_warm %}
+                        <span class="capability-pill is-icon-only" title="可温热">
+                          <img src="{% static warm_icon_path %}" alt="" aria-hidden="true">
+                          <span class="sr-only">可温热</span>
                         </span>
                       {% endif %}
                     </div>
@@ -191,6 +208,26 @@
                     </div>
                   {% endif %}
 
+                  {% if dish.supports_warm %}
+                    <div class="detail-setting-row">
+                      <div class="detail-setting-label">温热</div>
+                      <label class="warm-choice" title="温热">
+                        <input
+                          type="checkbox"
+                          name="serve_warm_{{ dish.id }}"
+                          value="1"
+                          class="sr-only"
+                          x-model="warm"
+                          :disabled="!selected"
+                          data-warm-toggle
+                          {% if row.serve_warm %}checked{% endif %}
+                        >
+                        <img src="{% static warm_icon_path %}" alt="" aria-hidden="true">
+                        <span>温热</span>
+                      </label>
+                    </div>
+                  {% endif %}
+
                   {% if dish.supports_ice %}
                     <div class="detail-setting-row">
                       <div class="detail-setting-label">冰量</div>
@@ -202,7 +239,7 @@
                               name="ice_level_{{ dish.id }}"
                               value="{{ option.value }}"
                               class="sr-only"
-                              :disabled="!selected"
+                              :disabled="!selected || warm"
                               {% if row.ice_level == option.value %}checked{% endif %}
                             >
                             <span class="level-choice-shell">
@@ -286,7 +323,13 @@
                               <span class="sr-only">可调冰量</span>
                             </span>
                           {% endif %}
-                          {% if not dish.supports_spice and not dish.supports_ice %}
+                          {% if dish.supports_warm %}
+                            <span class="capability-pill is-icon-only" title="可温热">
+                              <img src="{% static warm_icon_path %}" alt="" aria-hidden="true">
+                              <span class="sr-only">可温热</span>
+                            </span>
+                          {% endif %}
+                          {% if not dish.supports_spice and not dish.supports_ice and not dish.supports_warm %}
                             <span class="text-xs text-stone-500">无详细设置</span>
                           {% endif %}
                         </div>
@@ -331,6 +374,10 @@
       return row.querySelector("[data-note-input]");
     }
 
+    function rowWarmInput(row) {
+      return row.querySelector("[data-warm-toggle]");
+    }
+
     function normalizedQuantity(value) {
       const parsed = Number.parseInt(value, 10);
       if (Number.isNaN(parsed) || parsed < 1) return 1;
@@ -368,6 +415,11 @@
       if (row.dataset.initialIce) {
         setRadioValue(row, "ice_level_", row.dataset.initialIce);
       }
+      const warm = rowWarmInput(row);
+      if (warm) {
+        warm.checked = row.dataset.initialWarm === "1";
+        dispatchChange(warm);
+      }
       if (note) {
         note.value = note.defaultValue;
       }
@@ -403,7 +455,7 @@
 
     form.addEventListener("change", (event) => {
       const target = event.target;
-      if (target.matches("[data-dish-checkbox], [data-row-quantity-input]")) {
+      if (target.matches("[data-dish-checkbox], [data-row-quantity-input], [data-warm-toggle]")) {
         updateSelectionUi();
       }
     });

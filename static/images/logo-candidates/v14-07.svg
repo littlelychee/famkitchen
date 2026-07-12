@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132" role="img" aria-labelledby="title desc">
+  <title id="title">法米狗私厨 v1.4 logo 候选 7</title>
+  <desc id="desc">餐盘狗鼻与法米狗私厨文字的横向品牌标识。</desc>
+  <defs>
+    <linearGradient id="panel" x1="14" y1="14" x2="406" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffefa"/>
+      <stop offset="0.58" stop-color="#f7f4ee"/>
+      <stop offset="1" stop-color="#fff0ea"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-35%" width="124%" height="170%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#8a4b2f" flood-opacity="0.11"/>
+    </filter>
+  </defs>
+  <rect width="420" height="132" fill="none"/>
+  <rect x="14" y="14" width="392" height="104" rx="28" fill="url(#panel)" filter="url(#shadow)"/>
+  <rect x="32" y="26" width="88" height="80" rx="22" fill="#fffefa" stroke="#ead7bd" stroke-width="2"/>
+  <circle cx="76" cy="63" r="30" fill="#fffefa" stroke="#7b4a25" stroke-width="4"/>
+  <circle cx="76" cy="63" r="18" fill="#fff1c7" stroke="#d29a2f" stroke-width="3"/>
+  <circle cx="68" cy="59" r="2.6" fill="#3a3028"/>
+  <circle cx="84" cy="59" r="2.6" fill="#3a3028"/>
+  <path d="M72 68c3 3 5 3 8 0" fill="none" stroke="#3a3028" stroke-width="3" stroke-linecap="round"/>
+  <path d="M45 40l-8 44M107 40v44M99 40v44M99 60h8" stroke="#7b4a25" stroke-width="4" stroke-linecap="round"/>
+  <text x="270" y="69" text-anchor="middle" fill="#5c3420" font-family="'Hannotate SC','HanziPen SC','Kaiti SC','STKaiti',serif" font-size="34" font-weight="900" letter-spacing="0.5">法米狗私厨</text>
+  <text x="270" y="96" text-anchor="middle" fill="#a06f5a" font-family="'Avenir Next','Helvetica Neue',Arial,sans-serif" font-size="11.2" font-weight="800" letter-spacing="1.25">FAMIGO PRIVATE KITCHEN</text>
+</svg>

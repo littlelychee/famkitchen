@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}菜品库 - 私家御膳房{% endblock %}
+{% block title %}菜品库 - 法米狗私厨{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
@@ -31,10 +31,18 @@
     {% endif %}
   </div>
 
-  <div class="dish-library-grid grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-5" {% if can_manage_categories %}x-data="{ editingCategories: false }"{% endif %}>
+  <div class="dish-library-grid grid grid-cols-[7.5rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-5" {% if can_manage_categories %}x-data="{ editingCategories: false }" :class="{ 'is-editing-categories': editingCategories }"{% endif %}>
     <aside class="category-panel rounded-lg border border-base-300 bg-base-100 p-2 shadow-sm">
-      <div class="mb-2 flex items-center justify-between gap-2 px-2">
+      <div class="category-panel-heading mb-2 px-2">
         <div class="text-xs font-medium text-stone-500">分类</div>
+        <form method="post" action="{% url 'meals:category_sort_mode' %}" class="category-sort-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn btn-ghost btn-xs category-sort-button" aria-label="切换分类排序，当前{{ category_sort_label }}，下次{{ next_category_sort_label }}" title="当前：{{ category_sort_label }}。点击切换到{{ next_category_sort_label }}">
+            <i data-lucide="{{ category_sort_icon }}" aria-hidden="true"></i>
+            <span class="sr-only">切换排序</span>
+          </button>
+        </form>
         {% if can_manage_categories and can_create_library_content %}
           <button type="button" class="btn btn-ghost btn-xs category-edit-pill" @click="editingCategories = !editingCategories" :class="{ 'btn-primary': editingCategories }" :aria-pressed="editingCategories.toString()" :aria-label="editingCategories ? '完成编辑分类' : '编辑分类'" :title="editingCategories ? '完成编辑分类' : '编辑分类'">
             <i data-lucide="pencil" aria-hidden="true"></i>
@@ -43,13 +51,13 @@
         {% endif %}
       </div>
 
-      <nav class="category-nav-list" aria-label="菜品分类">
+      <nav class="category-nav-list" aria-label="菜品分类" data-category-sortable data-category-sort-mode="{{ category_sort_mode }}" data-reorder-url="{% url 'meals:category_reorder' %}">
         <a href="{% url 'meals:dish_list' %}{% if is_discarded_view %}?section=discarded{% endif %}" class="category-nav-link {% if not selected_category %}is-active{% endif %}">
           <span>全部</span>
         </a>
 
         {% for category in categories %}
-          <div class="category-nav-row">
+          <div class="category-nav-row" data-category-row data-category-id="{{ category.id }}">
             <a href="{% url 'meals:dish_list' %}?{% if is_discarded_view %}section=discarded&{% endif %}category={{ category.id }}" class="category-nav-link {% if selected_category_name == category.name %}is-active{% endif %}" {% if can_manage_categories and can_create_library_content %}:aria-disabled="editingCategories.toString()" @click="if (editingCategories) $event.preventDefault()"{% endif %}>
               <span>{{ category.name }}</span>
             </a>
@@ -66,6 +74,12 @@
                     <span class="sr-only">删除</span>
                   </button>
                 </form>
+                {% if category_sort_mode == "custom" %}
+                  <button type="button" class="btn btn-outline btn-xs icon-btn-sm shrink-0 category-drag-handle" data-category-drag-handle aria-label="移动 {{ category.name }}" title="按住移动 {{ category.name }}">
+                    <i data-lucide="grip-vertical" aria-hidden="true"></i>
+                    <span class="sr-only">移动</span>
+                  </button>
+                {% endif %}
               </div>
             {% endif %}
           </div>
@@ -98,7 +112,7 @@
             </div>
             <div class="dish-card-copy min-w-0 pt-0.5">
               <h2 class="dish-card-title text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
-              {% if dish.supports_spice or dish.supports_ice %}
+              {% if dish.supports_spice or dish.supports_ice or dish.supports_warm %}
                 <div class="capability-line mt-0.5">
                   {% if dish.supports_spice %}
                     <span class="capability-pill is-icon-only" title="可调辣度">
@@ -110,6 +124,12 @@
                     <span class="capability-pill is-icon-only" title="可调冰量">
                       <img src="{% static dish.ice_capability_icon_path %}" alt="" aria-hidden="true">
                       <span class="sr-only">可调冰量</span>
+                    </span>
+                  {% endif %}
+                  {% if dish.supports_warm %}
+                    <span class="capability-pill is-icon-only" title="可温热">
+                      <img src="{% static 'images/meal-customization/warm.svg' %}" alt="" aria-hidden="true">
+                      <span class="sr-only">可温热</span>
                     </span>
                   {% endif %}
                 </div>

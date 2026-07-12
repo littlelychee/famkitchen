@@ -9,7 +9,14 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
-from .forms import AvatarUploadForm, DishForm, FamilyForm, RegisterForm, UserProfileForm
+from .forms import (
+    AvatarUploadForm,
+    DishForm,
+    FamilyForm,
+    RegisterForm,
+    UserProfileForm,
+    looks_like_heif,
+)
 from .models import (
     Dish,
     DishCategory,
@@ -196,6 +203,11 @@ class AutoConvertingImageUploadTests(TestCase):
         self.assertNotContains(response, "alert alert-error")
         self.assertNotContains(response, "请上传一张有效的图片")
 
+    def test_heif_brand_is_detected_before_pillow_can_identify_it(self):
+        raw_data = b"\x00\x00\x00\x18ftypheif\x00\x00\x00\x00"
+
+        self.assertTrue(looks_like_heif(raw_data))
+
 
 class DishListDiscardedVisibilityTests(TestCase):
     def setUp(self):
@@ -261,9 +273,142 @@ class DishListDiscardedVisibilityTests(TestCase):
         )
 
 
+class CategoryAndDishOrderingTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="owner", password="password")
+        self.family = Family.objects.create(name="测试家庭", owner=self.user)
+        FamilyMember.objects.create(
+            family=self.family,
+            user=self.user,
+            role="owner",
+        )
+        self.member = User.objects.create_user(
+            username="library_member",
+            password="password",
+        )
+        FamilyMember.objects.create(
+            family=self.family,
+            user=self.member,
+            role="member",
+        )
+        self.client.force_login(self.user)
+
+        self.category_b = DishCategory.objects.create(
+            family=self.family,
+            meal_section=DishCategory.LUNCH,
+            name="B类",
+            sort_order=10,
+        )
+        self.category_a = DishCategory.objects.create(
+            family=self.family,
+            meal_section=DishCategory.LUNCH,
+            name="A类",
+            sort_order=20,
+        )
+        self.b_dish = Dish.objects.create(
+            family=self.family,
+            category=self.category_b,
+            meal_section=Dish.LUNCH,
+            name="B菜",
+        )
+        self.a_dish = Dish.objects.create(
+            family=self.family,
+            category=self.category_a,
+            meal_section=Dish.LUNCH,
+            name="A菜",
+        )
+        self.b_dish.categories.add(self.category_b)
+        self.a_dish.categories.add(self.category_a)
+        DishMealSection.objects.create(dish=self.b_dish, meal_section=Dish.LUNCH)
+        DishMealSection.objects.create(dish=self.a_dish, meal_section=Dish.LUNCH)
+
+    def test_default_library_orders_categories_and_all_dishes_by_name(self):
+        response = self.client.get(reverse("meals:dish_list"))
+
+        self.assertEqual(
+            [category.name for category in response.context["categories"]],
+            ["A类", "B类"],
+        )
+        self.assertEqual(
+            [dish.name for dish in response.context["dishes"]],
+            ["A菜", "B菜"],
+        )
+
+    def test_sort_mode_cycles_to_descending_and_updates_meal_select(self):
+        response = self.client.post(
+            reverse("meals:category_sort_mode"),
+            {"next": reverse("meals:dish_list")},
+        )
+
+        self.assertRedirects(response, reverse("meals:dish_list"))
+        self.family.refresh_from_db()
+        self.assertEqual(self.family.category_sort_mode, Family.CATEGORY_SORT_NAME_DESC)
+
+        response = self.client.get(
+            reverse("meals:meal_plan_select"),
+            {"meal_type": MealPlan.LUNCH, "date": "2026-07-11"},
+        )
+        self.assertEqual(
+            [category.name for category in response.context["categories"]],
+            ["B类", "A类"],
+        )
+        self.assertEqual(
+            [row["dish"].name for row in response.context["dish_rows"]],
+            ["B菜", "A菜"],
+        )
+
+    def test_custom_reorder_saves_category_order(self):
+        self.family.category_sort_mode = Family.CATEGORY_SORT_CUSTOM
+        self.family.save(update_fields=["category_sort_mode"])
+
+        response = self.client.post(
+            reverse("meals:category_reorder"),
+            {"category_ids": [str(self.category_a.id), str(self.category_b.id)]},
+            HTTP_ACCEPT="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.category_a.refresh_from_db()
+        self.category_b.refresh_from_db()
+        self.assertLess(self.category_a.sort_order, self.category_b.sort_order)
+
+        response = self.client.get(reverse("meals:dish_list"))
+        self.assertEqual(
+            [category.name for category in response.context["categories"]],
+            ["A类", "B类"],
+        )
+
+    def test_regular_family_member_can_manage_category_order(self):
+        self.client.force_login(self.member)
+        self.family.category_sort_mode = Family.CATEGORY_SORT_CUSTOM
+        self.family.save(update_fields=["category_sort_mode"])
+
+        response = self.client.get(reverse("meals:dish_list"))
+        self.assertContains(response, "category-edit-pill")
+
+        response = self.client.post(
+            reverse("meals:category_reorder"),
+            {"category_ids": [str(self.category_a.id), str(self.category_b.id)]},
+            HTTP_ACCEPT="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.category_a.refresh_from_db()
+        self.category_b.refresh_from_db()
+        self.assertLess(self.category_a.sort_order, self.category_b.sort_order)
+
+
 class FamilyMemberManagementTests(TestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(username="owner", password="password")
+        self.owner = User.objects.create_user(
+            username="owner",
+            password="password",
+            email="owner@example.com",
+        )
         self.member = User.objects.create_user(username="member", password="password")
         self.other_member = User.objects.create_user(
             username="other_member",
@@ -295,7 +440,7 @@ class FamilyMemberManagementTests(TestCase):
         self.assertContains(response, "我的家庭")
         self.assertContains(response, "当前家庭成员")
         self.assertContains(response, "other_member")
-        self.assertNotContains(response, "转让 owner")
+        self.assertNotContains(response, "转让家主")
         self.assertNotContains(response, "移除")
 
     def test_owner_manage_page_shows_family_members(self):
@@ -306,7 +451,7 @@ class FamilyMemberManagementTests(TestCase):
         self.assertContains(response, "owner")
         self.assertContains(response, "member")
         self.assertContains(response, "other_member")
-        self.assertContains(response, "转让 owner")
+        self.assertContains(response, "转让家主")
         self.assertContains(response, "移除")
 
     def test_owner_can_transfer_ownership_to_family_member(self):
@@ -430,6 +575,12 @@ class FamilySwitchingAndProfileUpdateTests(TestCase):
         self.second_family.refresh_from_db()
         self.assertEqual(self.second_family.name, "新的家名")
 
+    def test_top_header_shows_v14_version_and_rotating_logo(self):
+        response = self.client.get(reverse("meals:meal_plan"))
+
+        self.assertContains(response, "当前版本：v1.4")
+        self.assertContains(response, "images/logo-candidates/v14-02.svg")
+
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class AvatarUploadFormTests(TestCase):
@@ -521,6 +672,11 @@ class CategorySectionSyncTests(TestCase):
         self.user = User.objects.create_user(username="owner", password="password")
         self.family = Family.objects.create(name="测试家庭", owner=self.user)
         FamilyMember.objects.create(family=self.family, user=self.user, role="owner")
+        self.member = User.objects.create_user(
+            username="category_member",
+            password="password",
+        )
+        FamilyMember.objects.create(family=self.family, user=self.member, role="member")
         self.client.force_login(self.user)
 
         self.lunch_category = DishCategory.objects.create(
@@ -563,6 +719,20 @@ class CategorySectionSyncTests(TestCase):
         self.lunch_category.refresh_from_db()
         self.assertEqual(self.lunch_category.name, "日常主食")
 
+    def test_regular_family_member_can_edit_category(self):
+        self.client.force_login(self.member)
+
+        response = self.client.post(
+            reverse("meals:category_edit", args=[self.lunch_category.id]),
+            {
+                "name": "成员主食",
+            },
+        )
+
+        self.assertRedirects(response, reverse("meals:dish_list"))
+        self.lunch_category.refresh_from_db()
+        self.assertEqual(self.lunch_category.name, "成员主食")
+
     def test_deleting_category_removes_only_that_section_link(self):
         response = self.client.post(
             reverse("meals:category_delete", args=[self.lunch_category.id])
@@ -575,6 +745,18 @@ class CategorySectionSyncTests(TestCase):
         self.rice.refresh_from_db()
         self.assertEqual(self.meal_sections_for_rice(), {Dish.DINNER})
         self.assertEqual(list(self.rice.categories.all()), [self.dinner_category])
+
+    def test_regular_family_member_can_delete_category(self):
+        self.client.force_login(self.member)
+
+        response = self.client.post(
+            reverse("meals:category_delete", args=[self.dinner_category.id])
+        )
+
+        self.assertRedirects(response, reverse("meals:dish_list"))
+        self.rice.refresh_from_db()
+        self.assertEqual(self.meal_sections_for_rice(), {Dish.LUNCH})
+        self.assertEqual(list(self.rice.categories.all()), [self.lunch_category])
 
     def test_deleting_last_category_moves_dish_to_discarded(self):
         noodle_category = DishCategory.objects.create(
@@ -692,6 +874,30 @@ class MealPlanRepeatItemTests(TestCase):
         self.assertEqual(item.quantity, 3)
         self.assertEqual(item.spice_level, MealPlanItem.SPICE_MEDIUM)
         self.assertEqual(item.ice_level, MealPlanItem.ICE_MORE)
+
+    def test_warm_selection_clears_ice_level(self):
+        self.water.supports_ice = True
+        self.water.supports_warm = True
+        self.water.save(update_fields=["supports_ice", "supports_warm"])
+
+        response = self.client.post(
+            reverse("meals:meal_plan_toggle"),
+            {
+                "dish_id": self.water.id,
+                "date": "2026-07-11",
+                "meal_type": MealPlan.LUNCH,
+                "selected": "1",
+                f"serve_warm_{self.water.id}": "1",
+                f"ice_level_{self.water.id}": MealPlanItem.ICE_MORE,
+            },
+        )
+
+        self.assertEqual(response.status_code, 204)
+        item = MealPlanItem.objects.get(dish=self.water)
+        self.assertTrue(item.serve_warm)
+        self.assertEqual(item.ice_level, "")
+        self.assertEqual(item.ice_level_label, "")
+        self.assertEqual(item.warm_label, "温热")
 
 
 class GlobalMealPlanSelectionTests(TestCase):
@@ -878,7 +1084,11 @@ class MealPlanClearDayTests(TestCase):
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class FamilyNotificationTests(TestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(username="owner", password="password")
+        self.owner = User.objects.create_user(
+            username="owner",
+            password="password",
+            email="owner@example.com",
+        )
         self.member = User.objects.create_user(
             username="member",
             password="password",
@@ -942,11 +1152,13 @@ class FamilyNotificationTests(TestCase):
         self.assertEqual(reminder.meal_type, MealPlan.LUNCH)
         self.assertIn("米饭 x2", reminder.change_summary)
         self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("法米狗私厨给的通知", mail.outbox[0].subject)
         self.assertIn("owner", mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, ["member@example.com"])
         self.assertIn("发送人", mail.outbox[0].alternatives[0][0])
         self.assertIn("owner 提醒你", mail.outbox[0].alternatives[0][0])
         self.assertIn("关注 2026-07-11 的排餐", mail.outbox[0].alternatives[0][0])
+        self.assertNotIn("小餐桌便签", mail.outbox[0].alternatives[0][0])
         self.assertIn("米饭 x2", mail.outbox[0].body)
 
     def test_meal_plan_selection_page_shows_family_reminder_choices(self):
@@ -1113,6 +1325,71 @@ class FamilyNotificationTests(TestCase):
         self.assertContains(response, "owner")
         self.assertContains(response, "2026-07-11")
         self.assertContains(response, f"{reverse('meals:meal_plan')}?date=2026-07-11")
+
+    def test_family_message_create_sends_email_and_opens_thread(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                reverse("meals:notification_create"),
+                {
+                    "notify_user_ids": [str(self.member.id)],
+                    "message_body": "今晚米饭多煮一点。",
+                },
+            )
+
+        notification = FamilyNotification.objects.get(
+            kind=FamilyNotification.KIND_MESSAGE,
+            recipient=self.member,
+        )
+        self.assertRedirects(
+            response,
+            reverse("meals:notification_thread", args=[notification.message_thread_id]),
+        )
+        self.assertEqual(notification.actor, self.owner)
+        self.assertEqual(notification.message_body, "今晚米饭多煮一点。")
+        self.assertIn("今晚米饭多煮一点", notification.change_summary)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("法米狗私厨给的通知", mail.outbox[0].subject)
+        self.assertIn("给你留了一条家庭消息", mail.outbox[0].subject)
+        self.assertIn("今晚米饭多煮一点", mail.outbox[0].body)
+
+        response = self.client.get(reverse("meals:notifications"))
+        self.assertContains(response, "留言")
+        self.assertContains(
+            response,
+            reverse("meals:notification_thread", args=[notification.message_thread_id]),
+        )
+
+    def test_family_message_thread_can_add_reply(self):
+        initial = FamilyNotification.objects.create(
+            family=self.family,
+            actor=self.owner,
+            recipient=self.member,
+            meal_plan_date=date(2026, 7, 11),
+            kind=FamilyNotification.KIND_MESSAGE,
+            message_body="记得买鸡蛋。",
+            change_summary="记得买鸡蛋。",
+            message_thread_id="11111111-1111-1111-1111-111111111111",
+        )
+        self.client.force_login(self.member)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                reverse("meals:notification_thread", args=[initial.message_thread_id]),
+                {
+                    "notify_user_ids": [str(self.owner.id)],
+                    "message_body": "收到，我下班买。",
+                },
+            )
+
+        self.assertRedirects(
+            response,
+            reverse("meals:notification_thread", args=[initial.message_thread_id]),
+        )
+        reply = FamilyNotification.objects.get(message_body="收到，我下班买。")
+        self.assertEqual(reply.actor, self.member)
+        self.assertEqual(reply.recipient, self.owner)
+        self.assertEqual(str(reply.message_thread_id), str(initial.message_thread_id))
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_family_member_can_delete_and_clear_notifications(self):
         first = FamilyNotification.objects.create(

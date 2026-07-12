@@ -1,5 +1,6 @@
 from datetime import timedelta
 import logging
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -94,6 +95,8 @@ def meal_item_display(item):
     details = []
     if item.spice_level_label:
         details.append(item.spice_level_label)
+    if item.warm_label:
+        details.append(item.warm_label)
     if item.ice_level_label:
         details.append(item.ice_level_label)
     if item.note:
@@ -131,6 +134,7 @@ def daily_meal_sections(family, selected_date):
                     "quantity": item.quantity,
                     "note": item.note,
                     "spice_level_label": item.spice_level_label,
+                    "warm_label": item.warm_label,
                     "ice_level_label": item.ice_level_label,
                     "display": meal_item_display(item),
                 }
@@ -254,7 +258,7 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
         "<tr><td style='padding:22px 22px 18px;background:#fff7dc;border-bottom:1px solid #ecd8a9;'>"
         "<table role='presentation' width='100%' cellspacing='0' cellpadding='0'><tr>"
         "<td style='vertical-align:top;'>"
-        "<div style='display:inline-block;padding:5px 10px;border-radius:999px;background:#fffefa;border:1px solid #ecd8a9;color:#6f5121;font-size:13px;font-weight:800;'>私家御膳房排餐提醒</div>"
+        "<div style='display:inline-block;padding:5px 10px;border-radius:999px;background:#fffefa;border:1px solid #ecd8a9;color:#6f5121;font-size:13px;font-weight:800;'>法米狗私厨给的通知</div>"
         f"<div style='margin-top:14px;font-size:28px;line-height:1.18;font-weight:900;color:#211d19;letter-spacing:0;'>{escape(actor_name)} 提醒你</div>"
         f"<div style='margin-top:8px;font-size:18px;line-height:1.35;font-weight:800;color:#7b510f;'>关注 {escape(target_date)} 的排餐</div>"
         "</td>"
@@ -273,9 +277,6 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
         f"<td style='padding:12px 14px;border-top:1px solid #eee4d2;font-size:14px;line-height:1.7;color:#4b443d;'><strong>发送时间</strong><br>{escape(sent_at)}</td>"
         "</tr>"
         "</table>"
-        "<div style='margin:16px 0 6px;padding:12px 14px;border-radius:14px;background:#f4f1eb;color:#5d554d;font-size:14px;line-height:1.7;'>"
-        "这是一张来自家人的小餐桌便签，下面是这一天的完整安排。"
-        "</div>"
         f"{meal_sections_html(meal_sections)}"
         f"{html_detail_link}"
         "</td></tr>"
@@ -288,7 +289,7 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
     )
     try:
         sent_count = send_mail(
-            subject=f"{actor_name} 提醒你关注 {target} 的排餐",
+            subject=f"法米狗私厨给的通知：{actor_name} 提醒你关注 {target} 的排餐",
             message=(
                 f"{recipient.username}，\n\n"
                 f"{actor_name} 在 {sent_at} "
@@ -313,6 +314,75 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
     if not sent_count:
         logger.warning(
             "Meal notification email was not sent to user_id=%s notification_id=%s",
+            recipient.id,
+            notification.id,
+        )
+        return False
+    return True
+
+
+def send_family_message_email(notification, detail_url=""):
+    recipient = notification.recipient
+    if not recipient or not recipient.email:
+        return False
+
+    actor_name = notification.actor.username if notification.actor else "一位家人"
+    sent_at = timezone.localtime(notification.created_at).strftime("%Y-%m-%d %H:%M")
+    detail_line = f"\n查看留言：{detail_url}" if detail_url else ""
+    html_detail_link = (
+        "<table role='presentation' cellspacing='0' cellpadding='0' style='margin:22px 0 0;'>"
+        "<tr><td style='border-radius:12px;background:#ffd166;box-shadow:0 8px 18px rgba(122,83,20,0.18);'>"
+        f"<a href='{escape(detail_url)}' style='display:inline-block;padding:13px 18px;border-radius:12px;color:#4a3100;text-decoration:none;font-size:16px;font-weight:800;'>查看并回复留言</a>"
+        "</td></tr></table>"
+        if detail_url
+        else ""
+    )
+    html_message = (
+        "<div style='margin:0;padding:0;background:#f7f5f1;'>"
+        "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' style='background:#f7f5f1;padding:18px 10px;'>"
+        "<tr><td align='center'>"
+        "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' style='max-width:640px;border:1px solid #dcd7ce;border-radius:18px;background:#fffefa;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;color:#211d19;'>"
+        "<tr><td style='padding:22px;background:#fff7dc;border-bottom:1px solid #ecd8a9;'>"
+        "<div style='display:inline-block;padding:5px 10px;border-radius:999px;background:#fffefa;border:1px solid #ecd8a9;color:#6f5121;font-size:13px;font-weight:800;'>法米狗私厨给的通知</div>"
+        f"<div style='margin-top:14px;font-size:28px;line-height:1.18;font-weight:900;color:#211d19;'>{escape(actor_name)} 给你留言</div>"
+        f"<div style='margin-top:8px;font-size:14px;color:#8b8176;'>发送时间：{escape(sent_at)}</div>"
+        "</td></tr>"
+        "<tr><td style='padding:18px 22px 8px;'>"
+        f"<div style='padding:14px 16px;border:1px solid #e8dcc4;border-radius:14px;background:#fffdf7;color:#4b443d;font-size:16px;line-height:1.7;'>{escape(notification.message_body)}</div>"
+        f"{html_detail_link}"
+        "</td></tr>"
+        "<tr><td style='padding:0 22px 22px;color:#8b8176;font-size:12px;line-height:1.6;'>"
+        "如果按钮打不开，可以复制这封邮件中的链接到浏览器访问。"
+        "</td></tr>"
+        "</table>"
+        "</td></tr></table>"
+        "</div>"
+    )
+    try:
+        sent_count = send_mail(
+            subject=f"法米狗私厨给的通知：{actor_name} 给你留了一条家庭消息",
+            message=(
+                f"{recipient.username}，\n\n"
+                f"{actor_name} 在 {sent_at} 给你留了一条消息：\n\n"
+                f"{notification.message_body}"
+                f"{detail_line}\n"
+            ),
+            from_email=None,
+            recipient_list=[recipient.email],
+            fail_silently=settings.EMAIL_FAIL_SILENTLY,
+            html_message=html_message,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to send family message email to user_id=%s notification_id=%s",
+            recipient.id,
+            notification.id,
+        )
+        return False
+
+    if not sent_count:
+        logger.warning(
+            "Family message email was not sent to user_id=%s notification_id=%s",
             recipient.id,
             notification.id,
         )
@@ -395,3 +465,63 @@ def create_family_notifications(
         ]
     )
     return len(notifications)
+
+
+def create_family_message_notifications(
+    *,
+    family,
+    actor,
+    recipient_ids,
+    message_body,
+    request=None,
+    thread_id=None,
+):
+    normalized_ids = []
+    for recipient_id in recipient_ids:
+        try:
+            normalized_ids.append(int(recipient_id))
+        except (TypeError, ValueError):
+            continue
+    normalized_ids = sorted(set(normalized_ids))
+    if not normalized_ids:
+        return 0, thread_id
+
+    memberships = (
+        FamilyMember.objects.filter(family=family, user_id__in=normalized_ids)
+        .exclude(user=actor)
+        .select_related("user")
+        .order_by("joined_at")
+    )
+    recipients = [membership.user for membership in memberships]
+    if not recipients:
+        return 0, thread_id
+
+    thread_id = thread_id or uuid4()
+    message_body = message_body.strip()
+    summary = message_body[:255]
+    notifications = []
+    with transaction.atomic():
+        for recipient in recipients:
+            notifications.append(
+                FamilyNotification.objects.create(
+                    family=family,
+                    actor=actor,
+                    recipient=recipient,
+                    meal_plan_date=timezone.localdate(),
+                    change_summary=summary,
+                    kind=FamilyNotification.KIND_MESSAGE,
+                    message_body=message_body,
+                    message_thread_id=thread_id,
+                )
+            )
+        prune_family_notifications(family)
+
+    detail_path = reverse("meals:notification_thread", args=[thread_id])
+    detail_url = build_absolute_site_url(detail_path, request)
+    transaction.on_commit(
+        lambda: [
+            send_family_message_email(notification, detail_url)
+            for notification in notifications
+        ]
+    )
+    return len(notifications), thread_id

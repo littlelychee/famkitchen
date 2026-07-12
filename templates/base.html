@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}私家御膳房{% endblock %}</title>
+  <title>{% block title %}法米狗私厨{% endblock %}</title>
   <link rel="icon" href="{% static 'images/app-icon.svg' %}" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css">
@@ -85,30 +85,30 @@
 
     .top-slogan-strip {
       display: grid;
-      min-height: 1.9rem;
+      min-height: 1.35rem;
       place-items: center;
-      margin-top: -0.35rem;
-      padding: 0 0.75rem 0.12rem;
+      margin-top: -0.52rem;
+      padding: 0 0.75rem;
       overflow: hidden;
     }
 
     .top-slogan-image {
       display: block;
-      width: min(calc(100vw - 1.5rem), 30rem);
+      width: min(calc(100vw - 1.5rem), 25rem);
       height: auto;
-      margin-top: -0.2rem;
+      margin-top: -0.32rem;
     }
 
     @media (min-width: 640px) {
       .top-slogan-strip {
-        min-height: 2rem;
-        margin-top: -0.45rem;
-        padding-bottom: 0.15rem;
+        min-height: 1.45rem;
+        margin-top: -0.62rem;
+        padding-bottom: 0;
       }
 
       .top-slogan-image {
-        width: min(50vw, 34rem);
-        margin-top: -0.25rem;
+        width: min(44vw, 28rem);
+        margin-top: -0.38rem;
       }
     }
 
@@ -213,6 +213,13 @@
       object-fit: cover;
     }
 
+    .family-switch-block {
+      display: grid;
+      min-width: 0;
+      gap: 0.12rem;
+      align-items: start;
+    }
+
     .family-switch-form {
       position: relative;
       display: inline-flex;
@@ -254,6 +261,15 @@
       height: 0.9rem;
       color: var(--ui-muted);
       pointer-events: none;
+    }
+
+    .app-version-line {
+      padding-left: 0.65rem;
+      color: var(--ui-muted);
+      font-size: 0.62rem;
+      font-weight: 700;
+      line-height: 1.1;
+      white-space: nowrap;
     }
 
     .btn-primary,
@@ -453,7 +469,7 @@
 
     @media (min-width: 640px) {
       .setting-toggle-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
       }
     }
 
@@ -790,6 +806,38 @@
       object-fit: contain;
     }
 
+    .warm-choice {
+      display: inline-flex;
+      min-height: 2.2rem;
+      width: fit-content;
+      cursor: pointer;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--ui-line);
+      border-radius: 999px !important;
+      background: #fff;
+      padding: 0.2rem 0.7rem 0.2rem 0.28rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .warm-choice img {
+      height: 1.65rem;
+      width: 1.65rem;
+      object-fit: contain;
+    }
+
+    .warm-choice:has(input:checked) {
+      border-color: var(--ui-brand);
+      background: #fff8e4;
+      box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.32);
+    }
+
+    .warm-choice:has(input:disabled) {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
     .selection-dock {
       position: fixed;
       left: 50%;
@@ -1036,16 +1084,54 @@
     .category-panel {
       position: sticky;
       top: 7.2rem;
+      display: grid;
+      max-height: calc(100vh - 8.2rem);
+      max-height: calc(100dvh - 8.2rem);
+      grid-template-rows: auto minmax(0, 1fr);
       align-self: start;
+      overflow: hidden;
+    }
+
+    .category-panel-heading {
+      display: grid;
+      grid-template-columns: minmax(1.8rem, 1fr) auto auto;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .category-sort-form {
+      display: contents;
+    }
+
+    .category-sort-button {
+      min-height: 1.55rem;
+      height: 1.55rem;
+      width: 1.75rem;
+      padding: 0;
+      border-radius: 999px !important;
+    }
+
+    .category-sort-button .lucide {
+      width: 0.88rem;
+      height: 0.88rem;
     }
 
     .category-nav-list {
+      position: relative;
       display: grid;
       gap: 0.45rem;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: visible;
+      overscroll-behavior: contain;
+      padding-right: 0.12rem;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
 
     .category-nav-row {
       position: relative;
+      display: block;
     }
 
     .category-nav-link {
@@ -1091,13 +1177,21 @@
       overflow: visible;
     }
 
+    .dish-library-grid.is-editing-categories .category-panel {
+      z-index: 45;
+    }
+
+    .dish-library-grid.is-editing-categories .category-nav-list {
+      overflow: visible;
+    }
+
     .category-row-actions {
       position: absolute;
-      left: calc(100% + 0.4rem);
       top: 50%;
+      left: calc(100% + 0.75rem);
+      transform: translateY(-50%);
       z-index: 30;
       display: flex;
-      transform: translateY(-50%);
       gap: 0.3rem;
       border: 1px solid var(--ui-line);
       border-radius: 999px;
@@ -1107,10 +1201,30 @@
       white-space: nowrap;
     }
 
+    .category-row-actions .icon-btn-sm {
+      min-height: 1.65rem;
+      height: 1.65rem;
+      width: 1.65rem;
+    }
+
+    .category-nav-row.is-dragging {
+      z-index: 35;
+      opacity: 0.82;
+    }
+
+    .category-drag-handle {
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .category-drag-handle:active {
+      cursor: grabbing;
+    }
+
     .category-edit-pill {
       min-height: 1.55rem;
       height: 1.55rem;
-      width: 2.25rem;
+      width: 1.75rem;
       padding: 0;
       border-radius: 999px !important;
     }
@@ -1821,20 +1935,23 @@
     <header class="site-top-shell sticky top-0">
       <div class="navbar min-h-0 bg-base-100/95 px-3 py-2 shadow-sm backdrop-blur">
         <div class="flex min-w-0 flex-1 items-center gap-2">
-          <a href="{% url 'meals:meal_plan' %}" class="brand-logo-link" aria-label="私家御膳房首页">
-            <img src="{% static 'images/famigo-candidates/logo-05.svg' %}" alt="法米狗私厨" class="brand-logo">
+          <a href="{% url 'meals:meal_plan' %}" class="brand-logo-link" aria-label="法米狗私厨首页">
+            <img src="{% static active_logo_path %}" alt="法米狗私厨" class="brand-logo">
           </a>
           {% if user.is_authenticated and current_family %}
-            <form method="post" action="{% url 'meals:family_switch' %}" class="family-switch-form">
-              {% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <select name="family_id" class="family-switch-select" aria-label="切换家庭" onchange="this.form.submit()">
-                {% for membership in current_family_memberships %}
-                  <option value="{{ membership.family.id }}" {% if membership.family.id == current_family.id %}selected{% endif %}>{{ membership.family.name }}</option>
-                {% endfor %}
-              </select>
-              <i data-lucide="chevron-down" class="family-switch-icon" aria-hidden="true"></i>
-            </form>
+            <div class="family-switch-block">
+              <form method="post" action="{% url 'meals:family_switch' %}" class="family-switch-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select name="family_id" class="family-switch-select" aria-label="切换家庭" onchange="this.form.submit()">
+                  {% for membership in current_family_memberships %}
+                    <option value="{{ membership.family.id }}" {% if membership.family.id == current_family.id %}selected{% endif %}>{{ membership.family.name }}</option>
+                  {% endfor %}
+                </select>
+                <i data-lucide="chevron-down" class="family-switch-icon" aria-hidden="true"></i>
+              </form>
+              <div class="app-version-line">当前版本：{{ app_version }}</div>
+            </div>
           {% endif %}
         </div>
         {% if not user.is_authenticated %}
@@ -1860,20 +1977,23 @@
     <header class="site-top-shell sticky top-0">
       <div class="navbar bg-base-100/95 shadow-sm backdrop-blur">
         <div class="flex min-w-0 flex-1 items-center gap-3">
-          <a href="{% url 'meals:meal_plan' %}" class="brand-logo-link" aria-label="私家御膳房首页">
-            <img src="{% static 'images/famigo-candidates/logo-05.svg' %}" alt="法米狗私厨" class="brand-logo brand-logo-desktop">
+          <a href="{% url 'meals:meal_plan' %}" class="brand-logo-link" aria-label="法米狗私厨首页">
+            <img src="{% static active_logo_path %}" alt="法米狗私厨" class="brand-logo brand-logo-desktop">
           </a>
           {% if user.is_authenticated and current_family %}
-            <form method="post" action="{% url 'meals:family_switch' %}" class="family-switch-form">
-              {% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <select name="family_id" class="family-switch-select" aria-label="切换家庭" onchange="this.form.submit()">
-                {% for membership in current_family_memberships %}
-                  <option value="{{ membership.family.id }}" {% if membership.family.id == current_family.id %}selected{% endif %}>{{ membership.family.name }}</option>
-                {% endfor %}
-              </select>
-              <i data-lucide="chevron-down" class="family-switch-icon" aria-hidden="true"></i>
-            </form>
+            <div class="family-switch-block">
+              <form method="post" action="{% url 'meals:family_switch' %}" class="family-switch-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select name="family_id" class="family-switch-select" aria-label="切换家庭" onchange="this.form.submit()">
+                  {% for membership in current_family_memberships %}
+                    <option value="{{ membership.family.id }}" {% if membership.family.id == current_family.id %}selected{% endif %}>{{ membership.family.name }}</option>
+                  {% endfor %}
+                </select>
+                <i data-lucide="chevron-down" class="family-switch-icon" aria-hidden="true"></i>
+              </form>
+              <div class="app-version-line">当前版本：{{ app_version }}</div>
+            </div>
           {% endif %}
         </div>
 
@@ -1881,7 +2001,7 @@
           {% if user.is_authenticated %}
             <a href="{% url 'meals:dish_list' %}" class="btn btn-sm {% if current_page == 'dish_list' or current_page == 'dish_create' or current_page == 'dish_edit' or current_page == 'category_create' or current_page == 'category_edit' %}btn-primary{% else %}btn-ghost{% endif %}">菜品库</a>
             <a href="{% url 'meals:meal_plan' %}" class="btn btn-sm {% if current_page == 'home' or current_page == 'meal_plan' or current_page == 'meal_plan_select' or current_page == 'meal_plan_share' %}btn-primary{% else %}btn-ghost{% endif %}">排餐</a>
-            <a href="{% url 'meals:notifications' %}" class="btn btn-sm {% if current_page == 'notifications' %}btn-primary{% else %}btn-ghost{% endif %}">消息</a>
+            <a href="{% url 'meals:notifications' %}" class="btn btn-sm {% if current_page == 'notifications' or current_page == 'notification_create' or current_page == 'notification_thread' %}btn-primary{% else %}btn-ghost{% endif %}">消息</a>
             <a href="{% url 'meals:shopping' %}" class="btn btn-sm {% if current_page == 'shopping' %}btn-primary{% else %}btn-ghost{% endif %}">采购</a>
             <a href="{% url 'meals:profile' %}" class="top-avatar-link" aria-label="我的个人信息" title="我的个人信息">
               {% if current_user_profile.custom_avatar %}
@@ -1975,7 +2095,7 @@
           <img src="{% static 'images/famigo-candidates/tab-options/set01-plan.svg' %}" alt="" class="mobile-tabbar-svg">
           <span class="sr-only">排餐</span>
         </a>
-        <a href="{% url 'meals:notifications' %}" class="mobile-tabbar-link {% if current_page == 'notifications' %}is-active{% endif %}" aria-label="消息" title="消息">
+        <a href="{% url 'meals:notifications' %}" class="mobile-tabbar-link {% if current_page == 'notifications' or current_page == 'notification_create' or current_page == 'notification_thread' %}is-active{% endif %}" aria-label="消息" title="消息">
           <img src="{% static 'images/famigo-candidates/tab-options/set01-message.svg' %}" alt="" class="mobile-tabbar-svg">
           <span class="sr-only">消息</span>
         </a>
@@ -2084,6 +2204,119 @@
         requestAnimationFrame(() => {
           toast.classList.add("is-visible");
           timer = window.setTimeout(close, duration);
+        });
+      }
+      window.showClientToast = showClientToast;
+
+      function bindCategorySorting(root = document) {
+        root.querySelectorAll("[data-category-sortable]").forEach((panel) => {
+          if (panel.dataset.categorySortingBound) return;
+          panel.dataset.categorySortingBound = "1";
+
+          let pressTimer = null;
+          let draggingRow = null;
+          let activeHandle = null;
+
+          function orderedIds() {
+            return Array.from(panel.querySelectorAll("[data-category-row]")).map(
+              (row) => row.dataset.categoryId
+            ).filter(Boolean);
+          }
+
+          function csrfToken() {
+            return (
+              panel.querySelector("[name=csrfmiddlewaretoken]")?.value
+              || document.cookie.split("; ").find((item) => item.startsWith("csrftoken="))?.split("=")[1]
+              || ""
+            );
+          }
+
+          async function saveOrder() {
+            const reorderUrl = panel.dataset.reorderUrl;
+            if (!reorderUrl) return;
+            const body = new FormData();
+            orderedIds().forEach((categoryId) => body.append("category_ids", categoryId));
+            body.append("csrfmiddlewaretoken", csrfToken());
+            try {
+              const response = await fetch(reorderUrl, {
+                method: "POST",
+                body,
+                headers: {
+                  Accept: "application/json",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              });
+              const data = await response.json();
+              if (!response.ok || !data.ok) {
+                showClientToast(data.message || "分类顺序保存失败。", "error");
+                return;
+              }
+              showClientToast(data.message || "分类顺序已保存。", "success");
+            } catch (_error) {
+              showClientToast("分类顺序保存失败，请稍后再试。", "error");
+            }
+          }
+
+          function startDrag(row, handle) {
+            draggingRow = row;
+            activeHandle = handle;
+            draggingRow.classList.add("is-dragging");
+          }
+
+          function stopDrag() {
+            window.clearTimeout(pressTimer);
+            pressTimer = null;
+            if (!draggingRow) return;
+            draggingRow.classList.remove("is-dragging");
+            draggingRow = null;
+            activeHandle = null;
+            saveOrder();
+          }
+
+          panel.addEventListener("pointerdown", (event) => {
+            const handle = event.target.closest("[data-category-drag-handle]");
+            if (!handle) return;
+            const row = handle.closest("[data-category-row]");
+            if (!row || panel.dataset.categorySortMode !== "custom") return;
+            event.preventDefault();
+            try {
+              handle.setPointerCapture(event.pointerId);
+            } catch (_error) {
+              // Some older mobile browsers do not expose pointer capture here.
+            }
+            pressTimer = window.setTimeout(() => startDrag(row, handle), 180);
+          });
+
+          panel.addEventListener("pointermove", (event) => {
+            if (!draggingRow) return;
+            event.preventDefault();
+            const rows = Array.from(panel.querySelectorAll("[data-category-row]"))
+              .filter((row) => row !== draggingRow);
+            const target = rows.find((row) => {
+              const rect = row.getBoundingClientRect();
+              return event.clientY >= rect.top && event.clientY <= rect.bottom;
+            });
+            if (!target) return;
+            const rect = target.getBoundingClientRect();
+            if (event.clientY < rect.top + rect.height / 2) {
+              panel.insertBefore(draggingRow, target);
+            } else {
+              panel.insertBefore(draggingRow, target.nextSibling);
+            }
+          });
+
+          panel.addEventListener("pointerup", (event) => {
+            if (activeHandle) {
+              try {
+                activeHandle.releasePointerCapture(event.pointerId);
+              } catch (_error) {
+                // Ignore pointer-capture mismatches.
+              }
+            }
+            stopDrag();
+          });
+
+          panel.addEventListener("pointercancel", stopDrag);
         });
       }
 
@@ -2305,12 +2538,14 @@
         refreshLevelControls();
         bindDisplayWidthLimits();
         bindAvatarPickers();
+        bindCategorySorting();
       });
       document.body.addEventListener("htmx:afterSettle", (event) => {
         refreshIcons();
         refreshLevelControls(event.target);
         bindDisplayWidthLimits(event.target);
         bindAvatarPickers(event.target);
+        bindCategorySorting(event.target);
       });
       document.addEventListener("click", async (event) => {
         const button = event.target.closest("[data-copy-text]");

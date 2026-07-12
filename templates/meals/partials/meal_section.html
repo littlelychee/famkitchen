@@ -41,12 +41,18 @@
                 <span class="badge badge-primary text-[0.68rem]">x{{ item.quantity }}</span>
               {% endif %}
             </p>
-            {% if item.spice_icon_path or item.ice_icon_path %}
+            {% if item.spice_icon_path or item.warm_icon_path or item.ice_icon_path %}
               <div class="capability-line mt-0.5">
                 {% if item.spice_icon_path %}
                   <span class="capability-pill">
                     <img src="{% static item.spice_icon_path %}" alt="" aria-hidden="true">
                     <span>{{ item.spice_level_label }}</span>
+                  </span>
+                {% endif %}
+                {% if item.warm_icon_path %}
+                  <span class="capability-pill">
+                    <img src="{% static item.warm_icon_path %}" alt="" aria-hidden="true">
+                    <span>{{ item.warm_label }}</span>
                   </span>
                 {% endif %}
                 {% if item.ice_icon_path %}

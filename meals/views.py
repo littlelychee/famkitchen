@@ -50,6 +50,7 @@ from .utils import (
     create_family_history,
     daily_meal_change_summary,
     daily_meal_sections,
+    create_family_message_notifications,
     get_current_family,
     get_or_create_daily_plans,
     get_user_profile,
@@ -144,11 +145,41 @@ ICE_ICON_PATHS = {
     MealPlanItem.ICE_MEDIUM: "images/meal-customization/ice-medium.svg",
     MealPlanItem.ICE_MORE: "images/meal-customization/ice-more.svg",
 }
+WARM_ICON_PATH = "images/meal-customization/warm.svg"
 QUANTITY_OPTIONS = range(1, 7)
+
+CATEGORY_SORT_PRESENTATION = {
+    Family.CATEGORY_SORT_NAME_ASC: {
+        "label": "名称正序",
+        "icon": "arrow-down-a-z",
+        "message": "已切换到名称正序：分类按字符正序，菜品按名称正序。",
+    },
+    Family.CATEGORY_SORT_NAME_DESC: {
+        "label": "名称倒序",
+        "icon": "arrow-down-z-a",
+        "message": "已切换到名称倒序：分类和菜品都按名称倒序。",
+    },
+    Family.CATEGORY_SORT_CUSTOM: {
+        "label": "自定义排序",
+        "icon": "grip-vertical",
+        "message": "已切换到自定义排序。请先按编辑按钮，再按住圆形移动按钮上下挪动分类。",
+    },
+}
+CATEGORY_SORT_MODE_SEQUENCE = [
+    Family.CATEGORY_SORT_NAME_ASC,
+    Family.CATEGORY_SORT_NAME_DESC,
+    Family.CATEGORY_SORT_CUSTOM,
+]
 
 
 def is_family_owner(user, family):
     return family and family.owner_id == user.id
+
+
+def can_manage_family_categories(user, family):
+    if not family or not user.is_authenticated:
+        return False
+    return FamilyMember.objects.filter(family=family, user=user).exists()
 
 
 def delete_dish_image_file(image_name):
@@ -217,6 +248,109 @@ def get_category_options_by_section(family):
 def get_category_picker_sections(family):
     categories_by_section = get_category_options_by_section(family)
     return categories_by_section["library"]
+
+
+def normalized_category_sort_mode(family):
+    if family.category_sort_mode in CATEGORY_SORT_PRESENTATION:
+        return family.category_sort_mode
+    return Family.CATEGORY_SORT_NAME_ASC
+
+
+def next_category_sort_mode(sort_mode):
+    try:
+        current_index = CATEGORY_SORT_MODE_SEQUENCE.index(sort_mode)
+    except ValueError:
+        current_index = 0
+    return CATEGORY_SORT_MODE_SEQUENCE[
+        (current_index + 1) % len(CATEGORY_SORT_MODE_SEQUENCE)
+    ]
+
+
+def category_sort_context(family):
+    sort_mode = normalized_category_sort_mode(family)
+    next_mode = next_category_sort_mode(sort_mode)
+    return {
+        "category_sort_mode": sort_mode,
+        "category_sort_label": CATEGORY_SORT_PRESENTATION[sort_mode]["label"],
+        "category_sort_icon": CATEGORY_SORT_PRESENTATION[sort_mode]["icon"],
+        "next_category_sort_label": CATEGORY_SORT_PRESENTATION[next_mode]["label"],
+    }
+
+
+def category_queryset_for_library(family, *, is_discarded_view=False):
+    categories = DishCategory.objects.filter(family=family)
+    if is_discarded_view:
+        return categories.filter(meal_section=DishCategory.DISCARDED)
+    return categories.filter(meal_section__in=ACTIVE_DISH_SECTIONS)
+
+
+def ordered_categories_for_library(family, *, is_discarded_view=False):
+    categories = category_queryset_for_library(
+        family,
+        is_discarded_view=is_discarded_view,
+    )
+    sort_mode = normalized_category_sort_mode(family)
+    if is_discarded_view or sort_mode == Family.CATEGORY_SORT_NAME_ASC:
+        categories = categories.order_by("name", "id")
+    elif sort_mode == Family.CATEGORY_SORT_NAME_DESC:
+        categories = categories.order_by("-name", "-id")
+    else:
+        categories = categories.order_by("sort_order", "created_at", "id")
+    return group_categories_for_library(categories)
+
+
+def first_dish_category_name(dish):
+    categories = list(dish.categories.all())
+    if not categories and dish.category_id:
+        categories = [dish.category]
+    for category in categories:
+        if category:
+            return category.name
+    return ""
+
+
+def order_dishes_for_library(dishes, *, categories, family, selected_category=None):
+    dish_list = list(dishes)
+    sort_mode = normalized_category_sort_mode(family)
+    if selected_category:
+        reverse_names = sort_mode == Family.CATEGORY_SORT_NAME_DESC
+        return sorted(
+            dish_list,
+            key=lambda dish: (dish.name.casefold(), dish.id),
+            reverse=reverse_names,
+        )
+
+    category_order = {
+        category.name: index
+        for index, category in enumerate(categories)
+    }
+    reverse_names = sort_mode == Family.CATEGORY_SORT_NAME_DESC
+    dish_list = sorted(
+        dish_list,
+        key=lambda dish: (dish.name.casefold(), dish.id),
+        reverse=reverse_names,
+    )
+    return sorted(
+        dish_list,
+        key=lambda dish: (
+            category_order.get(first_dish_category_name(dish), len(category_order)),
+            first_dish_category_name(dish).casefold(),
+            dish.id,
+        ),
+    )
+
+
+def next_category_sort_order(family):
+    current_max = (
+        DishCategory.objects.filter(
+            family=family,
+            meal_section__in=ACTIVE_DISH_SECTIONS,
+        )
+        .order_by("-sort_order")
+        .values_list("sort_order", flat=True)
+        .first()
+    )
+    return (current_max or 0) + 10
 
 
 def dish_queryset_for_family(family):
@@ -392,6 +526,7 @@ def save_meal_item_for_request(
     quantity = values["quantity"]
     spice_level = values["spice_level"]
     ice_level = values["ice_level"]
+    serve_warm = values["serve_warm"]
 
     item = None
     if note and not duplicate_when_noted:
@@ -408,7 +543,16 @@ def save_meal_item_for_request(
         item.quantity = quantity
         item.spice_level = spice_level
         item.ice_level = ice_level
-        item.save(update_fields=["note", "quantity", "spice_level", "ice_level"])
+        item.serve_warm = serve_warm
+        item.save(
+            update_fields=[
+                "note",
+                "quantity",
+                "spice_level",
+                "ice_level",
+                "serve_warm",
+            ]
+        )
         return item, False
 
     return (
@@ -420,6 +564,7 @@ def save_meal_item_for_request(
             quantity=quantity,
             spice_level=spice_level,
             ice_level=ice_level,
+            serve_warm=serve_warm,
         ),
         True,
     )
@@ -459,6 +604,7 @@ def meal_item_defaults_from_request(request, dish, meal_type):
     )
     spice_level = ""
     ice_level = ""
+    serve_warm = False
     if dish.supports_spice:
         spice_level = clean_choice(
             request.POST.get(f"spice_level_{dish.id}")
@@ -466,7 +612,12 @@ def meal_item_defaults_from_request(request, dish, meal_type):
             MealPlanItem.SPICE_LEVEL_CHOICES,
             MealPlanItem.SPICE_NONE,
         )
-    if dish.supports_ice:
+    if dish.supports_warm:
+        serve_warm = (
+            request.POST.get(f"serve_warm_{dish.id}")
+            or request.POST.get("serve_warm")
+        ) == "1"
+    if dish.supports_ice and not serve_warm:
         ice_level = clean_choice(
             request.POST.get(f"ice_level_{dish.id}") or request.POST.get("ice_level"),
             MealPlanItem.ICE_LEVEL_CHOICES,
@@ -477,6 +628,7 @@ def meal_item_defaults_from_request(request, dish, meal_type):
         "quantity": quantity,
         "spice_level": spice_level,
         "ice_level": ice_level,
+        "serve_warm": serve_warm,
     }
 
 
@@ -687,7 +839,7 @@ def family_update_view(request):
     if not family:
         return redirect("meals:family_create")
     if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭 owner 可以编辑家庭信息。")
+        return HttpResponseForbidden("只有家庭家主可以编辑家庭信息。")
 
     form = FamilyForm(request.POST, instance=family)
     if form.is_valid():
@@ -704,7 +856,7 @@ def family_manage_view(request):
     if not family:
         return redirect("meals:family_create")
     if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭 owner 可以管理家庭信息。")
+        return HttpResponseForbidden("只有家庭家主可以管理家庭信息。")
 
     family_members = (
         FamilyMember.objects.filter(family=family)
@@ -738,7 +890,7 @@ def family_leave_view(request):
         user=request.user
     )
     if family.owner_id == request.user.id and other_members.exists():
-        messages.error(request, "请先把 owner 权限转让给其他成员，再退出家庭。")
+        messages.error(request, "请先把家主身份转让给其他成员，再退出家庭。")
         return redirect("meals:profile")
 
     family_name = family.name
@@ -769,7 +921,7 @@ def family_transfer_owner_view(request, member_id):
     if not family:
         return redirect("meals:family_create")
     if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭 owner 可以转让 owner 权限。")
+        return HttpResponseForbidden("只有家庭家主可以转让家主身份。")
 
     target_membership = get_object_or_404(
         FamilyMember.objects.select_related("user"),
@@ -777,13 +929,13 @@ def family_transfer_owner_view(request, member_id):
         family=family,
     )
     if target_membership.user_id == request.user.id:
-        messages.info(request, "你已经是这个家庭的 owner。")
+        messages.info(request, "你已经是这个家庭的家主。")
         return redirect("meals:profile")
 
     with transaction.atomic():
         locked_family = Family.objects.select_for_update().get(id=family.id)
         if locked_family.owner_id != request.user.id:
-            return HttpResponseForbidden("只有当前 owner 可以转让 owner 权限。")
+            return HttpResponseForbidden("只有当前家主可以转让家主身份。")
         locked_family.owner = target_membership.user
         locked_family.save(update_fields=["owner", "updated_at"])
         FamilyMember.objects.filter(family=locked_family).update(role="member")
@@ -792,7 +944,7 @@ def family_transfer_owner_view(request, member_id):
             user=target_membership.user,
         ).update(role="owner")
 
-    messages.success(request, f"已把 owner 权限转让给 {target_membership.user.username}。")
+    messages.success(request, f"已把家主身份转让给 {target_membership.user.username}。")
     return redirect_to_next(request, "meals:profile")
 
 
@@ -803,7 +955,7 @@ def family_remove_member_view(request, member_id):
     if not family:
         return redirect("meals:family_create")
     if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭 owner 可以管理家庭成员。")
+        return HttpResponseForbidden("只有家庭家主可以管理家庭成员。")
 
     membership = get_object_or_404(
         FamilyMember.objects.select_related("user"),
@@ -811,7 +963,7 @@ def family_remove_member_view(request, member_id):
         family=family,
     )
     if membership.user_id == family.owner_id:
-        messages.error(request, "不能移除当前 owner，请先把 owner 权限转让给其他成员。")
+        messages.error(request, "不能移除当前家主，请先把家主身份转让给其他成员。")
         return redirect("meals:profile")
 
     username = membership.user.username
@@ -884,6 +1036,107 @@ def family_notification_delete_view(request, notification_id):
 
 
 @login_required
+def family_message_create_view(request):
+    family = get_current_family(request)
+    if not family:
+        return redirect("meals:family_create")
+
+    recipients = (
+        FamilyMember.objects.filter(family=family)
+        .exclude(user=request.user)
+        .select_related("user", "user__meal_profile")
+        .order_by("joined_at")
+    )
+    if request.method == "POST":
+        notify_user_ids = request.POST.getlist("notify_user_ids")
+        message_body = request.POST.get("message_body", "").strip()
+        if not notify_user_ids:
+            messages.error(request, "请先选择至少一位家庭成员。")
+        elif not message_body:
+            messages.error(request, "请先写下留言内容。")
+        else:
+            notification_count, thread_id = create_family_message_notifications(
+                family=family,
+                actor=request.user,
+                recipient_ids=notify_user_ids,
+                message_body=message_body,
+                request=request,
+            )
+            if notification_count:
+                messages.success(request, f"留言已发送给 {notification_count} 位家人。")
+                return redirect("meals:notification_thread", thread_id=thread_id)
+            messages.error(request, "没有找到可发送的家庭成员。")
+
+    return render(
+        request,
+        "meals/notification_form.html",
+        {
+            "family": family,
+            "recipients": recipients,
+            "page_title": "新留言",
+            "submit_label": "发送留言",
+        },
+    )
+
+
+@login_required
+def family_message_thread_view(request, thread_id):
+    family = get_current_family(request)
+    if not family:
+        return redirect("meals:family_create")
+
+    thread_messages = (
+        FamilyNotification.objects.filter(
+            family=family,
+            kind=FamilyNotification.KIND_MESSAGE,
+            message_thread_id=thread_id,
+        )
+        .select_related("actor", "recipient", "family")
+        .order_by("created_at", "id")
+    )
+    if not thread_messages.exists():
+        return redirect("meals:notifications")
+
+    recipients = (
+        FamilyMember.objects.filter(family=family)
+        .exclude(user=request.user)
+        .select_related("user", "user__meal_profile")
+        .order_by("joined_at")
+    )
+
+    if request.method == "POST":
+        notify_user_ids = request.POST.getlist("notify_user_ids")
+        message_body = request.POST.get("message_body", "").strip()
+        if not notify_user_ids:
+            messages.error(request, "请先选择至少一位家庭成员。")
+        elif not message_body:
+            messages.error(request, "请先写下回复内容。")
+        else:
+            notification_count, _thread_id = create_family_message_notifications(
+                family=family,
+                actor=request.user,
+                recipient_ids=notify_user_ids,
+                message_body=message_body,
+                request=request,
+                thread_id=thread_id,
+            )
+            if notification_count:
+                messages.success(request, f"回复已发送给 {notification_count} 位家人。")
+                return redirect("meals:notification_thread", thread_id=thread_id)
+            messages.error(request, "没有找到可发送的家庭成员。")
+
+    return render(
+        request,
+        "meals/notification_thread.html",
+        {
+            "family": family,
+            "thread_messages": thread_messages,
+            "recipients": recipients,
+        },
+    )
+
+
+@login_required
 def dish_list_view(request):
     family = get_current_family(request)
     if not family:
@@ -916,24 +1169,30 @@ def dish_list_view(request):
             return redirect("meals:dish_list")
         dishes = filter_dishes_by_category_name(dishes, selected_category)
 
-    categories = DishCategory.objects.filter(family=family)
-    if is_discarded_view:
-        categories = categories.filter(meal_section=DishCategory.DISCARDED).order_by("name")
-    else:
-        categories = categories.filter(meal_section__in=ACTIVE_DISH_SECTIONS).order_by("name")
-    categories = group_categories_for_library(categories)
+    categories = ordered_categories_for_library(
+        family,
+        is_discarded_view=is_discarded_view,
+    )
+    ordered_dishes = order_dishes_for_library(
+        dishes,
+        categories=categories,
+        family=family,
+        selected_category=selected_category,
+    )
+    sort_context = category_sort_context(family)
     return render(
         request,
         "meals/dish_list.html",
         {
             "family": family,
-            "dishes": dishes,
+            "dishes": ordered_dishes,
             "categories": categories,
             "selected_category": selected_category,
             "selected_category_name": selected_category_name,
             "is_discarded_view": is_discarded_view,
-            "can_manage_categories": is_family_owner(request.user, family),
+            "can_manage_categories": can_manage_family_categories(request.user, family),
             "can_create_library_content": not is_discarded_view,
+            **sort_context,
         },
     )
 
@@ -1072,6 +1331,7 @@ def category_create_view(request):
             category = form.save(commit=False)
             category.family = family
             category.meal_section = DishCategory.LUNCH
+            category.sort_order = next_category_sort_order(family)
             category.save()
             messages.success(request, f"已添加分类：{category.name}")
             return redirect(return_url)
@@ -1101,8 +1361,8 @@ def category_edit_view(request, category_id):
     family = get_current_family(request)
     if not family:
         return redirect("meals:family_create")
-    if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭创建者可以编辑分类。")
+    if not can_manage_family_categories(request.user, family):
+        return HttpResponseForbidden("只有家庭成员可以编辑分类。")
 
     category = get_object_or_404(DishCategory, id=category_id, family=family)
     old_meal_section = category.meal_section
@@ -1122,6 +1382,8 @@ def category_edit_view(request, category_id):
                 )
                 category = form.save(commit=False)
                 category.meal_section = DishCategory.LUNCH
+                if not category.sort_order:
+                    category.sort_order = next_category_sort_order(family)
                 category.save()
                 if old_meal_section != category.meal_section:
                     affected_dishes = (
@@ -1164,8 +1426,8 @@ def category_delete_view(request, category_id):
     family = get_current_family(request)
     if not family:
         return redirect("meals:family_create")
-    if not is_family_owner(request.user, family):
-        return HttpResponseForbidden("只有家庭创建者可以删除分类。")
+    if not can_manage_family_categories(request.user, family):
+        return HttpResponseForbidden("只有家庭成员可以删除分类。")
 
     category = get_object_or_404(DishCategory, id=category_id, family=family)
     category_name = category.name
@@ -1194,6 +1456,67 @@ def category_delete_view(request, category_id):
         f"已删除分类：{category_name}，没有其他归属的菜品已移入废弃。",
     )
     return redirect("meals:dish_list")
+
+
+@login_required
+@require_POST
+def category_sort_mode_view(request):
+    family = get_current_family(request)
+    if not family:
+        return redirect("meals:family_create")
+
+    sort_mode = next_category_sort_mode(normalized_category_sort_mode(family))
+    family.category_sort_mode = sort_mode
+    family.save(update_fields=["category_sort_mode", "updated_at"])
+    messages.info(request, CATEGORY_SORT_PRESENTATION[sort_mode]["message"])
+    return redirect_to_next(request, "meals:dish_list")
+
+
+@login_required
+@require_POST
+def category_reorder_view(request):
+    family = get_current_family(request)
+    if not family:
+        return JsonResponse({"ok": False, "message": "请先选择家庭。"}, status=400)
+    if not can_manage_family_categories(request.user, family):
+        return JsonResponse(
+            {"ok": False, "message": "只有家庭成员可以调整分类顺序。"},
+            status=403,
+        )
+    if normalized_category_sort_mode(family) != Family.CATEGORY_SORT_CUSTOM:
+        return JsonResponse(
+            {"ok": False, "message": "请先切换到自定义排序。"},
+            status=400,
+        )
+
+    category_ids = []
+    for raw_id in request.POST.getlist("category_ids"):
+        try:
+            category_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+    if not category_ids:
+        return JsonResponse(
+            {"ok": False, "message": "没有收到新的分类顺序。"},
+            status=400,
+        )
+
+    categories = {
+        category.id: category
+        for category in DishCategory.objects.filter(
+            family=family,
+            meal_section__in=ACTIVE_DISH_SECTIONS,
+            id__in=category_ids,
+        )
+    }
+    with transaction.atomic():
+        for index, category_id in enumerate(category_ids, start=1):
+            category = categories.get(category_id)
+            if not category:
+                continue
+            category.sort_order = index * 10
+            category.save(update_fields=["sort_order"])
+    return JsonResponse({"ok": True, "message": "分类顺序已保存。"})
 
 
 @login_required
@@ -1341,14 +1664,13 @@ def meal_plan_select_view(request):
             )
         dishes = filter_dishes_by_category_name(dishes, selected_category)
 
-    categories = (
-        DishCategory.objects.filter(
-            family=family,
-            meal_section__in=ACTIVE_DISH_SECTIONS,
-        )
-        .order_by("name")
+    categories = ordered_categories_for_library(family)
+    ordered_dishes = order_dishes_for_library(
+        dishes,
+        categories=categories,
+        family=family,
+        selected_category=selected_category,
     )
-    categories = group_categories_for_library(categories)
     existing_items = (
         meal_plan.items.filter(dish__family=family)
         .select_related("dish")
@@ -1359,7 +1681,7 @@ def meal_plan_select_view(request):
         items_by_dish.setdefault(item.dish_id, item)
     selected_ids = set(items_by_dish)
     dish_rows = []
-    for dish in dishes:
+    for dish in ordered_dishes:
         item = items_by_dish.get(dish.id)
         dish_rows.append(
             {
@@ -1373,6 +1695,7 @@ def meal_plan_select_view(request):
                 "ice_level": item.ice_level
                 if item and item.ice_level
                 else MealPlanItem.ICE_NONE,
+                "serve_warm": item.serve_warm if item else False,
             }
         )
 
@@ -1435,7 +1758,7 @@ def meal_plan_select_view(request):
             "meal_type": meal_type,
             "meal_meta": MEAL_SECTION_META[meal_type],
             "meal_plan": meal_plan,
-            "dishes": dishes,
+            "dishes": ordered_dishes,
             "dish_rows": dish_rows,
             "categories": categories,
             "selected_category": selected_category,
@@ -1451,6 +1774,8 @@ def meal_plan_select_view(request):
                 MealPlanItem.ICE_LEVEL_CHOICES,
                 ICE_ICON_PATHS,
             ),
+            "warm_icon_path": WARM_ICON_PATH,
+            **category_sort_context(family),
         },
     )
 
@@ -1593,19 +1918,30 @@ def meal_plan_update_item_view(request, item_id):
     item.quantity = parse_positive_quantity(request.POST.get("quantity"))
     item.spice_level = ""
     item.ice_level = ""
+    item.serve_warm = False
     if item.dish.supports_spice:
         item.spice_level = clean_choice(
             request.POST.get("spice_level"),
             MealPlanItem.SPICE_LEVEL_CHOICES,
             MealPlanItem.SPICE_NONE,
         )
-    if item.dish.supports_ice:
+    if item.dish.supports_warm:
+        item.serve_warm = request.POST.get("serve_warm") == "1"
+    if item.dish.supports_ice and not item.serve_warm:
         item.ice_level = clean_choice(
             request.POST.get("ice_level"),
             MealPlanItem.ICE_LEVEL_CHOICES,
             MealPlanItem.ICE_NONE,
         )
-    item.save(update_fields=["note", "quantity", "spice_level", "ice_level"])
+    item.save(
+        update_fields=[
+            "note",
+            "quantity",
+            "spice_level",
+            "ice_level",
+            "serve_warm",
+        ]
+    )
     record_meal_plan_history(
         family=family,
         actor=request.user,

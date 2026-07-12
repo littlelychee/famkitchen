@@ -15,6 +15,15 @@ def user_avatar_upload_path(instance, filename):
 
 
 class Family(models.Model):
+    CATEGORY_SORT_NAME_ASC = "name_asc"
+    CATEGORY_SORT_NAME_DESC = "name_desc"
+    CATEGORY_SORT_CUSTOM = "custom"
+    CATEGORY_SORT_MODE_CHOICES = [
+        (CATEGORY_SORT_NAME_ASC, "名称正序"),
+        (CATEGORY_SORT_NAME_DESC, "名称倒序"),
+        (CATEGORY_SORT_CUSTOM, "自定义排序"),
+    ]
+
     name = models.CharField(max_length=100, verbose_name="家庭名称")
     owner = models.ForeignKey(
         User,
@@ -30,6 +39,12 @@ class Family(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    category_sort_mode = models.CharField(
+        max_length=20,
+        choices=CATEGORY_SORT_MODE_CHOICES,
+        default=CATEGORY_SORT_NAME_ASC,
+        verbose_name="分类排序方式",
+    )
 
     def save(self, *args, **kwargs):
         if not self.invite_code:
@@ -186,6 +201,7 @@ class DishCategory(models.Model):
         verbose_name="归属大类",
     )
     name = models.CharField(max_length=50, verbose_name="分类名称")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="自定义排序")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
     class Meta:
@@ -263,6 +279,7 @@ class Dish(models.Model):
     description = models.TextField(blank=True, verbose_name="描述")
     supports_spice = models.BooleanField(default=False, verbose_name="可调辣度")
     supports_ice = models.BooleanField(default=False, verbose_name="可调冰量")
+    supports_warm = models.BooleanField(default=False, verbose_name="可温热")
     created_by = models.ForeignKey(
         User,
         null=True,
@@ -388,6 +405,12 @@ class MealPlan(models.Model):
 
 class FamilyNotification(models.Model):
     MAX_PER_FAMILY = 50
+    KIND_MEAL = "meal"
+    KIND_MESSAGE = "message"
+    KIND_CHOICES = [
+        (KIND_MEAL, "排餐提醒"),
+        (KIND_MESSAGE, "家庭留言"),
+    ]
 
     family = models.ForeignKey(
         Family,
@@ -423,6 +446,20 @@ class FamilyNotification(models.Model):
         blank=True,
         verbose_name="变更摘要",
     )
+    kind = models.CharField(
+        max_length=20,
+        choices=KIND_CHOICES,
+        default=KIND_MEAL,
+        db_index=True,
+        verbose_name="消息类型",
+    )
+    message_body = models.TextField(blank=True, verbose_name="留言内容")
+    message_thread_id = models.UUIDField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name="留言会话",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="提醒时间")
 
     class Meta:
@@ -435,6 +472,10 @@ class FamilyNotification(models.Model):
     @property
     def meal_type_label(self):
         return dict(MealPlan.MEAL_TYPE_CHOICES).get(self.meal_type, "")
+
+    @property
+    def is_family_message(self):
+        return self.kind == self.KIND_MESSAGE
 
     def __str__(self):
         recipient = self.recipient.username if self.recipient else "家庭成员"
@@ -501,6 +542,7 @@ class MealPlanItem(models.Model):
         default="",
         verbose_name="冰量",
     )
+    serve_warm = models.BooleanField(default=False, verbose_name="温热")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="添加时间")
 
     class Meta:
@@ -519,11 +561,17 @@ class MealPlanItem(models.Model):
 
     @property
     def effective_ice_level(self):
+        if self.serve_warm:
+            return ""
         if self.ice_level:
             return self.ice_level
         if self.dish_id and self.dish.supports_ice:
             return self.ICE_NONE
         return ""
+
+    @property
+    def warm_icon_path(self):
+        return "images/meal-customization/warm.svg" if self.serve_warm else ""
 
     @property
     def spice_icon_path(self):
@@ -550,3 +598,7 @@ class MealPlanItem(models.Model):
     @property
     def ice_level_label(self):
         return dict(self.ICE_LEVEL_CHOICES).get(self.effective_ice_level, "")
+
+    @property
+    def warm_label(self):
+        return "温热" if self.serve_warm else ""

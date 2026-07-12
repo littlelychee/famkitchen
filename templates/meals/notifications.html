@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}消息 - 私家御膳房{% endblock %}
+{% block title %}消息 - 法米狗私厨{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6">
@@ -14,13 +14,19 @@
         <p class="truncate text-sm text-stone-500">{{ family.name }} · 最多保留 50 条</p>
       </div>
     </div>
-    <form method="post" action="{% url 'meals:notifications_clear' %}" class="shrink-0">
-      {% csrf_token %}
-      <button class="btn btn-outline btn-sm" onclick="return confirm('确定清空当前家庭的全部消息吗？')">
-        <i data-lucide="trash-2" aria-hidden="true"></i>
-        <span>清空</span>
-      </button>
-    </form>
+    <div class="flex shrink-0 items-center gap-2">
+      <a href="{% url 'meals:notification_create' %}" class="btn btn-primary btn-sm" aria-label="发消息" title="发消息">
+        <i data-lucide="message-square-plus" aria-hidden="true"></i>
+        <span>发消息</span>
+      </a>
+      <form method="post" action="{% url 'meals:notifications_clear' %}">
+        {% csrf_token %}
+        <button class="btn btn-outline btn-sm" onclick="return confirm('确定清空当前家庭的全部消息吗？')">
+          <i data-lucide="trash-2" aria-hidden="true"></i>
+          <span>清空</span>
+        </button>
+      </form>
+    </div>
   </div>
 
   {% if notifications %}
@@ -32,7 +38,7 @@
       <div class="mx-auto mb-3 inline-grid h-14 w-14 place-items-center rounded-full bg-base-200">
         <i data-lucide="bell" aria-hidden="true"></i>
       </div>
-      <p>还没有排餐提醒。</p>
+      <p>还没有消息。</p>
     </div>
   {% endif %}
 </section>

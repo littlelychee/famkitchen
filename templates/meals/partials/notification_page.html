@@ -1,12 +1,16 @@
 {% for notification in notifications %}
   <article class="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
     <div class="inline-grid h-10 w-10 place-items-center rounded-full bg-base-200 text-stone-700">
-      <i data-lucide="bell-ring" aria-hidden="true"></i>
+      {% if notification.is_family_message %}
+        <i data-lucide="message-circle" aria-hidden="true"></i>
+      {% else %}
+        <i data-lucide="bell-ring" aria-hidden="true"></i>
+      {% endif %}
     </div>
     <div class="min-w-0">
       <div class="flex min-w-0 flex-wrap items-center gap-2">
         {% if notification.recipient_id == user.id %}
-          <span class="badge badge-primary">提醒你</span>
+          <span class="badge badge-primary">{% if notification.is_family_message %}给你{% else %}提醒你{% endif %}</span>
         {% endif %}
         {% if notification.recipient %}
           <span class="badge badge-outline">给 {{ notification.recipient.username }}</span>
@@ -18,8 +22,12 @@
         </time>
       </div>
       <p class="mt-1 text-sm font-semibold leading-snug">
-        {% if notification.actor %}{{ notification.actor.username }}{% else %}某位家人{% endif %}
-        更改了 {{ notification.meal_plan_date|date:"Y-m-d" }}{% if notification.meal_type_label %} {{ notification.meal_type_label }}{% endif %} 的排餐需求
+        {% if notification.is_family_message %}
+          {% if notification.actor %}{{ notification.actor.username }}{% else %}某位家人{% endif %} 留言
+        {% else %}
+          {% if notification.actor %}{{ notification.actor.username }}{% else %}某位家人{% endif %}
+          更改了 {{ notification.meal_plan_date|date:"Y-m-d" }}{% if notification.meal_type_label %} {{ notification.meal_type_label }}{% endif %} 的排餐需求
+        {% endif %}
       </p>
       {% if notification.change_summary %}
         <p class="mt-1 line-clamp-2 text-xs leading-snug text-stone-500">{{ notification.change_summary }}</p>
@@ -33,10 +41,17 @@
           <span class="sr-only">删除</span>
         </button>
       </form>
+      {% if notification.is_family_message %}
+        <a href="{% url 'meals:notification_thread' notification.message_thread_id %}" class="btn btn-primary btn-xs icon-btn-sm" aria-label="查看留言" title="查看留言">
+          <i data-lucide="chevron-right" aria-hidden="true"></i>
+          <span class="sr-only">查看</span>
+        </a>
+      {% else %}
       <a href="{% url 'meals:meal_plan' %}?date={{ notification.meal_plan_date|date:'Y-m-d' }}" class="btn btn-primary btn-xs icon-btn-sm" aria-label="查看这天排餐" title="查看这天排餐">
         <i data-lucide="chevron-right" aria-hidden="true"></i>
         <span class="sr-only">查看</span>
       </a>
+      {% endif %}
     </div>
   </article>
 {% endfor %}
