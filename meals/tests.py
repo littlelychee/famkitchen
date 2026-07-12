@@ -21,6 +21,20 @@ from .models import (
 from .utils import create_family_notifications
 
 
+class LoginFeedbackTests(TestCase):
+    def test_invalid_credentials_use_toast_without_inline_error_box(self):
+        User.objects.create_user(username="owner", password="correct-password")
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "owner", "password": "wrong-password"},
+        )
+
+        self.assertContains(response, "登录失败，用户名或密码不正确，请再试一次。")
+        self.assertContains(response, "message-toast-error")
+        self.assertNotContains(response, "alert alert-error")
+
+
 class DishListDiscardedVisibilityTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="owner", password="password")

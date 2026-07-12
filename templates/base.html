@@ -1704,7 +1704,7 @@
             },
             start() {
               this.visible = true;
-              this.timer = window.setTimeout(() => this.close(), 5200);
+              this.timer = window.setTimeout(() => this.close(), 3000);
             },
             dismiss() {
               window.clearTimeout(this.timer);
@@ -1715,7 +1715,7 @@
           x-show="visible"
           :class="{ 'is-visible': visible && !leaving, 'is-leaving': leaving }"
           class="message-toast {% if message.tags == 'error' %}message-toast-error{% elif message.tags == 'warning' %}message-toast-warning{% elif message.tags == 'info' %}message-toast-info{% else %}message-toast-success{% endif %}"
-          style="--toast-duration: 5200ms;"
+          style="--toast-duration: 3000ms;"
         >
           <div class="min-w-0">
             <div class="message-toast-title">

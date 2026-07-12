@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from meals.forms import LoginForm
 from meals import views as meal_views
 
 
@@ -12,10 +11,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path(
         "accounts/login/",
-        auth_views.LoginView.as_view(
-            template_name="accounts/login.html",
-            authentication_form=LoginForm,
-        ),
+        meal_views.ToastLoginView.as_view(),
         name="login",
     ),
     path(

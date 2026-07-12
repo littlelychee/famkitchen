@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -19,6 +20,7 @@ from .forms import (
     DishForm,
     FamilyForm,
     FamilyJoinForm,
+    LoginForm,
     MAIN_DISH_SECTIONS,
     RegisterForm,
     UserProfileForm,
@@ -53,6 +55,16 @@ CATEGORY_RETURN_OPTIONS = {
     "dish_list": ("meals:dish_list", "返回菜品库"),
     "dish_create": ("meals:dish_create", "返回新增菜品"),
 }
+
+
+class ToastLoginView(LoginView):
+    template_name = "accounts/login.html"
+    authentication_form = LoginForm
+
+    def form_invalid(self, form):
+        if form.non_field_errors():
+            messages.error(self.request, "登录失败，用户名或密码不正确，请再试一次。")
+        return super().form_invalid(form)
 
 MEAL_SECTION_META = {
     MealPlan.BREAKFAST: {
