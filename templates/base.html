@@ -1915,6 +1915,7 @@
             visible: false,
             leaving: false,
             timer: null,
+            duration: 3000,
             close() {
               if (this.leaving) return;
               this.leaving = true;
@@ -1922,7 +1923,8 @@
             },
             start() {
               this.visible = true;
-              this.timer = window.setTimeout(() => this.close(), 3000);
+              this.duration = Number.parseInt(this.$el.dataset.duration || '3000', 10);
+              this.timer = window.setTimeout(() => this.close(), this.duration);
             },
             dismiss() {
               window.clearTimeout(this.timer);
@@ -1933,7 +1935,8 @@
           x-show="visible"
           :class="{ 'is-visible': visible && !leaving, 'is-leaving': leaving }"
           class="message-toast {% if message.tags == 'error' %}message-toast-error{% elif message.tags == 'warning' %}message-toast-warning{% elif message.tags == 'info' %}message-toast-info{% else %}message-toast-success{% endif %}"
-          style="--toast-duration: 3000ms;"
+          data-duration="{% if message.tags == 'error' %}6000{% elif message.tags == 'warning' %}4500{% elif message.tags == 'info' %}3600{% else %}3000{% endif %}"
+          style="--toast-duration: {% if message.tags == 'error' %}6000ms{% elif message.tags == 'warning' %}4500ms{% elif message.tags == 'info' %}3600ms{% else %}3000ms{% endif %};"
         >
           <div class="min-w-0">
             <div class="message-toast-title">
@@ -2008,7 +2011,7 @@
         return Promise.resolve();
       }
 
-      function showClientToast(message, type = "success") {
+      function showClientToast(message, type = "success", durationMs = null) {
         const toastType = ["success", "error", "warning", "info"].includes(type)
           ? type
           : "success";
@@ -2018,6 +2021,13 @@
           warning: "注意",
           info: "提示",
         };
+        const durationByType = {
+          success: 3000,
+          info: 3600,
+          warning: 4500,
+          error: 6000,
+        };
+        const duration = durationMs || durationByType[toastType];
         let stack = document.querySelector("[data-client-toast-stack]");
         if (!stack) {
           stack = document.createElement("div");
@@ -2030,7 +2040,7 @@
 
         const toast = document.createElement("div");
         toast.className = `message-toast message-toast-${toastType}`;
-        toast.style.setProperty("--toast-duration", "3000ms");
+        toast.style.setProperty("--toast-duration", `${duration}ms`);
 
         const content = document.createElement("div");
         content.className = "min-w-0";
@@ -2073,7 +2083,7 @@
         refreshIcons();
         requestAnimationFrame(() => {
           toast.classList.add("is-visible");
-          timer = window.setTimeout(close, 3000);
+          timer = window.setTimeout(close, duration);
         });
       }
 

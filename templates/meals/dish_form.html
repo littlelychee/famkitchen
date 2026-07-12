@@ -23,11 +23,6 @@
 
       <form method="post" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
-        {% if form.non_field_errors %}
-          <div class="alert alert-error">
-            <span>{{ form.non_field_errors|striptags }}</span>
-          </div>
-        {% endif %}
         {% if is_edit %}
           <div class="rounded-lg border border-base-300 bg-base-200 p-3">
             <div class="mb-2 text-sm font-medium">当前图片</div>
@@ -47,11 +42,6 @@
             <span class="label-text-alt text-error">必填</span>
           </label>
           {{ form.name }}
-          {% if form.name.errors %}
-            <div class="label">
-              <span class="label-text-alt text-error">{{ form.name.errors|striptags }}</span>
-            </div>
-          {% endif %}
         </div>
 
         <div class="form-control w-full">
@@ -59,11 +49,6 @@
             <span class="label-text">{{ form.calories.label }}</span>
           </label>
           {{ form.calories }}
-          {% if form.calories.errors %}
-            <div class="label">
-              <span class="label-text-alt text-error">{{ form.calories.errors|striptags }}</span>
-            </div>
-          {% endif %}
         </div>
 
         <div class="form-control w-full" data-dish-category-picker>
@@ -84,14 +69,6 @@
               {% endfor %}
             </div>
           </div>
-
-          {% if form.categories.errors %}
-            <div class="label">
-              <span class="label-text-alt text-error">
-                {{ form.categories.errors|striptags }}
-              </span>
-            </div>
-          {% endif %}
         </div>
 
         <details class="dish-detail-settings">
@@ -120,11 +97,6 @@
               </span>
             </label>
           </div>
-          {% if form.supports_spice.errors or form.supports_ice.errors %}
-            <div class="px-3 pb-3 text-xs text-error">
-              {{ form.supports_spice.errors|striptags }} {{ form.supports_ice.errors|striptags }}
-            </div>
-          {% endif %}
         </details>
 
         <div class="form-control w-full">
@@ -132,11 +104,6 @@
             <span class="label-text">{{ form.image.label }}</span>
           </label>
           {{ form.image }}
-          {% if form.image.errors %}
-            <div class="label">
-              <span class="label-text-alt text-error">{{ form.image.errors|striptags }}</span>
-            </div>
-          {% endif %}
         </div>
 
         <div class="form-control w-full">
@@ -144,11 +111,6 @@
             <span class="label-text">{{ form.description.label }}</span>
           </label>
           {{ form.description }}
-          {% if form.description.errors %}
-            <div class="label">
-              <span class="label-text-alt text-error">{{ form.description.errors|striptags }}</span>
-            </div>
-          {% endif %}
         </div>
 
         <div class="grid grid-cols-1 gap-2 sm:flex">

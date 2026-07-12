@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
+from django.forms.forms import NON_FIELD_ERRORS
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -63,6 +64,30 @@ CATEGORY_RETURN_OPTIONS = {
 }
 
 
+def form_error_message(form, fallback):
+    error_parts = []
+    for field_name, errors in form.errors.items():
+        if field_name == NON_FIELD_ERRORS:
+            label = "表单"
+        else:
+            field = form.fields.get(field_name)
+            label = field.label if field else field_name
+        for error in errors:
+            error_parts.append(f"{label}：{error}")
+    return "；".join(error_parts) or fallback
+
+
+def notify_form_errors(request, form, fallback):
+    messages.error(request, form_error_message(form, fallback))
+
+
+def image_conversion_note(form):
+    image = form.cleaned_data.get("image") if hasattr(form, "cleaned_data") else None
+    if image and getattr(image, "was_auto_converted", False):
+        return "，图片已自动转换为通用 JPG 格式"
+    return ""
+
+
 class ToastLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = LoginForm
@@ -70,7 +95,10 @@ class ToastLoginView(LoginView):
     def form_invalid(self, form):
         if form.non_field_errors():
             messages.error(self.request, "登录失败，用户名或密码不正确，请再试一次。")
+        else:
+            notify_form_errors(self.request, form, "登录失败，请检查后再试。")
         return super().form_invalid(form)
+
 
 MEAL_SECTION_META = {
     MealPlan.BREAKFAST: {
@@ -463,6 +491,7 @@ def register_view(request):
             login(request, user)
             messages.success(request, "注册成功，先创建或加入一个家庭吧。")
             return redirect("meals:family_create")
+        notify_form_errors(request, form, "注册失败，请检查后再试。")
     else:
         form = RegisterForm()
 
@@ -485,6 +514,7 @@ def family_create_view(request):
             set_current_family(request, family)
             messages.success(request, f"已创建家庭：{family.name}")
             return redirect("meals:meal_plan")
+        notify_form_errors(request, form, "家庭创建失败，请检查后再试。")
     else:
         form = FamilyForm()
 
@@ -500,11 +530,13 @@ def family_join_view(request):
             family = Family.objects.filter(invite_code=invite_code).first()
             if family is None:
                 form.add_error("invite_code", "没有找到对应家庭，请检查邀请码。")
+                notify_form_errors(request, form, "加入家庭失败，请检查邀请码。")
                 return render(request, "meals/family_join.html", {"form": form})
             FamilyMember.objects.get_or_create(family=family, user=request.user)
             set_current_family(request, family)
             messages.success(request, f"已加入家庭：{family.name}")
             return redirect("meals:meal_plan")
+        notify_form_errors(request, form, "加入家庭失败，请检查后再试。")
     else:
         form = FamilyJoinForm()
 
@@ -553,12 +585,7 @@ def profile_update_view(request):
         form.save()
         messages.success(request, "个人信息已更新。")
     else:
-        error = " ".join(
-            error
-            for errors in form.errors.values()
-            for error in errors
-        )
-        messages.error(request, error or "用户名更新失败，请检查后再试。")
+        notify_form_errors(request, form, "用户名更新失败，请检查后再试。")
     return redirect("meals:profile")
 
 
@@ -571,12 +598,7 @@ def avatar_update_view(request):
         form.save(profile)
         messages.success(request, "头像已更新。")
     else:
-        error = " ".join(
-            error
-            for errors in form.errors.values()
-            for error in errors
-        )
-        messages.error(request, error or "头像更新失败，请重新选择。")
+        notify_form_errors(request, form, "头像更新失败，请重新选择。")
     return redirect("meals:profile")
 
 
@@ -592,17 +614,16 @@ def avatar_upload_view(request):
             return JsonResponse(
                 {
                     "ok": True,
-                    "message": "头像已上传。",
+                    "message": f"头像已上传{image_conversion_note(form)}。",
                     "avatar": serialize_custom_avatar(avatar),
                 }
             )
-        messages.success(request, "头像已上传，可以在头像列表里选择后保存。")
-    else:
-        error = " ".join(
-            error
-            for errors in form.errors.values()
-            for error in errors
+        messages.success(
+            request,
+            f"头像已上传{image_conversion_note(form)}，可以在头像列表里选择后保存。",
         )
+    else:
+        error = form_error_message(form, "头像上传失败，请检查图片。")
         if wants_json(request):
             return JsonResponse(
                 {
@@ -673,12 +694,7 @@ def family_update_view(request):
         form.save()
         messages.success(request, "家庭信息已更新。")
     else:
-        error = " ".join(
-            error
-            for errors in form.errors.values()
-            for error in errors
-        )
-        messages.error(request, error or "家庭信息更新失败，请检查后再试。")
+        notify_form_errors(request, form, "家庭信息更新失败，请检查后再试。")
     return redirect_to_next(request, "meals:family_manage")
 
 
@@ -938,8 +954,12 @@ def dish_create_view(request):
             dish.save()
             form.save_m2m()
             form.save_meal_sections(dish)
-            messages.success(request, f"已添加菜品：{dish.name}")
+            messages.success(
+                request,
+                f"已添加菜品：{dish.name}{image_conversion_note(form)}。",
+            )
             return redirect("meals:dish_list")
+        notify_form_errors(request, form, "菜品保存失败，请检查后再试。")
     else:
         form = DishForm(family=family)
 
@@ -998,8 +1018,12 @@ def dish_edit_view(request, dish_id):
             ):
                 delete_dish_image_file(old_image_name)
 
-            messages.success(request, f"已更新菜品：{dish.name}")
+            messages.success(
+                request,
+                f"已更新菜品：{dish.name}{image_conversion_note(form)}。",
+            )
             return redirect("meals:dish_list")
+        notify_form_errors(request, form, "菜品更新失败，请检查后再试。")
     else:
         form = DishForm(family=family, instance=dish)
 
@@ -1051,6 +1075,7 @@ def category_create_view(request):
             category.save()
             messages.success(request, f"已添加分类：{category.name}")
             return redirect(return_url)
+        notify_form_errors(request, form, "分类保存失败，请检查后再试。")
     else:
         form = DishCategoryForm(family=family)
 
@@ -1111,6 +1136,7 @@ def category_edit_view(request, category_id):
                         )
             messages.success(request, f"已更新分类：{category.name}")
             return redirect("meals:dish_list")
+        notify_form_errors(request, form, "分类更新失败，请检查后再试。")
     else:
         form = DishCategoryForm(family=family, instance=category)
 

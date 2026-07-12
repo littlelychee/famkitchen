@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from io import BytesIO
 import tempfile
 
 from django.contrib.auth.models import User
@@ -6,6 +7,7 @@ from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from .forms import AvatarUploadForm, DishForm, FamilyForm, RegisterForm, UserProfileForm
 from .models import (
@@ -21,6 +23,16 @@ from .models import (
     UserProfile,
 )
 from .utils import create_family_notifications
+
+
+def uploaded_test_image(name="test.png", image_format="PNG"):
+    buffer = BytesIO()
+    Image.new("RGBA", (4, 4), (211, 77, 55, 180)).save(buffer, format=image_format)
+    return SimpleUploadedFile(
+        name,
+        buffer.getvalue(),
+        content_type=f"image/{image_format.lower()}",
+    )
 
 
 class LoginFeedbackTests(TestCase):
@@ -116,6 +128,73 @@ class DisplayWidthValidationTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("菜品名称不能超过 8 个汉字长度", str(form.errors))
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class AutoConvertingImageUploadTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="owner", password="password")
+        self.family = Family.objects.create(name="测试家庭", owner=self.user)
+        FamilyMember.objects.create(
+            family=self.family,
+            user=self.user,
+            role="owner",
+        )
+        self.client.force_login(self.user)
+        session = self.client.session
+        session["current_family_id"] = self.family.id
+        session.save()
+
+    def test_dish_form_converts_supported_image_to_jpeg(self):
+        form = DishForm(
+            data={"name": "小红书菜品"},
+            files={"image": uploaded_test_image("xiaohongshu.png")},
+            family=self.family,
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        image = form.cleaned_data["image"]
+        image.seek(0)
+        converted_image = Image.open(BytesIO(image.read()))
+
+        self.assertEqual(image.name, "xiaohongshu.jpg")
+        self.assertEqual(image.content_type, "image/jpeg")
+        self.assertTrue(image.was_auto_converted)
+        self.assertEqual(converted_image.format, "JPEG")
+
+    def test_dish_form_rejects_file_that_is_not_an_image(self):
+        upload = SimpleUploadedFile(
+            "not-image.jpg",
+            b"this is not an image",
+            content_type="image/jpeg",
+        )
+
+        form = DishForm(
+            data={"name": "问题菜品"},
+            files={"image": upload},
+            family=self.family,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("不是可识别的图片", str(form.errors))
+
+    def test_invalid_dish_image_is_reported_in_toast(self):
+        upload = SimpleUploadedFile(
+            "not-image.jpg",
+            b"this is not an image",
+            content_type="image/jpeg",
+        )
+
+        response = self.client.post(
+            reverse("meals:dish_create"),
+            {"name": "问题菜品", "image": upload},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "message-toast-error")
+        self.assertContains(response, "菜品图片：这个文件不是可识别的图片")
+        self.assertNotContains(response, "alert alert-error")
+        self.assertNotContains(response, "请上传一张有效的图片")
 
 
 class DishListDiscardedVisibilityTests(TestCase):

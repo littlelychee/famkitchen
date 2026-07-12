@@ -1,10 +1,23 @@
+from io import BytesIO
+from pathlib import Path
 import unicodedata
 
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from django.utils.text import get_valid_filename
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .models import Dish, DishCategory, DishMealSection, Family, UserAvatar, UserProfile
+
+try:
+    from pillow_heif import register_heif_opener
+except ImportError:
+    HEIF_SUPPORT_ENABLED = False
+else:
+    register_heif_opener()
+    HEIF_SUPPORT_ENABLED = True
 
 
 MAIN_DISH_SECTION_CHOICES = [
@@ -19,6 +32,112 @@ FAMILY_NAME_MAX_DISPLAY_WIDTH = 14
 FAMILY_NAME_MAX_HAN_LENGTH = 7
 DISH_NAME_MAX_DISPLAY_WIDTH = 16
 DISH_NAME_MAX_HAN_LENGTH = 8
+HEIF_BRANDS = {
+    b"heic",
+    b"heix",
+    b"hevc",
+    b"hevx",
+    b"heim",
+    b"heis",
+    b"mif1",
+    b"msf1",
+}
+
+
+def looks_like_heif(raw_data):
+    return (
+        len(raw_data) >= 12
+        and raw_data[4:8] == b"ftyp"
+        and raw_data[8:12] in HEIF_BRANDS
+    )
+
+
+def converted_image_name(uploaded_file):
+    original_name = Path(getattr(uploaded_file, "name", "") or "image").stem
+    safe_stem = get_valid_filename(original_name) or "image"
+    return f"{safe_stem}.jpg"
+
+
+def image_as_rgb(image):
+    try:
+        image.seek(0)
+    except EOFError:
+        pass
+
+    image = ImageOps.exif_transpose(image)
+    if image.mode == "RGB":
+        return image
+
+    has_alpha = image.mode in {"RGBA", "LA"} or "transparency" in image.info
+    if has_alpha:
+        rgba_image = image.convert("RGBA")
+        background = Image.new("RGBA", rgba_image.size, (255, 255, 255, 255))
+        background.alpha_composite(rgba_image)
+        return background.convert("RGB")
+
+    return image.convert("RGB")
+
+
+def normalize_uploaded_image(uploaded_file):
+    try:
+        uploaded_file.seek(0)
+    except (AttributeError, OSError):
+        pass
+
+    raw_data = uploaded_file.read()
+    try:
+        uploaded_file.seek(0)
+    except (AttributeError, OSError):
+        pass
+
+    if not raw_data:
+        raise forms.ValidationError("图片文件是空的，请重新选择一张图片。")
+
+    try:
+        image = Image.open(BytesIO(raw_data))
+        source_format = (image.format or "").upper()
+        image.load()
+    except Image.DecompressionBombError:
+        raise forms.ValidationError("这张图片尺寸过大，请压缩后再上传。")
+    except (UnidentifiedImageError, OSError):
+        if looks_like_heif(raw_data) and not HEIF_SUPPORT_ENABLED:
+            raise forms.ValidationError(
+                "这张图片是 HEIC/HEIF 格式，当前环境还不能自动转换。"
+                "请先转成 JPG/PNG，或重新安装项目依赖后再试。"
+            )
+        raise forms.ValidationError(
+            "这个文件不是可识别的图片，或图片文件已经损坏。"
+            "请换一张 JPG、PNG、WebP、AVIF 或 HEIC 图片后再试。"
+        )
+
+    if not image.width or not image.height:
+        raise forms.ValidationError("这张图片没有有效尺寸，请换一张图片后再试。")
+
+    output = BytesIO()
+    rgb_image = image_as_rgb(image)
+    rgb_image.save(output, format="JPEG", quality=88, optimize=True)
+
+    converted_file = ContentFile(
+        output.getvalue(),
+        name=converted_image_name(uploaded_file),
+    )
+    converted_file.content_type = "image/jpeg"
+    converted_file.original_upload_size = getattr(uploaded_file, "size", len(raw_data))
+    converted_file.original_image_format = source_format or "UNKNOWN"
+    converted_file.was_auto_converted = source_format != "JPEG"
+    return converted_file
+
+
+class AutoConvertingImageField(forms.FileField):
+    default_error_messages = {
+        "invalid": "请上传一张图片文件。",
+    }
+
+    def to_python(self, data):
+        uploaded_file = super().to_python(data)
+        if uploaded_file in self.empty_values:
+            return None
+        return normalize_uploaded_image(uploaded_file)
 
 
 def display_width(value):
@@ -259,6 +378,8 @@ class AvatarChoiceForm(forms.Form):
 
 
 class AvatarUploadForm(StyledFormMixin, forms.ModelForm):
+    image = AutoConvertingImageField(label="上传头像", widget=forms.FileInput())
+
     class Meta:
         model = UserAvatar
         fields = ["image"]
@@ -276,7 +397,8 @@ class AvatarUploadForm(StyledFormMixin, forms.ModelForm):
             raise forms.ValidationError(
                 f"达到最大 {UserAvatar.MAX_CUSTOM_AVATARS} 张头像的上限了，请先删除废弃头像后，再次上传。"
             )
-        if image.size > UserAvatar.MAX_UPLOAD_SIZE:
+        upload_size = getattr(image, "original_upload_size", image.size)
+        if upload_size > UserAvatar.MAX_UPLOAD_SIZE:
             raise forms.ValidationError("头像图片不能超过 4MB。")
         return image
 
@@ -316,6 +438,12 @@ class DishCategoryForm(StyledFormMixin, forms.ModelForm):
 
 
 class DishForm(StyledFormMixin, forms.ModelForm):
+    image = AutoConvertingImageField(
+        label="菜品图片",
+        required=False,
+        widget=forms.FileInput(),
+    )
+
     class Meta:
         model = Dish
         fields = [
