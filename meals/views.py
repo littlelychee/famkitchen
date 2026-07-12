@@ -6,8 +6,14 @@ from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect, render
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -133,6 +139,32 @@ def delete_avatar_image_file(image_name):
         return
     if default_storage.exists(image_name):
         default_storage.delete(image_name)
+
+
+def wants_json(request):
+    return (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("accept", "")
+    )
+
+
+def serialize_custom_avatar(avatar):
+    return {
+        "id": avatar.id,
+        "choice": f"custom:{avatar.id}",
+        "url": avatar.image.url,
+        "delete_url": reverse("meals:avatar_delete", args=[avatar.id]),
+    }
+
+
+def default_avatar_url(default_key):
+    return static(UserProfile.DEFAULT_AVATAR_PATHS[default_key])
+
+
+def profile_avatar_url(profile):
+    if profile.custom_avatar_id and profile.custom_avatar:
+        return profile.custom_avatar.image.url
+    return default_avatar_url(profile.default_avatar)
 
 
 def get_category_options_by_section(family):
@@ -556,16 +588,29 @@ def avatar_upload_view(request):
         avatar = form.save(commit=False)
         avatar.user = request.user
         avatar.save()
-        profile = get_user_profile(request.user)
-        profile.custom_avatar = avatar
-        profile.save(update_fields=["custom_avatar", "updated_at"])
-        messages.success(request, "头像已上传并设为当前头像。")
+        if wants_json(request):
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message": "头像已上传。",
+                    "avatar": serialize_custom_avatar(avatar),
+                }
+            )
+        messages.success(request, "头像已上传，可以在头像列表里选择后保存。")
     else:
         error = " ".join(
             error
             for errors in form.errors.values()
             for error in errors
         )
+        if wants_json(request):
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "message": error or "头像上传失败，请检查图片。",
+                },
+                status=400,
+            )
         messages.error(request, error or "头像上传失败，请检查图片。")
     return redirect("meals:profile")
 
@@ -581,6 +626,17 @@ def avatar_delete_view(request, avatar_id):
     ).update(custom_avatar=None)
     avatar.delete()
     delete_avatar_image_file(image_name)
+    if wants_json(request):
+        profile = get_user_profile(request.user)
+        return JsonResponse(
+            {
+                "ok": True,
+                "message": "已删除自定义头像。",
+                "deleted_avatar_id": avatar_id,
+                "current_choice": profile.selected_avatar_key,
+                "current_avatar_url": profile_avatar_url(profile),
+            }
+        )
     messages.success(request, "已删除自定义头像。")
     return redirect("meals:profile")
 

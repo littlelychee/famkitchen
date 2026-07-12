@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -11,6 +12,7 @@ from .models import FamilyMember, FamilyNotification, MealPlan, UserProfile
 
 
 MAIN_MEAL_TYPES = (MealPlan.BREAKFAST, MealPlan.LUNCH, MealPlan.DINNER)
+logger = logging.getLogger(__name__)
 
 
 def get_user_profile(user):
@@ -223,7 +225,7 @@ def meal_sections_html(meal_sections):
 def send_notification_email(notification, detail_url="", meal_sections=None):
     recipient = notification.recipient
     if not recipient or not recipient.email:
-        return
+        return False
 
     actor_name = notification.actor.username if notification.actor else "一位家人"
     meal_label = notification.meal_type_label
@@ -284,21 +286,38 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
         "</td></tr></table>"
         "</div>"
     )
-    send_mail(
-        subject=f"{actor_name} 提醒你关注 {target} 的排餐",
-        message=(
-            f"{recipient.username}，\n\n"
-            f"{actor_name} 在 {sent_at} "
-            f"更改了 {notification.family.name} 的 {target} 排餐需求。\n\n"
-            f"{notification.change_summary}"
-            f"{meal_detail}"
-            f"{detail_line}\n"
-        ),
-        from_email=None,
-        recipient_list=[recipient.email],
-        fail_silently=True,
-        html_message=html_message,
-    )
+    try:
+        sent_count = send_mail(
+            subject=f"{actor_name} 提醒你关注 {target} 的排餐",
+            message=(
+                f"{recipient.username}，\n\n"
+                f"{actor_name} 在 {sent_at} "
+                f"更改了 {notification.family.name} 的 {target} 排餐需求。\n\n"
+                f"{notification.change_summary}"
+                f"{meal_detail}"
+                f"{detail_line}\n"
+            ),
+            from_email=None,
+            recipient_list=[recipient.email],
+            fail_silently=settings.EMAIL_FAIL_SILENTLY,
+            html_message=html_message,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to send meal notification email to user_id=%s notification_id=%s",
+            recipient.id,
+            notification.id,
+        )
+        return False
+
+    if not sent_count:
+        logger.warning(
+            "Meal notification email was not sent to user_id=%s notification_id=%s",
+            recipient.id,
+            notification.id,
+        )
+        return False
+    return True
 
 
 def create_family_history(

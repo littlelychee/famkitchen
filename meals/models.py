@@ -73,7 +73,7 @@ class FamilyMember(models.Model):
 
 class UserAvatar(models.Model):
     MAX_UPLOAD_SIZE = 4 * 1024 * 1024
-    MAX_CUSTOM_AVATARS = 2
+    MAX_CUSTOM_AVATARS = 10
 
     user = models.ForeignKey(
         User,

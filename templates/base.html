@@ -539,7 +539,11 @@
     .dish-preview-card {
       position: relative;
       min-height: 5.75rem;
-      padding: 0.65rem 2.9rem 0.65rem 0.65rem;
+      padding: 0.65rem;
+    }
+
+    .dish-card-copy {
+      padding-right: 2.75rem;
     }
 
     .dish-card-category-corner {
@@ -555,9 +559,13 @@
     }
 
     .dish-card-category-corner .badge {
-      max-width: 5.5rem;
+      min-height: 1.1rem;
+      max-width: 4.7rem;
       overflow: hidden;
       background: var(--ui-card);
+      padding: 0 0.34rem;
+      font-size: 0.58rem !important;
+      line-height: 1.05;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -622,7 +630,7 @@
     .meal-select-card {
       position: relative;
       min-height: 5.85rem;
-      padding: 0.65rem 2.9rem 0.65rem 0.65rem;
+      padding: 0.65rem;
       cursor: pointer;
       transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
     }
@@ -1128,15 +1136,31 @@
 
     .dish-card-tags .badge {
       flex: 0 0 auto;
-      max-width: 5.5rem;
+      min-height: 1.1rem;
+      max-width: 4.7rem;
       overflow: hidden;
+      padding: 0 0.34rem;
+      font-size: 0.58rem !important;
+      line-height: 1.05;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .dish-card-title {
-      max-width: 10em;
       min-width: 0;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .dish-tag {
+      min-height: 1.1rem;
+      max-width: 4.7rem;
+      overflow: hidden;
+      padding: 0 0.34rem;
+      font-size: 0.58rem !important;
+      line-height: 1.05;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .dish-inline-edit {
@@ -1279,32 +1303,226 @@
       background: #fff;
     }
 
-    .avatar-choice-grid {
+    .profile-avatar-control {
+      position: relative;
+    }
+
+    .profile-avatar-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .avatar-picker-overlay[hidden] {
+      display: none;
+    }
+
+    .avatar-picker-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(4.8rem, 1fr));
+      align-items: end;
+      background: rgba(33, 29, 25, 0.42);
+      padding-top: env(safe-area-inset-top, 0);
+    }
+
+    .avatar-picker-panel {
+      display: grid;
+      width: 100%;
+      max-height: min(88vh, 42rem);
+      overflow-y: auto;
+      border: 1px solid var(--ui-line);
+      border-radius: var(--ui-radius);
+      background: var(--ui-card);
+      box-shadow: 0 28px 80px rgba(33, 29, 25, 0.24);
+    }
+
+    .avatar-picker-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--ui-line);
+      background: rgba(255, 254, 250, 0.96);
+      padding: 0.75rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .avatar-picker-body {
+      display: grid;
+      gap: 1rem;
+      padding: 0.9rem 0.75rem 0.75rem;
+    }
+
+    .avatar-picker-section {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .avatar-picker-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .avatar-picker-section-title {
+      color: var(--ui-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .avatar-scroll-row {
+      display: flex;
       gap: 0.65rem;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      padding: 0.1rem 0.1rem 0.35rem;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .avatar-scroll-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .avatar-choice-shell {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .avatar-choice-shell.is-broken {
+      opacity: 0.45;
     }
 
     .avatar-choice {
       display: grid;
-      gap: 0.35rem;
-      justify-items: center;
-      border: 1px solid var(--ui-line);
-      border-radius: var(--ui-radius);
-      background: #fff;
-      padding: 0.45rem;
+      height: 4.15rem;
+      width: 4.15rem;
+      place-items: center;
+      border: 2px solid transparent;
+      border-radius: 999px !important;
+      padding: 0;
       cursor: pointer;
+      transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
     }
 
     .avatar-choice input {
-      accent-color: var(--ui-brand);
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
+    .avatar-choice:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 209, 102, 0.55);
+    }
+
+    .avatar-choice:has(input:checked) {
+      border-color: var(--ui-brand);
+      box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.42);
+    }
+
+    .avatar-image-frame {
+      display: block;
+      height: 3.9rem;
+      width: 3.9rem;
+      overflow: hidden;
+      border-radius: 999px !important;
+      background: #fff;
+    }
+
+    .avatar-image-frame img,
     .avatar-choice img {
-      height: 3.25rem;
-      width: 3.25rem;
+      height: 100%;
+      width: 100%;
       border-radius: 999px !important;
       object-fit: cover;
+    }
+
+    .avatar-delete-button {
+      position: absolute;
+      top: -0.25rem;
+      right: -0.25rem;
+      display: none;
+      height: 1.45rem;
+      width: 1.45rem;
+      place-items: center;
+      border: 1px solid var(--ui-danger);
+      border-radius: 999px !important;
+      background: var(--ui-danger);
+      color: var(--ui-danger-ink);
+      box-shadow: 0 8px 16px rgba(239, 71, 111, 0.24);
+    }
+
+    .avatar-delete-button .lucide {
+      width: 0.78rem;
+      height: 0.78rem;
+    }
+
+    .profile-avatar-control.is-editing .avatar-delete-button {
+      display: grid;
+    }
+
+    .avatar-empty-state {
+      display: grid;
+      min-width: 8rem;
+      min-height: 4rem;
+      place-items: center;
+      border: 1px dashed var(--ui-line);
+      border-radius: var(--ui-radius);
+      color: var(--ui-muted);
+      font-size: 0.88rem;
+    }
+
+    .avatar-upload-panel {
+      display: grid;
+      gap: 0.65rem;
+      border-top: 1px solid var(--ui-line);
+      padding: 0.75rem;
+    }
+
+    .family-member-chip {
+      display: inline-flex;
+      max-width: 100%;
+      align-items: center;
+      gap: 0.35rem;
+      border: 1px solid var(--ui-line);
+      border-radius: 999px !important;
+      background: #fff;
+      padding: 0.22rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .family-member-role {
+      color: var(--ui-muted);
+      font-size: 0.66rem;
+      font-weight: 800;
+    }
+
+    @media (min-width: 640px) {
+      .avatar-picker-overlay {
+        place-items: center;
+        padding: 1rem;
+      }
+
+      .avatar-picker-panel {
+        width: min(92vw, 32rem);
+      }
+
+      .avatar-upload-panel {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+      }
     }
 
     .mobile-tabbar-svg {
@@ -1627,7 +1845,7 @@
         {% else %}
           <a href="{% url 'meals:profile' %}" class="top-avatar-link" aria-label="我的个人信息" title="我的个人信息">
             {% if current_user_profile.custom_avatar %}
-              <img src="{{ current_user_profile.custom_avatar.image.url }}" alt="{{ user.username }}">
+              <img src="{{ current_user_profile.custom_avatar.image.url }}" alt="{{ user.username }}" onerror="this.onerror=null;this.src='{% static current_user_profile.default_avatar_path %}'">
             {% else %}
               <img src="{% static current_user_profile.default_avatar_path %}" alt="{{ user.username }}">
             {% endif %}
@@ -1667,7 +1885,7 @@
             <a href="{% url 'meals:shopping' %}" class="btn btn-sm {% if current_page == 'shopping' %}btn-primary{% else %}btn-ghost{% endif %}">采购</a>
             <a href="{% url 'meals:profile' %}" class="top-avatar-link" aria-label="我的个人信息" title="我的个人信息">
               {% if current_user_profile.custom_avatar %}
-                <img src="{{ current_user_profile.custom_avatar.image.url }}" alt="{{ user.username }}">
+                <img src="{{ current_user_profile.custom_avatar.image.url }}" alt="{{ user.username }}" onerror="this.onerror=null;this.src='{% static current_user_profile.default_avatar_path %}'">
               {% else %}
                 <img src="{% static current_user_profile.default_avatar_path %}" alt="{{ user.username }}">
               {% endif %}
@@ -1790,22 +2008,265 @@
         return Promise.resolve();
       }
 
-      function showClientToast(message) {
+      function showClientToast(message, type = "success") {
+        const toastType = ["success", "error", "warning", "info"].includes(type)
+          ? type
+          : "success";
+        const titleByType = {
+          success: "已完成",
+          error: "需要处理",
+          warning: "注意",
+          info: "提示",
+        };
         let stack = document.querySelector("[data-client-toast-stack]");
         if (!stack) {
           stack = document.createElement("div");
-          stack.className = "client-toast-stack";
+          stack.className = "message-toast-stack";
           stack.dataset.clientToastStack = "";
+          stack.setAttribute("aria-live", "polite");
+          stack.setAttribute("aria-atomic", "true");
           document.body.appendChild(stack);
         }
+
         const toast = document.createElement("div");
-        toast.className = "client-toast";
-        toast.textContent = message;
-        stack.appendChild(toast);
-        window.setTimeout(() => {
+        toast.className = `message-toast message-toast-${toastType}`;
+        toast.style.setProperty("--toast-duration", "3000ms");
+
+        const content = document.createElement("div");
+        content.className = "min-w-0";
+
+        const title = document.createElement("div");
+        title.className = "message-toast-title";
+        title.textContent = titleByType[toastType];
+
+        const text = document.createElement("div");
+        text.className = "message-toast-text";
+        text.textContent = message;
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "message-toast-close";
+        closeButton.setAttribute("aria-label", "关闭提示");
+        closeButton.innerHTML = `
+          <svg class="message-toast-countdown" viewBox="0 0 28 28" aria-hidden="true">
+            <circle class="message-toast-countdown-track" cx="14" cy="14" r="11"></circle>
+            <circle class="message-toast-countdown-progress" cx="14" cy="14" r="11"></circle>
+          </svg>
+          <i data-lucide="x" aria-hidden="true"></i>
+        `;
+
+        let leaving = false;
+        let timer = null;
+        const close = () => {
+          if (leaving) return;
+          leaving = true;
+          window.clearTimeout(timer);
+          toast.classList.remove("is-visible");
           toast.classList.add("is-leaving");
-          window.setTimeout(() => toast.remove(), 180);
-        }, 1800);
+          window.setTimeout(() => toast.remove(), 240);
+        };
+
+        closeButton.addEventListener("click", close);
+        content.append(title, text);
+        toast.append(content, closeButton);
+        stack.appendChild(toast);
+        refreshIcons();
+        requestAnimationFrame(() => {
+          toast.classList.add("is-visible");
+          timer = window.setTimeout(close, 3000);
+        });
+      }
+
+      function displayWidth(value) {
+        return Array.from(value).reduce((total, char) => {
+          return total + (/[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\uff00-\uffef]/.test(char) ? 2 : 1);
+        }, 0);
+      }
+
+      function bindDisplayWidthLimits(root = document) {
+        root.querySelectorAll("[data-max-display-width]").forEach((input) => {
+          if (input.dataset.displayWidthBound) return;
+          input.dataset.displayWidthBound = "1";
+          const maxWidth = Number.parseInt(input.dataset.maxDisplayWidth || "0", 10);
+          const message = input.dataset.maxDisplayMessage || "内容太长了。";
+          const validate = () => {
+            input.setCustomValidity(displayWidth(input.value) > maxWidth ? message : "");
+          };
+          input.addEventListener("input", validate);
+          input.addEventListener("blur", validate);
+          validate();
+        });
+      }
+
+      function bindAvatarPickers(root = document) {
+        root.querySelectorAll("[data-avatar-picker]").forEach((picker) => {
+          if (picker.dataset.avatarPickerBound) return;
+          picker.dataset.avatarPickerBound = "1";
+
+          const modal = picker.querySelector("[data-avatar-modal]");
+          const openButton = picker.querySelector("[data-avatar-open]");
+          const closeButton = picker.querySelector("[data-avatar-close]");
+          const editButton = picker.querySelector("[data-avatar-edit]");
+          const uploadForm = picker.querySelector("[data-avatar-upload-form]");
+          const choiceForm = picker.querySelector("#avatar-choice-form");
+          const customList = picker.querySelector("[data-custom-avatar-list]");
+          const emptyState = picker.querySelector("[data-custom-avatar-empty]");
+          const preview = picker.querySelector("[data-current-avatar-img]");
+
+          function csrfToken() {
+            return (
+              uploadForm?.querySelector("[name=csrfmiddlewaretoken]")?.value
+              || choiceForm?.querySelector("[name=csrfmiddlewaretoken]")?.value
+              || ""
+            );
+          }
+
+          function syncEmptyState() {
+            if (!emptyState || !customList) return;
+            emptyState.classList.toggle(
+              "hidden",
+              Boolean(customList.querySelector("[data-custom-avatar-id]"))
+            );
+          }
+
+          function selectChoice(value) {
+            const inputs = Array.from(choiceForm?.querySelectorAll('input[name="avatar_choice"]') || []);
+            const target = inputs.find((input) => input.value === value) || inputs[0];
+            if (target) target.checked = true;
+          }
+
+          function customAvatarNode(avatar) {
+            const shell = document.createElement("div");
+            shell.className = "avatar-choice-shell";
+            shell.dataset.customAvatarId = avatar.id;
+
+            const label = document.createElement("label");
+            label.className = "avatar-choice";
+
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "avatar_choice";
+            input.value = avatar.choice;
+
+            const img = document.createElement("img");
+            img.src = avatar.url;
+            img.alt = "自定义头像";
+            img.addEventListener("error", () => shell.classList.add("is-broken"));
+
+            const frame = document.createElement("span");
+            frame.className = "avatar-image-frame";
+            frame.appendChild(img);
+
+            const sr = document.createElement("span");
+            sr.className = "sr-only";
+            sr.textContent = "自定义头像";
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "avatar-delete-button";
+            button.dataset.avatarDelete = "";
+            button.dataset.deleteUrl = avatar.delete_url;
+            button.setAttribute("aria-label", "删除自定义头像");
+            button.setAttribute("title", "删除自定义头像");
+            button.innerHTML = '<i data-lucide="x" aria-hidden="true"></i>';
+
+            label.append(input, frame, sr);
+            shell.append(label, button);
+            return shell;
+          }
+
+          openButton?.addEventListener("click", () => {
+            if (modal) modal.hidden = false;
+          });
+
+          closeButton?.addEventListener("click", () => {
+            if (modal) modal.hidden = true;
+            picker.classList.remove("is-editing");
+          });
+
+          modal?.addEventListener("click", (event) => {
+            if (event.target === modal) {
+              modal.hidden = true;
+              picker.classList.remove("is-editing");
+            }
+          });
+
+          editButton?.addEventListener("click", () => {
+            picker.classList.toggle("is-editing");
+          });
+
+          uploadForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const fileInput = uploadForm.querySelector('input[type="file"]');
+            if (!fileInput?.files?.length) {
+              showClientToast("请先选择一张头像图片。", "warning");
+              return;
+            }
+            try {
+              const response = await fetch(uploadForm.action, {
+                method: "POST",
+                body: new FormData(uploadForm),
+                headers: {
+                  Accept: "application/json",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              });
+              const data = await response.json();
+              if (!response.ok || !data.ok) {
+                showClientToast(data.message || "头像上传失败，请检查图片。", "error");
+                return;
+              }
+              customList?.appendChild(customAvatarNode(data.avatar));
+              uploadForm.reset();
+              syncEmptyState();
+              showClientToast(data.message || "头像已上传。", "success");
+              refreshIcons();
+            } catch (_error) {
+              showClientToast("头像上传失败，请稍后再试。", "error");
+            }
+          });
+
+          picker.addEventListener("click", async (event) => {
+            const deleteButton = event.target.closest("[data-avatar-delete]");
+            if (!deleteButton) return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (!window.confirm("删除这张自定义头像吗？")) return;
+
+            const shell = deleteButton.closest("[data-custom-avatar-id]");
+            const checkedInput = shell?.querySelector('input[name="avatar_choice"]:checked');
+            const body = new FormData();
+            body.append("csrfmiddlewaretoken", csrfToken());
+            try {
+              const response = await fetch(deleteButton.dataset.deleteUrl, {
+                method: "POST",
+                body,
+                headers: {
+                  Accept: "application/json",
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              });
+              const data = await response.json();
+              if (!response.ok || !data.ok) {
+                showClientToast(data.message || "删除失败，请稍后再试。", "error");
+                return;
+              }
+              shell?.remove();
+              if (checkedInput) {
+                selectChoice(data.current_choice);
+              }
+              if (preview && data.current_avatar_url) {
+                preview.src = data.current_avatar_url;
+              }
+              syncEmptyState();
+              showClientToast(data.message || "已删除自定义头像。", "success");
+            } catch (_error) {
+              showClientToast("删除失败，请稍后再试。", "error");
+            }
+          });
+
+          syncEmptyState();
+        });
       }
 
       function refreshLevelControls(root = document) {
@@ -1832,10 +2293,14 @@
       document.addEventListener("DOMContentLoaded", () => {
         refreshIcons();
         refreshLevelControls();
+        bindDisplayWidthLimits();
+        bindAvatarPickers();
       });
       document.body.addEventListener("htmx:afterSettle", (event) => {
         refreshIcons();
         refreshLevelControls(event.target);
+        bindDisplayWidthLimits(event.target);
+        bindAvatarPickers(event.target);
       });
       document.addEventListener("click", async (event) => {
         const button = event.target.closest("[data-copy-text]");

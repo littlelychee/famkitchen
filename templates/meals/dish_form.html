@@ -32,7 +32,7 @@
           <div class="rounded-lg border border-base-300 bg-base-200 p-3">
             <div class="mb-2 text-sm font-medium">当前图片</div>
             {% if dish.image %}
-              <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-44 w-full rounded-lg object-cover sm:h-64">
+              <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-44 w-full rounded-lg object-cover sm:h-64" onerror="this.onerror=null;this.src='{% static dish.default_image_path %}'">
               <button name="clear_image" value="1" class="btn btn-outline btn-sm mt-3">清除当前图片并保存</button>
             {% else %}
               <img src="{% static dish.default_image_path %}" alt="默认菜品图片" class="h-44 w-full rounded-lg object-cover sm:h-64">

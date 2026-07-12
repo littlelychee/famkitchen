@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import tempfile
 
 from django.contrib.auth.models import User
 from django.core import mail
@@ -6,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .forms import AvatarUploadForm
+from .forms import AvatarUploadForm, DishForm, FamilyForm, RegisterForm, UserProfileForm
 from .models import (
     Dish,
     DishCategory,
@@ -17,6 +18,7 @@ from .models import (
     MealPlan,
     MealPlanItem,
     UserAvatar,
+    UserProfile,
 )
 from .utils import create_family_notifications
 
@@ -33,6 +35,87 @@ class LoginFeedbackTests(TestCase):
         self.assertContains(response, "登录失败，用户名或密码不正确，请再试一次。")
         self.assertContains(response, "message-toast-error")
         self.assertNotContains(response, "alert alert-error")
+
+    def test_user_can_login_with_registered_email(self):
+        user = User.objects.create_user(
+            username="owner",
+            email="owner@example.com",
+            password="correct-password",
+        )
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "owner@example.com", "password": "correct-password"},
+        )
+
+        self.assertRedirects(response, "/meal-plan/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), user.id)
+
+
+class DisplayWidthValidationTests(TestCase):
+    def test_register_form_limits_username_to_eight_han_characters(self):
+        form = RegisterForm(
+            data={
+                "username": "一二三四五六七八九",
+                "email": "new@example.com",
+                "password1": "strong-password-123",
+                "password2": "strong-password-123",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("用户名不能超过 8 个汉字长度", str(form.errors))
+
+    def test_register_form_rejects_duplicate_email(self):
+        User.objects.create_user(
+            username="owner",
+            email="owner@example.com",
+            password="password",
+        )
+
+        form = RegisterForm(
+            data={
+                "username": "newowner",
+                "email": "OWNER@example.com",
+                "password1": "strong-password-123",
+                "password2": "strong-password-123",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("这个邮箱已经被注册", str(form.errors))
+
+    def test_profile_form_rejects_too_long_username(self):
+        user = User.objects.create_user(username="owner", password="password")
+        form = UserProfileForm(
+            data={
+                "username": "一二三四五六七八九",
+                "email": "owner@example.com",
+                "phone_number": "",
+            },
+            instance=user,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("用户名不能超过 8 个汉字长度", str(form.errors))
+
+    def test_family_form_limits_name_to_seven_han_characters(self):
+        form = FamilyForm(data={"name": "一二三四五六七八"})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("家庭名称不能超过 7 个汉字长度", str(form.errors))
+
+    def test_dish_form_limits_name_to_eight_han_characters(self):
+        user = User.objects.create_user(username="owner", password="password")
+        family = Family.objects.create(name="测试家", owner=user)
+        form = DishForm(
+            data={"name": "一二三四五六七八九"},
+            files={},
+            family=family,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("菜品名称不能超过 8 个汉字长度", str(form.errors))
 
 
 class DishListDiscardedVisibilityTests(TestCase):
@@ -131,7 +214,8 @@ class FamilyMemberManagementTests(TestCase):
 
         self.assertContains(response, "member")
         self.assertContains(response, "我的家庭")
-        self.assertNotContains(response, "other_member")
+        self.assertContains(response, "当前家庭成员")
+        self.assertContains(response, "other_member")
         self.assertNotContains(response, "转让 owner")
         self.assertNotContains(response, "移除")
 
@@ -268,11 +352,15 @@ class FamilySwitchingAndProfileUpdateTests(TestCase):
         self.assertEqual(self.second_family.name, "新的家名")
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class AvatarUploadFormTests(TestCase):
-    def test_upload_form_rejects_more_than_two_custom_avatars(self):
+    def test_upload_form_rejects_more_than_ten_custom_avatars(self):
         user = User.objects.create_user(username="owner", password="password")
-        UserAvatar.objects.create(user=user, image="avatars/user_1/a.png")
-        UserAvatar.objects.create(user=user, image="avatars/user_1/b.png")
+        for index in range(UserAvatar.MAX_CUSTOM_AVATARS):
+            UserAvatar.objects.create(
+                user=user,
+                image=f"avatars/user_1/avatar-{index}.png",
+            )
         image = SimpleUploadedFile(
             "avatar.gif",
             b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;",
@@ -282,7 +370,30 @@ class AvatarUploadFormTests(TestCase):
         form = AvatarUploadForm(files={"image": image}, user=user)
 
         self.assertFalse(form.is_valid())
-        self.assertIn("达到最大两个头像的上限了", str(form.errors))
+        self.assertIn("达到最大 10 张头像的上限了", str(form.errors))
+
+    def test_avatar_upload_json_does_not_apply_avatar_before_save(self):
+        user = User.objects.create_user(username="owner", password="password")
+        UserProfile.objects.create(user=user)
+        self.client.force_login(user)
+        image = SimpleUploadedFile(
+            "avatar.gif",
+            b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;",
+            content_type="image/gif",
+        )
+
+        response = self.client.post(
+            reverse("meals:avatar_upload"),
+            {"image": image},
+            HTTP_ACCEPT="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertEqual(UserAvatar.objects.filter(user=user).count(), 1)
+        user.meal_profile.refresh_from_db()
+        self.assertIsNone(user.meal_profile.custom_avatar)
 
 
 class MultiSectionDishTests(TestCase):

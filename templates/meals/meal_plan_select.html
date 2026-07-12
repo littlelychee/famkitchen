@@ -93,9 +93,9 @@
 
               <div class="dish-card-category-corner" aria-label="类别标签">
                 {% for label in dish.category_labels %}
-                  <span class="badge badge-outline text-[0.68rem]">{{ label }}</span>
+                  <span class="badge badge-outline dish-tag">{{ label }}</span>
                 {% empty %}
-                  <span class="badge badge-outline text-[0.68rem]">未分类</span>
+                  <span class="badge badge-outline dish-tag">未分类</span>
                 {% endfor %}
               </div>
 
@@ -112,18 +112,15 @@
                 >
                 <div class="h-[4.5rem] w-[4.5rem] overflow-hidden rounded-lg bg-base-200 sm:h-20 sm:w-20">
                   {% if dish.image %}
-                    <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-full w-full object-cover">
+                    <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='{% static dish.default_image_path %}'">
                   {% else %}
                     <img src="{% static dish.default_image_path %}" alt="默认菜品图片" class="h-full w-full object-cover">
                   {% endif %}
                 </div>
-                <div class="min-w-0">
-                  <h2 class="dish-card-title truncate text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
-                  {% if dish.calories or dish.supports_spice or dish.supports_ice %}
+                <div class="dish-card-copy min-w-0">
+                  <h2 class="dish-card-title text-sm font-semibold leading-tight sm:text-base">{{ dish.name }}</h2>
+                  {% if dish.supports_spice or dish.supports_ice %}
                     <div class="capability-line mt-0.5">
-                      {% if dish.calories %}
-                        <span>{{ dish.calories }} 千卡</span>
-                      {% endif %}
                       {% if dish.supports_spice %}
                         <span class="capability-pill is-icon-only" title="可调辣度">
                           <img src="{% static dish.spice_capability_icon_path %}" alt="" aria-hidden="true">
@@ -139,9 +136,9 @@
                     </div>
                   {% endif %}
                   {% if dish.description %}
-                    <p class="mt-1 truncate text-xs leading-snug text-stone-600">{{ dish.description }}</p>
+                    <p class="mt-1 line-clamp-2 text-xs leading-snug text-stone-600">{{ dish.description }}</p>
                   {% else %}
-                    <p class="mt-1 truncate text-xs leading-snug text-stone-400">还没有描述。</p>
+                    <p class="mt-1 text-xs leading-snug text-stone-400">还没有描述。</p>
                   {% endif %}
                 </div>
               </div>
@@ -270,7 +267,7 @@
                   <div class="cart-item-track">
                     <div class="cart-item-card">
                       {% if dish.image %}
-                        <img src="{{ dish.image.url }}" alt="{{ dish.name }}">
+                        <img src="{{ dish.image.url }}" alt="{{ dish.name }}" onerror="this.onerror=null;this.src='{% static dish.default_image_path %}'">
                       {% else %}
                         <img src="{% static dish.default_image_path %}" alt="默认菜品图片">
                       {% endif %}

@@ -30,7 +30,7 @@
       <article class="meal-plan-dish-card">
         <div class="grid grid-cols-[3.75rem_minmax(0,1fr)_auto] gap-3">
           {% if item.dish.image %}
-            <img src="{{ item.dish.image.url }}" alt="{{ item.dish.name }}" class="h-14 w-14 rounded-md object-cover">
+            <img src="{{ item.dish.image.url }}" alt="{{ item.dish.name }}" class="h-14 w-14 rounded-md object-cover" onerror="this.onerror=null;this.src='{% static item.dish.default_image_path %}'">
           {% else %}
             <img src="{% static item.dish.default_image_path %}" alt="默认菜品图片" class="h-14 w-14 rounded-md object-cover">
           {% endif %}
@@ -41,11 +41,8 @@
                 <span class="badge badge-primary text-[0.68rem]">x{{ item.quantity }}</span>
               {% endif %}
             </p>
-            {% if item.dish.calories or item.spice_icon_path or item.ice_icon_path %}
+            {% if item.spice_icon_path or item.ice_icon_path %}
               <div class="capability-line mt-0.5">
-                {% if item.dish.calories %}
-                  <span>{{ item.dish.calories }} 千卡</span>
-                {% endif %}
                 {% if item.spice_icon_path %}
                   <span class="capability-pill">
                     <img src="{% static item.spice_icon_path %}" alt="" aria-hidden="true">
@@ -62,9 +59,9 @@
             {% endif %}
             <div class="mt-1 flex flex-wrap gap-1">
               {% for label in item.dish.category_labels %}
-                <span class="badge badge-outline text-[0.68rem]">{{ label }}</span>
+                <span class="badge badge-outline dish-tag">{{ label }}</span>
               {% empty %}
-                <span class="badge badge-outline text-[0.68rem]">未分类</span>
+                <span class="badge badge-outline dish-tag">未分类</span>
               {% endfor %}
             </div>
             {% if item.dish.description %}

@@ -1,3 +1,5 @@
+import unicodedata
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
@@ -11,6 +13,35 @@ MAIN_DISH_SECTION_CHOICES = [
     if choice[0] in {Dish.BREAKFAST, Dish.LUNCH, Dish.DINNER}
 ]
 MAIN_DISH_SECTIONS = tuple(choice[0] for choice in MAIN_DISH_SECTION_CHOICES)
+USERNAME_MAX_DISPLAY_WIDTH = 16
+USERNAME_MAX_HAN_LENGTH = 8
+FAMILY_NAME_MAX_DISPLAY_WIDTH = 14
+FAMILY_NAME_MAX_HAN_LENGTH = 7
+DISH_NAME_MAX_DISPLAY_WIDTH = 16
+DISH_NAME_MAX_HAN_LENGTH = 8
+
+
+def display_width(value):
+    return sum(
+        2 if unicodedata.east_asian_width(char) in {"F", "W"} else 1
+        for char in value
+    )
+
+
+def validate_display_width(value, *, max_width, max_han_length, label):
+    if display_width(value) > max_width:
+        raise forms.ValidationError(f"{label}不能超过 {max_han_length} 个汉字长度。")
+    return value
+
+
+def apply_display_width_limit(field, *, max_width, max_han_length, label):
+    field.widget.attrs.update(
+        {
+            "maxlength": str(max_width),
+            "data-max-display-width": str(max_width),
+            "data-max-display-message": f"{label}不能超过 {max_han_length} 个汉字长度。",
+        }
+    )
 
 
 class StyledFormMixin:
@@ -37,7 +68,7 @@ class StyledFormMixin:
 
 
 class RegisterForm(StyledFormMixin, UserCreationForm):
-    email = forms.EmailField(label="邮箱", required=False)
+    email = forms.EmailField(label="邮箱", required=True)
     phone_number = forms.CharField(label="手机号", max_length=30, required=False)
 
     class Meta:
@@ -46,7 +77,31 @@ class RegisterForm(StyledFormMixin, UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        apply_display_width_limit(
+            self.fields["username"],
+            max_width=USERNAME_MAX_DISPLAY_WIDTH,
+            max_han_length=USERNAME_MAX_HAN_LENGTH,
+            label="用户名",
+        )
+        self.fields["email"].widget.attrs.update(
+            {"autocomplete": "email", "inputmode": "email"}
+        )
         self.apply_widget_classes()
+
+    def clean_username(self):
+        username = self.cleaned_data["username"].strip()
+        return validate_display_width(
+            username,
+            max_width=USERNAME_MAX_DISPLAY_WIDTH,
+            max_han_length=USERNAME_MAX_HAN_LENGTH,
+            label="用户名",
+        )
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("这个邮箱已经被注册。")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -60,9 +115,22 @@ class RegisterForm(StyledFormMixin, UserCreationForm):
 
 
 class LoginForm(StyledFormMixin, AuthenticationForm):
+    username = forms.CharField(label="用户名或邮箱")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update(
+            {"autocomplete": "username email"}
+        )
         self.apply_widget_classes()
+
+    def clean(self):
+        username = self.cleaned_data.get("username", "").strip()
+        if "@" in username:
+            matched_user = User.objects.filter(email__iexact=username).first()
+            if matched_user:
+                self.cleaned_data["username"] = matched_user.get_username()
+        return super().clean()
 
 
 class FamilyForm(StyledFormMixin, forms.ModelForm):
@@ -72,7 +140,22 @@ class FamilyForm(StyledFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        apply_display_width_limit(
+            self.fields["name"],
+            max_width=FAMILY_NAME_MAX_DISPLAY_WIDTH,
+            max_han_length=FAMILY_NAME_MAX_HAN_LENGTH,
+            label="家庭名称",
+        )
         self.apply_widget_classes()
+
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        return validate_display_width(
+            name,
+            max_width=FAMILY_NAME_MAX_DISPLAY_WIDTH,
+            max_han_length=FAMILY_NAME_MAX_HAN_LENGTH,
+            label="家庭名称",
+        )
 
 
 class UserProfileForm(StyledFormMixin, forms.ModelForm):
@@ -86,6 +169,15 @@ class UserProfileForm(StyledFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "用户名"
         self.fields["email"].label = "邮箱"
+        apply_display_width_limit(
+            self.fields["username"],
+            max_width=USERNAME_MAX_DISPLAY_WIDTH,
+            max_han_length=USERNAME_MAX_HAN_LENGTH,
+            label="用户名",
+        )
+        self.fields["email"].widget.attrs.update(
+            {"autocomplete": "email", "inputmode": "email"}
+        )
         if self.instance and self.instance.pk:
             profile = UserProfile.objects.filter(user=self.instance).first()
             if profile:
@@ -93,10 +185,23 @@ class UserProfileForm(StyledFormMixin, forms.ModelForm):
         self.apply_widget_classes()
 
     def clean_username(self):
-        return self.cleaned_data["username"].strip()
+        username = self.cleaned_data["username"].strip()
+        return validate_display_width(
+            username,
+            max_width=USERNAME_MAX_DISPLAY_WIDTH,
+            max_han_length=USERNAME_MAX_HAN_LENGTH,
+            label="用户名",
+        )
 
     def clean_email(self):
-        return self.cleaned_data.get("email", "").strip()
+        email = self.cleaned_data.get("email", "").strip()
+        if email:
+            existing_users = User.objects.filter(email__iexact=email)
+            if self.instance and self.instance.pk:
+                existing_users = existing_users.exclude(pk=self.instance.pk)
+            if existing_users.exists():
+                raise forms.ValidationError("这个邮箱已经被其他账号使用。")
+        return email
 
     def clean_phone_number(self):
         return self.cleaned_data.get("phone_number", "").strip()
@@ -169,7 +274,7 @@ class AvatarUploadForm(StyledFormMixin, forms.ModelForm):
         image = self.cleaned_data["image"]
         if self.user and self.user.custom_avatars.count() >= UserAvatar.MAX_CUSTOM_AVATARS:
             raise forms.ValidationError(
-                "达到最大两个头像的上限了，请先删除废弃头像后，再次上传。"
+                f"达到最大 {UserAvatar.MAX_CUSTOM_AVATARS} 张头像的上限了，请先删除废弃头像后，再次上传。"
             )
         if image.size > UserAvatar.MAX_UPLOAD_SIZE:
             raise forms.ValidationError("头像图片不能超过 4MB。")
@@ -268,7 +373,22 @@ class DishForm(StyledFormMixin, forms.ModelForm):
                 "description",
             ]
         )
+        apply_display_width_limit(
+            self.fields["name"],
+            max_width=DISH_NAME_MAX_DISPLAY_WIDTH,
+            max_han_length=DISH_NAME_MAX_HAN_LENGTH,
+            label="菜品名称",
+        )
         self.apply_widget_classes()
+
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        return validate_display_width(
+            name,
+            max_width=DISH_NAME_MAX_DISPLAY_WIDTH,
+            max_han_length=DISH_NAME_MAX_HAN_LENGTH,
+            label="菜品名称",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
