@@ -44,26 +44,7 @@
 
   <form method="post" class="grid gap-4 rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
     {% csrf_token %}
-    <div>
-      <div class="mb-2 text-sm font-bold">回复给谁</div>
-      <div class="grid gap-2 sm:grid-cols-2">
-        {% for membership in recipients %}
-          <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
-            <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary">
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-bold">{{ membership.user.username }}</span>
-              <span class="block truncate text-xs text-stone-500">
-                {% if membership.user.email %}邮箱通知{% else %}站内消息{% endif %}
-              </span>
-            </span>
-          </label>
-        {% empty %}
-          <div class="rounded-lg border border-dashed border-base-300 bg-base-200 p-4 text-center text-sm text-stone-500">
-            当前家庭还没有其他成员。
-          </div>
-        {% endfor %}
-      </div>
-    </div>
+    {% include "meals/partials/recipient_picker.html" with memberships=recipients title="回复给谁" hint="可多选，回复会进入同一条留言" icon="reply" %}
 
     <label class="block">
       <span class="mb-2 block text-sm font-bold">回复内容</span>

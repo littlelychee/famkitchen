@@ -1,0 +1,45 @@
+<div class="recipient-picker {% if standalone %}recipient-picker-standalone{% endif %}" data-recipient-picker>
+  <div class="recipient-picker-head">
+    <div class="recipient-picker-copy">
+      <span class="recipient-picker-icon">
+        <i data-lucide="{{ icon|default:'users-round' }}" aria-hidden="true"></i>
+      </span>
+      <div class="min-w-0">
+        <div class="recipient-picker-title">{{ title|default:"发送给谁" }}</div>
+        {% if hint %}
+          <div class="recipient-picker-hint">{{ hint }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% if memberships %}
+      <div class="recipient-picker-actions">
+        <span class="recipient-picker-count" data-recipient-picker-count>已选 0 位</span>
+        <button type="button" class="btn btn-ghost btn-xs" data-recipient-select-all>全选</button>
+        <button type="button" class="btn btn-ghost btn-xs" data-recipient-clear>清空</button>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if memberships %}
+    <div class="recipient-chip-grid">
+      {% for membership in memberships %}
+        <label class="recipient-chip" title="{% if membership.user.email %}{{ membership.user.email }}{% else %}站内消息{% endif %}">
+          <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary recipient-chip-input">
+          <span class="recipient-chip-status">
+            <i data-lucide="check" aria-hidden="true"></i>
+          </span>
+          <span class="recipient-chip-main">
+            <span class="recipient-chip-name">{{ membership.user.username }}</span>
+            <span class="recipient-chip-channel">
+              {% if membership.user.email %}邮箱通知{% else %}站内消息{% endif %}
+            </span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="rounded-lg border border-dashed border-base-300 bg-base-200 p-4 text-center text-sm text-stone-500">
+      {{ empty_text|default:"当前家庭还没有其他成员。" }}
+    </div>
+  {% endif %}
+</div>

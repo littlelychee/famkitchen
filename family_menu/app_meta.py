@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 
-APP_VERSION = "v1.4"
+APP_VERSION = "v1.5"
 APP_STARTED_AT = timezone.now()
 
 ACTIVE_LOGO_CANDIDATES = [

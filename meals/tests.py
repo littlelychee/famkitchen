@@ -575,10 +575,10 @@ class FamilySwitchingAndProfileUpdateTests(TestCase):
         self.second_family.refresh_from_db()
         self.assertEqual(self.second_family.name, "新的家名")
 
-    def test_top_header_shows_v14_version_and_rotating_logo(self):
+    def test_top_header_shows_v15_version_and_rotating_logo(self):
         response = self.client.get(reverse("meals:meal_plan"))
 
-        self.assertContains(response, "当前版本：v1.4")
+        self.assertContains(response, "当前版本：v1.5")
         self.assertContains(response, "images/logo-candidates/v14-02.svg")
 
 
@@ -1173,6 +1173,9 @@ class FamilyNotificationTests(TestCase):
         self.assertContains(response, "提醒家人")
         self.assertContains(response, "member")
         self.assertContains(response, "邮箱通知")
+        self.assertContains(response, "recipient-picker")
+        self.assertContains(response, "data-selection-save")
+        self.assertContains(response, 'form="meal-select-category-sort-form"')
 
     def test_notification_recipient_must_belong_to_same_family(self):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1247,6 +1250,7 @@ class FamilyNotificationTests(TestCase):
         )
         self.assertContains(get_response, "发送给谁")
         self.assertContains(get_response, "member@example.com")
+        self.assertContains(get_response, "recipient-picker")
         self.assertContains(get_response, "米饭")
         self.assertContains(get_response, "少盐")
 
@@ -1324,6 +1328,8 @@ class FamilyNotificationTests(TestCase):
         self.assertContains(response, "提醒你")
         self.assertContains(response, "owner")
         self.assertContains(response, "2026-07-11")
+        self.assertContains(response, "测试家庭")
+        self.assertNotContains(response, "最多保留 50 条")
         self.assertContains(response, f"{reverse('meals:meal_plan')}?date=2026-07-11")
 
     def test_family_message_create_sends_email_and_opens_thread(self):

@@ -48,37 +48,7 @@
     <form method="post" class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm lg:sticky lg:top-28 lg:self-start">
       {% csrf_token %}
       <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
-      <div class="mb-3 flex items-center gap-2">
-        <span class="inline-grid h-9 w-9 place-items-center rounded-full bg-base-200 text-stone-700">
-          <i data-lucide="mail" aria-hidden="true"></i>
-        </span>
-        <div>
-          <h2 class="font-bold">发送给谁</h2>
-          <p class="text-xs text-stone-500">会生成站内提醒，并给有邮箱的成员发邮件</p>
-        </div>
-      </div>
-
-      <div class="grid gap-2">
-        {% for membership in recipients %}
-          <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
-            <input type="checkbox" name="notify_user_ids" value="{{ membership.user_id }}" class="checkbox checkbox-primary">
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-bold">{{ membership.user.username }}</span>
-              <span class="block truncate text-xs text-stone-500">
-                {% if membership.user.email %}
-                  {{ membership.user.email }}
-                {% else %}
-                  未填写邮箱，仅站内提醒
-                {% endif %}
-              </span>
-            </span>
-          </label>
-        {% empty %}
-          <div class="rounded-lg border border-dashed border-base-300 p-4 text-center text-sm text-stone-500">
-            当前家庭还没有其他成员。
-          </div>
-        {% endfor %}
-      </div>
+      {% include "meals/partials/recipient_picker.html" with memberships=recipients title="发送给谁" hint="会生成站内提醒，有邮箱的成员同步邮件" icon="mail" %}
 
       <button class="btn btn-primary mt-4 w-full" {% if not recipients %}disabled{% endif %}>
         <i data-lucide="send" aria-hidden="true"></i>

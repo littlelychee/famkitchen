@@ -25,6 +25,10 @@
       --ui-danger: #ef476f;
       --ui-danger-ink: #ffffff;
       --ui-business-pattern: url("{% static 'images/famigo-candidates/card-paws-02.svg' %}");
+      --category-panel-top: 7.2rem;
+      --category-panel-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.35rem);
+      --category-panel-gap: 0.45rem;
+      --category-panel-height: calc(100dvh - var(--category-panel-top) - var(--category-panel-bottom) - var(--category-panel-gap));
     }
 
     [x-cloak] { display: none !important; }
@@ -100,6 +104,10 @@
     }
 
     @media (min-width: 640px) {
+      :root {
+        --category-panel-bottom: 1rem;
+      }
+
       .top-slogan-strip {
         min-height: 1.45rem;
         margin-top: -0.62rem;
@@ -846,7 +854,7 @@
       display: grid;
       width: min(calc(100vw - 1.25rem), 56rem);
       transform: translateX(-50%);
-      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      grid-template-columns: minmax(0, 1fr) auto auto auto auto;
       align-items: center;
       gap: 0.45rem;
       border: 1px solid var(--ui-line);
@@ -874,9 +882,30 @@
       white-space: nowrap;
     }
 
+    .selection-dock .btn-sm {
+      min-height: 2.15rem;
+      padding-inline: 0.58rem;
+    }
+
+    .selection-save-button .lucide {
+      width: 0.92rem;
+      height: 0.92rem;
+    }
+
     .selection-cart-button img {
       height: 1.3rem;
       width: 1.3rem;
+    }
+
+    @media (max-width: 380px) {
+      .selection-dock {
+        grid-template-columns: auto auto auto auto;
+      }
+
+      .selection-dock-summary,
+      .selection-cart-button > span:not(.badge) {
+        display: none;
+      }
     }
 
     .selection-sheet {
@@ -974,6 +1003,187 @@
       background: var(--ui-danger);
       color: var(--ui-danger-ink);
       font-weight: 800;
+    }
+
+    .recipient-picker {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .recipient-picker-standalone {
+      border: 1px solid var(--ui-line);
+      border-radius: var(--ui-radius);
+      background-color: rgba(255, 254, 250, 0.92);
+      background-image: var(--ui-business-pattern);
+      background-repeat: repeat;
+      background-size: 360px 240px;
+      padding: 0.72rem;
+      box-shadow: 0 8px 18px rgba(33, 29, 25, 0.08);
+    }
+
+    .recipient-picker-head {
+      display: flex;
+      min-width: 0;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.55rem;
+    }
+
+    .recipient-picker-copy {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .recipient-picker-icon {
+      display: inline-grid;
+      height: 2.15rem;
+      width: 2.15rem;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--ui-soft);
+      color: var(--ui-ink);
+    }
+
+    .recipient-picker-title {
+      font-size: 0.95rem;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .recipient-picker-hint {
+      overflow: hidden;
+      color: var(--ui-muted);
+      font-size: 0.74rem;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .recipient-picker-actions {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .recipient-picker-count {
+      display: inline-flex;
+      min-height: 1.55rem;
+      align-items: center;
+      border: 1px solid var(--ui-line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ui-muted);
+      padding: 0 0.52rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .recipient-chip-grid {
+      display: grid;
+      max-height: min(34dvh, 14rem);
+      grid-template-columns: repeat(auto-fit, minmax(8.2rem, 1fr));
+      gap: 0.45rem;
+      overflow-y: auto;
+      padding-right: 0.1rem;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .recipient-chip {
+      display: grid;
+      min-height: 2.75rem;
+      cursor: pointer;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--ui-line);
+      border-radius: var(--ui-radius);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.42rem 0.52rem;
+      transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+    }
+
+    .recipient-chip:hover {
+      transform: translateY(-1px);
+      border-color: var(--ui-brand);
+      background: #fffaf0;
+    }
+
+    .recipient-chip:focus-within {
+      outline: 2px solid var(--ui-brand);
+      outline-offset: 2px;
+    }
+
+    .recipient-chip:has(input:checked) {
+      border-color: var(--ui-brand);
+      background: #fff8e4;
+      box-shadow: inset 3px 0 0 var(--ui-brand);
+    }
+
+    .recipient-chip-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .recipient-chip-status {
+      display: inline-grid;
+      height: 1.28rem;
+      width: 1.28rem;
+      place-items: center;
+      border: 1px solid var(--ui-line);
+      border-radius: 999px;
+      background: #fff;
+      color: transparent;
+    }
+
+    .recipient-chip-status .lucide {
+      width: 0.78rem;
+      height: 0.78rem;
+    }
+
+    .recipient-chip:has(input:checked) .recipient-chip-status {
+      border-color: transparent;
+      background: var(--ui-brand);
+      color: var(--ui-brand-ink);
+    }
+
+    .recipient-chip-main {
+      display: grid;
+      min-width: 0;
+      gap: 0.12rem;
+    }
+
+    .recipient-chip-name,
+    .recipient-chip-channel {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .recipient-chip-name {
+      color: var(--ui-ink);
+      font-size: 0.84rem;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .recipient-chip-channel {
+      color: var(--ui-muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      line-height: 1.1;
     }
 
     .category-section-divider {
@@ -1083,10 +1293,11 @@
 
     .category-panel {
       position: sticky;
-      top: 7.2rem;
+      top: var(--category-panel-top);
       display: grid;
-      max-height: calc(100vh - 8.2rem);
-      max-height: calc(100dvh - 8.2rem);
+      height: var(--category-panel-height);
+      max-height: var(--category-panel-height);
+      min-height: 0;
       grid-template-rows: auto minmax(0, 1fr);
       align-self: start;
       overflow: hidden;
@@ -1119,6 +1330,8 @@
     .category-nav-list {
       position: relative;
       display: grid;
+      align-content: start;
+      grid-auto-rows: max-content;
       gap: 0.45rem;
       min-height: 0;
       overflow-y: auto;
@@ -1174,11 +1387,12 @@
 
     .dish-library-grid .category-panel {
       z-index: 20;
-      overflow: visible;
+      overflow: hidden;
     }
 
     .dish-library-grid.is-editing-categories .category-panel {
       z-index: 45;
+      overflow: visible;
     }
 
     .dish-library-grid.is-editing-categories .category-nav-list {
@@ -1969,7 +2183,7 @@
           </a>
         {% endif %}
       </div>
-      <div class="top-slogan-strip">
+      <div class="top-slogan-strip" data-category-upper-bound>
         <img src="{% static 'images/famigo-candidates/slogan-03.svg' %}" alt="幸福就是一起吃饭，吃好多好多顿饭" class="top-slogan-image">
       </div>
     </header>
@@ -2016,7 +2230,7 @@
           {% endif %}
         </div>
       </div>
-      <div class="top-slogan-strip">
+      <div class="top-slogan-strip" data-category-upper-bound>
         <img src="{% static 'images/famigo-candidates/slogan-03.svg' %}" alt="幸福就是一起吃饭，吃好多好多顿饭" class="top-slogan-image">
       </div>
     </header>
@@ -2085,7 +2299,7 @@
   {% endif %}
 
   {% if user.is_authenticated and is_mobile_device %}
-    <nav class="mobile-tabbar" aria-label="底部导航">
+    <nav class="mobile-tabbar" aria-label="底部导航" data-category-lower-bound>
       <div class="mobile-tabbar-inner">
         <a href="{% url 'meals:dish_list' %}" class="mobile-tabbar-link {% if current_page == 'dish_list' or current_page == 'dish_create' or current_page == 'dish_edit' or current_page == 'category_create' or current_page == 'category_edit' %}is-active{% endif %}" aria-label="菜品库" title="菜品库">
           <img src="{% static 'images/famigo-candidates/tab-options/set01-library.svg' %}" alt="" class="mobile-tabbar-svg">
@@ -2533,12 +2747,83 @@
         });
       }
 
+      function bindRecipientPickers(root = document) {
+        root.querySelectorAll("[data-recipient-picker]").forEach((picker) => {
+          if (picker.dataset.recipientPickerBound) return;
+          picker.dataset.recipientPickerBound = "1";
+
+          const checkboxes = Array.from(picker.querySelectorAll('input[name="notify_user_ids"]'));
+          const countNode = picker.querySelector("[data-recipient-picker-count]");
+
+          function updateCount() {
+            const count = checkboxes.filter((checkbox) => checkbox.checked).length;
+            if (countNode) {
+              countNode.textContent = count ? `已选 ${count} 位` : "已选 0 位";
+            }
+          }
+
+          picker.querySelector("[data-recipient-select-all]")?.addEventListener("click", () => {
+            checkboxes.forEach((checkbox) => {
+              checkbox.checked = true;
+            });
+            updateCount();
+          });
+
+          picker.querySelector("[data-recipient-clear]")?.addEventListener("click", () => {
+            checkboxes.forEach((checkbox) => {
+              checkbox.checked = false;
+            });
+            updateCount();
+          });
+
+          checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", updateCount);
+          });
+          updateCount();
+        });
+      }
+
+      function syncCategoryPanelBounds() {
+        const panels = Array.from(document.querySelectorAll(".category-panel"));
+        if (!panels.length) return;
+
+        const upperBound = document.querySelector("[data-category-upper-bound]");
+        const lowerBound = document.querySelector("[data-category-lower-bound]");
+        const viewportHeight = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0;
+        const upperRect = upperBound?.getBoundingClientRect();
+        const lowerRect = lowerBound?.getBoundingClientRect();
+        const top = upperRect ? Math.max(0, Math.ceil(upperRect.bottom)) : 0;
+        const bottom = lowerRect
+          ? Math.max(0, Math.ceil(viewportHeight - lowerRect.top))
+          : Math.max(0, Math.ceil(viewportHeight - document.documentElement.clientHeight));
+        const lowerTop = lowerRect ? Math.min(viewportHeight, lowerRect.top) : viewportHeight;
+
+        document.documentElement.style.setProperty("--category-panel-top", `${top}px`);
+        document.documentElement.style.setProperty("--category-panel-bottom", `${bottom}px`);
+        panels.forEach((panel) => {
+          const panelTop = Math.max(0, panel.getBoundingClientRect().top);
+          const height = Math.max(120, Math.floor(lowerTop - panelTop - 8));
+          panel.style.setProperty("--category-panel-height", `${height}px`);
+        });
+      }
+
+      let categoryPanelSyncFrame = null;
+      function requestCategoryPanelBoundsSync() {
+        if (categoryPanelSyncFrame !== null) return;
+        categoryPanelSyncFrame = window.requestAnimationFrame(() => {
+          categoryPanelSyncFrame = null;
+          syncCategoryPanelBounds();
+        });
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         refreshIcons();
         refreshLevelControls();
         bindDisplayWidthLimits();
         bindAvatarPickers();
         bindCategorySorting();
+        bindRecipientPickers();
+        syncCategoryPanelBounds();
       });
       document.body.addEventListener("htmx:afterSettle", (event) => {
         refreshIcons();
@@ -2546,7 +2831,15 @@
         bindDisplayWidthLimits(event.target);
         bindAvatarPickers(event.target);
         bindCategorySorting(event.target);
+        bindRecipientPickers(event.target);
+        syncCategoryPanelBounds();
       });
+      window.addEventListener("load", syncCategoryPanelBounds);
+      window.addEventListener("resize", requestCategoryPanelBoundsSync);
+      window.addEventListener("orientationchange", requestCategoryPanelBoundsSync);
+      window.addEventListener("scroll", requestCategoryPanelBoundsSync, { passive: true });
+      window.visualViewport?.addEventListener("resize", requestCategoryPanelBoundsSync);
+      document.fonts?.ready?.then(syncCategoryPanelBounds);
       document.addEventListener("click", async (event) => {
         const button = event.target.closest("[data-copy-text]");
         if (!button) return;
