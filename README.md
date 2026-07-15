@@ -1,6 +1,6 @@
 # 法米狗私厨 FamKitchen
 
-当前应用版本：`v1.5`
+当前应用版本：`v1.6`
 
 法米狗私厨是一个使用 Django Templates 构建的家庭餐饮排餐系统。它不是前后端分离项目，页面、表单、交互和后端业务都在同一个 Django 应用里完成，适合小家庭先低成本上线、边用边改。
 
@@ -194,6 +194,7 @@ DJANGO_CSRF_TRUSTED_ORIGINS=https://zepeng.pythonanywhere.com
 DJANGO_PUBLIC_SITE_URL=https://zepeng.pythonanywhere.com
 DJANGO_MEDIA_URL=/media/
 DJANGO_MEDIA_ROOT=/home/zepeng/famkitchen/media
+FAMKITCHEN_DATA_ADMIN_PASSWORD=替换成独立的数据管理密码
 DJANGO_SESSION_COOKIE_SECURE=True
 DJANGO_CSRF_COOKIE_SECURE=True
 DJANGO_SECURE_SSL_REDIRECT=False
@@ -274,7 +275,7 @@ git diff --check
 
 ```bash
 git add .
-git commit -m "Release v1.5 updates"
+git commit -m "Release v1.6 updates"
 git push
 ```
 
@@ -377,9 +378,9 @@ https://zepeng.pythonanywhere.com
 /me/
 ```
 
-v1.5 重点检查：
+v1.6 重点检查：
 
-- 顶部显示 `当前版本：v1.5`。
+- 顶部显示 `当前版本：v1.6`。
 - 菜品库分类栏不会盖住底部导航。
 - 新账号或没有类别时，`全部` 按钮不会异常拉长。
 - 排餐添加菜品页分类栏停在底部已选栏上方。

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}数据管理验证 - 法米狗私厨{% endblock %}
+
+{% block content %}
+<section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-start px-4 py-4 sm:py-6">
+  <div class="card w-full bg-base-100 shadow-md">
+    <div class="card-body">
+      <div class="mb-1 inline-grid h-12 w-12 place-items-center rounded-full bg-base-200 text-stone-700">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+      </div>
+      <h1 class="card-title text-2xl">数据管理验证</h1>
+      <p class="text-sm text-stone-500">输入管理员授权码后查看后端数据。</p>
+
+      {% if not password_configured %}
+        <div class="alert alert-warning text-sm">
+          <i data-lucide="triangle-alert" aria-hidden="true"></i>
+          <span>数据管理入口暂未启用，请联系管理员。</span>
+        </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" %}
+        <button class="btn btn-primary w-full" {% if not password_configured %}disabled{% endif %}>
+          <i data-lucide="key-round" aria-hidden="true"></i>
+          <span>进入数据管理</span>
+        </button>
+      </form>
+
+      <div class="text-center text-sm">
+        <a href="{% url 'login' %}" class="link link-primary">返回普通用户登录</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

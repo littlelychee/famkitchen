@@ -5,6 +5,8 @@ from . import views
 app_name = "meals"
 
 urlpatterns = [
+    path("data/", views.data_admin_view, name="data_admin"),
+    path("data/logout/", views.data_admin_logout_view, name="data_admin_logout"),
     path("", views.meal_plan_view, name="home"),
     path("family/create/", views.family_create_view, name="family_create"),
     path("family/join/", views.family_join_view, name="family_join"),

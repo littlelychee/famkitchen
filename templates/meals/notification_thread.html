@@ -36,6 +36,14 @@
           <time class="text-xs font-medium text-stone-500" datetime="{{ notification.created_at|date:'c' }}">
             {{ notification.created_at|date:"Y-m-d H:i" }}
           </time>
+          {% if notification.email_status %}
+            <span
+              class="badge badge-sm {% if notification.email_status == notification.EMAIL_SENT %}badge-success{% elif notification.email_status == notification.EMAIL_FAILED %}badge-error{% elif notification.email_status == notification.EMAIL_SKIPPED %}badge-warning{% else %}badge-info{% endif %}"
+              {% if notification.email_error %}title="{{ notification.email_error }}"{% endif %}
+            >
+              邮件 {{ notification.get_email_status_display }}
+            </span>
+          {% endif %}
         </div>
         <p class="whitespace-pre-wrap text-sm leading-relaxed text-stone-700">{{ notification.message_body }}</p>
       </article>

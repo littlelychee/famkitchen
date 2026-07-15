@@ -6,7 +6,12 @@
 <section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-start px-4 py-4 sm:py-6">
   <div class="card w-full bg-base-100 shadow-md">
     <div class="card-body">
-      <h1 class="card-title text-2xl">登录</h1>
+      <div class="flex items-center justify-between gap-3">
+        <h1 class="card-title text-2xl">登录</h1>
+        <a href="{% url 'meals:data_admin' %}" class="btn btn-outline btn-sm shrink-0">
+          -&gt; 切换管理
+        </a>
+      </div>
       <p class="text-sm text-stone-500">进入家庭菜品库和每日排餐。</p>
 
       <form method="post" class="space-y-4">

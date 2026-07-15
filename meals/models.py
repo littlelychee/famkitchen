@@ -407,9 +407,19 @@ class FamilyNotification(models.Model):
     MAX_PER_FAMILY = 50
     KIND_MEAL = "meal"
     KIND_MESSAGE = "message"
+    EMAIL_PENDING = "pending"
+    EMAIL_SENT = "sent"
+    EMAIL_SKIPPED = "skipped"
+    EMAIL_FAILED = "failed"
     KIND_CHOICES = [
         (KIND_MEAL, "排餐提醒"),
         (KIND_MESSAGE, "家庭留言"),
+    ]
+    EMAIL_STATUS_CHOICES = [
+        (EMAIL_PENDING, "等待发送"),
+        (EMAIL_SENT, "已交给邮件服务器"),
+        (EMAIL_SKIPPED, "未发送"),
+        (EMAIL_FAILED, "发送失败"),
     ]
 
     family = models.ForeignKey(
@@ -459,6 +469,30 @@ class FamilyNotification(models.Model):
         blank=True,
         db_index=True,
         verbose_name="留言会话",
+    )
+    email_status = models.CharField(
+        max_length=20,
+        choices=EMAIL_STATUS_CHOICES,
+        blank=True,
+        default="",
+        db_index=True,
+        verbose_name="邮件状态",
+    )
+    email_error = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="邮件错误",
+    )
+    email_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="邮件发送时间",
+    )
+    recipient_deleted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name="收件人隐藏时间",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="提醒时间")
 

@@ -87,12 +87,16 @@ class FamilyNotificationAdmin(admin.ModelAdmin):
         "recipient",
         "meal_plan_date",
         "meal_type",
+        "email_status",
+        "email_sent_at",
         "created_at",
     )
-    list_filter = ("family", "meal_type", "created_at")
+    list_filter = ("family", "meal_type", "email_status", "created_at")
     search_fields = (
         "family__name",
         "actor__username",
         "recipient__username",
+        "recipient__email",
         "change_summary",
+        "email_error",
     )

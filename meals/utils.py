@@ -3,7 +3,9 @@ import logging
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.validators import validate_email
 from django.db import transaction
 from django.urls import reverse
 from django.utils.html import escape
@@ -226,9 +228,61 @@ def meal_sections_html(meal_sections):
     return "".join(blocks)
 
 
+def mark_email_delivery(notification, status, error="", sent_at=None):
+    error = (error or "")[:255]
+    update_fields = {
+        "email_status": status,
+        "email_error": error,
+        "email_sent_at": sent_at,
+    }
+    FamilyNotification.objects.filter(pk=notification.pk).update(**update_fields)
+    notification.email_status = status
+    notification.email_error = error
+    notification.email_sent_at = sent_at
+
+
+def recipient_email_for_delivery(notification):
+    recipient = notification.recipient
+    if not recipient:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_SKIPPED,
+            "没有收件人",
+        )
+        return ""
+
+    email = (recipient.email or "").strip()
+    if not email:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_SKIPPED,
+            "收件人没有填写邮箱",
+        )
+        return ""
+
+    try:
+        validate_email(email)
+    except ValidationError as error:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_FAILED,
+            f"邮箱格式无效：{'; '.join(error.messages)}",
+        )
+        logger.info(
+            "Notification email skipped because recipient email is invalid user_id=%s notification_id=%s email=%r",
+            recipient.id,
+            notification.id,
+            email,
+        )
+        return ""
+
+    return email
+
+
 def send_notification_email(notification, detail_url="", meal_sections=None):
     recipient = notification.recipient
-    if not recipient or not recipient.email:
+    email = recipient_email_for_delivery(notification)
+    if not email:
         return False
 
     actor_name = notification.actor.username if notification.actor else "一位家人"
@@ -299,31 +353,49 @@ def send_notification_email(notification, detail_url="", meal_sections=None):
                 f"{detail_line}\n"
             ),
             from_email=None,
-            recipient_list=[recipient.email],
+            recipient_list=[email],
             fail_silently=settings.EMAIL_FAIL_SILENTLY,
             html_message=html_message,
         )
-    except Exception:
+    except Exception as error:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_FAILED,
+            f"{error.__class__.__name__}: {error}",
+        )
         logger.exception(
-            "Failed to send meal notification email to user_id=%s notification_id=%s",
+            "Failed to send meal notification email to user_id=%s notification_id=%s email=%r",
             recipient.id,
             notification.id,
+            email,
         )
         return False
 
     if not sent_count:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_FAILED,
+            "邮件后端返回发送数量为 0",
+        )
         logger.warning(
-            "Meal notification email was not sent to user_id=%s notification_id=%s",
+            "Meal notification email was not sent to user_id=%s notification_id=%s email=%r",
             recipient.id,
             notification.id,
+            email,
         )
         return False
+    mark_email_delivery(
+        notification,
+        FamilyNotification.EMAIL_SENT,
+        sent_at=timezone.now(),
+    )
     return True
 
 
 def send_family_message_email(notification, detail_url=""):
     recipient = notification.recipient
-    if not recipient or not recipient.email:
+    email = recipient_email_for_delivery(notification)
+    if not email:
         return False
 
     actor_name = notification.actor.username if notification.actor else "一位家人"
@@ -368,25 +440,42 @@ def send_family_message_email(notification, detail_url=""):
                 f"{detail_line}\n"
             ),
             from_email=None,
-            recipient_list=[recipient.email],
+            recipient_list=[email],
             fail_silently=settings.EMAIL_FAIL_SILENTLY,
             html_message=html_message,
         )
-    except Exception:
+    except Exception as error:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_FAILED,
+            f"{error.__class__.__name__}: {error}",
+        )
         logger.exception(
-            "Failed to send family message email to user_id=%s notification_id=%s",
+            "Failed to send family message email to user_id=%s notification_id=%s email=%r",
             recipient.id,
             notification.id,
+            email,
         )
         return False
 
     if not sent_count:
+        mark_email_delivery(
+            notification,
+            FamilyNotification.EMAIL_FAILED,
+            "邮件后端返回发送数量为 0",
+        )
         logger.warning(
-            "Family message email was not sent to user_id=%s notification_id=%s",
+            "Family message email was not sent to user_id=%s notification_id=%s email=%r",
             recipient.id,
             notification.id,
+            email,
         )
         return False
+    mark_email_delivery(
+        notification,
+        FamilyNotification.EMAIL_SENT,
+        sent_at=timezone.now(),
+    )
     return True
 
 
@@ -454,6 +543,7 @@ def create_family_notifications(
                     meal_plan_date=meal_plan_date,
                     meal_type=meal_type,
                     change_summary=change_summary[:255],
+                    email_status=FamilyNotification.EMAIL_PENDING,
                 )
             )
         prune_family_notifications(family)
@@ -512,6 +602,7 @@ def create_family_message_notifications(
                     kind=FamilyNotification.KIND_MESSAGE,
                     message_body=message_body,
                     message_thread_id=thread_id,
+                    email_status=FamilyNotification.EMAIL_PENDING,
                 )
             )
         prune_family_notifications(family)

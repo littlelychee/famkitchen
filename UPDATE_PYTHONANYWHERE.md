@@ -19,7 +19,7 @@ git diff --check
 
 ```bash
 git add .
-git commit -m "Release v1.5 updates"
+git commit -m "Release v1.6 updates"
 git push
 ```
 
@@ -85,7 +85,7 @@ pip install -r requirements.txt
 
 ## 6. 执行数据库迁移
 
-v1.5 包含前端交互、模板和已有数据结构相关功能更新；每次发布仍建议执行迁移，确保线上数据库和代码一致：
+v1.6 包含前端交互、模板、通知邮件发送状态字段和数据管理入口更新；这次必须执行迁移，确保线上数据库和代码一致：
 
 ```bash
 python manage.py migrate
@@ -130,7 +130,7 @@ https://zepeng.pythonanywhere.com
 
 重点确认：
 
-- 顶部显示 `当前版本：v1.5`
+- 顶部显示 `当前版本：v1.6`
 - 大 logo 显示为法米狗私厨，并按选中的 2、3、4、6、8、9、10 轮换
 - 成员账号也能看到并使用分类编辑按钮
 - 家庭角色显示为 `家主`、`成员`

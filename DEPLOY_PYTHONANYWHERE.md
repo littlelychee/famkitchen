@@ -46,7 +46,7 @@ cd ~/famkitchen
 nano .env
 ```
 
-粘贴下面内容。`DJANGO_SECRET_KEY` 和 `DJANGO_EMAIL_HOST_PASSWORD` 需要填你自己的值：
+粘贴下面内容。`DJANGO_SECRET_KEY`、`FAMKITCHEN_DATA_ADMIN_PASSWORD` 和 `DJANGO_EMAIL_HOST_PASSWORD` 需要填你自己的值：
 
 ```env
 DJANGO_SECRET_KEY=替换成一个很长的随机字符串
@@ -56,6 +56,7 @@ DJANGO_CSRF_TRUSTED_ORIGINS=https://zepeng.pythonanywhere.com
 DJANGO_PUBLIC_SITE_URL=https://zepeng.pythonanywhere.com
 DJANGO_MEDIA_URL=/media/
 DJANGO_MEDIA_ROOT=/home/zepeng/famkitchen/media
+FAMKITCHEN_DATA_ADMIN_PASSWORD=替换成独立的数据管理密码
 DJANGO_SESSION_COOKIE_SECURE=True
 DJANGO_CSRF_COOKIE_SECURE=True
 DJANGO_SECURE_SSL_REDIRECT=False

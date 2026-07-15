@@ -253,6 +253,22 @@ class LoginForm(StyledFormMixin, AuthenticationForm):
         return super().clean()
 
 
+class DataAdminPasswordForm(StyledFormMixin, forms.Form):
+    password = forms.CharField(
+        label="管理员授权码",
+        widget=forms.PasswordInput(
+            attrs={
+                "autocomplete": "current-password",
+                "placeholder": "输入管理员授权码",
+            }
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_widget_classes()
+
+
 class FamilyForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Family

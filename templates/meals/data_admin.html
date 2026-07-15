@@ -1,0 +1,673 @@
+{% extends "base.html" %}
+
+{% block title %}数据管理 - 法米狗私厨{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+  <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-3">
+      <span class="inline-grid h-12 w-12 place-items-center rounded-full bg-base-100 text-stone-700 shadow-sm">
+        <i data-lucide="database" aria-hidden="true"></i>
+      </span>
+      <div class="min-w-0">
+        <h1 class="text-xl font-semibold">数据管理</h1>
+        <p class="truncate text-sm text-stone-500">只读后端数据总览</p>
+      </div>
+    </div>
+    <form method="post" action="{% url 'meals:data_admin_logout' %}">
+      {% csrf_token %}
+      <button class="btn btn-outline btn-sm">
+        <i data-lucide="log-out" aria-hidden="true"></i>
+        <span>退出</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">用户</div>
+      <div class="text-2xl font-bold">{{ counts.users }}</div>
+    </div>
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">家庭</div>
+      <div class="text-2xl font-bold">{{ counts.families }}</div>
+    </div>
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">菜品</div>
+      <div class="text-2xl font-bold">{{ counts.dishes }}</div>
+    </div>
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">排餐</div>
+      <div class="text-2xl font-bold">{{ counts.meal_plans }}</div>
+    </div>
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">排餐项</div>
+      <div class="text-2xl font-bold">{{ counts.meal_items }}</div>
+    </div>
+    <div class="rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm">
+      <div class="text-xs text-stone-500">消息</div>
+      <div class="text-2xl font-bold">{{ counts.notifications }}</div>
+    </div>
+  </div>
+
+  <div class="mb-4 grid gap-3 md:hidden">
+    <details open class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">用户账号</span>
+        <span class="badge badge-outline">{{ counts.users }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for account in users %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ account.username }}</h2>
+                <p class="truncate text-xs text-stone-500">ID {{ account.id }} · {{ account.email|default:"无邮箱" }}</p>
+              </div>
+              {% if account.is_active %}<span class="badge badge-success badge-sm">启用</span>{% else %}<span class="badge badge-warning badge-sm">停用</span>{% endif %}
+            </div>
+            <div class="grid gap-1 text-xs text-stone-500">
+              <div>加入：{{ account.date_joined|date:"Y-m-d H:i" }}</div>
+              <div>登录：{{ account.last_login|date:"Y-m-d H:i"|default:"-" }}</div>
+              {% if account.is_staff or account.is_superuser %}
+                <div class="flex flex-wrap gap-1">
+                  {% if account.is_staff %}<span class="badge badge-outline badge-sm">staff</span>{% endif %}
+                  {% if account.is_superuser %}<span class="badge badge-outline badge-sm">superuser</span>{% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无用户。</p>
+        {% endfor %}
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">家庭和成员</span>
+        <span class="badge badge-outline">{{ counts.families }} / {{ counts.family_members }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for family in families %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ family.name }}</h2>
+                <p class="text-xs text-stone-500">ID {{ family.id }} · 家主 {{ family.owner.username }}</p>
+              </div>
+              <span class="badge badge-outline badge-sm">{{ family.get_category_sort_mode_display }}</span>
+            </div>
+            <div class="grid gap-1 text-xs text-stone-500">
+              <div>邀请码：<code>{{ family.invite_code }}</code></div>
+              <div>创建：{{ family.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无家庭。</p>
+        {% endfor %}
+        <div class="mt-2 grid gap-2">
+          {% for member in family_members %}
+            <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <h3 class="truncate text-sm font-bold">{{ member.user.username }}</h3>
+                  <p class="truncate text-xs text-stone-500">{{ member.family.name }} · {{ member.joined_at|date:"Y-m-d H:i" }}</p>
+                </div>
+                <span class="badge badge-outline badge-sm">{{ member.role }}</span>
+              </div>
+            </article>
+          {% empty %}
+            <p class="py-4 text-center text-sm text-stone-500">暂无成员。</p>
+          {% endfor %}
+        </div>
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">资料和头像</span>
+        <span class="badge badge-outline">{{ counts.profiles }} / {{ counts.avatars }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for profile in profiles %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <h2 class="truncate text-sm font-bold">{{ profile.user.username }}</h2>
+            <div class="mt-2 grid gap-1 text-xs text-stone-500">
+              <div>手机号：{{ profile.phone_number|default:"-" }}</div>
+              <div>系统头像：{{ profile.default_avatar }}</div>
+              <div class="truncate">自定义头像：{% if profile.custom_avatar %}{{ profile.custom_avatar.image }}{% else %}-{% endif %}</div>
+              <div>更新：{{ profile.updated_at|date:"Y-m-d H:i" }}</div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无资料。</p>
+        {% endfor %}
+        {% for avatar in avatars %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <h3 class="truncate text-sm font-bold">{{ avatar.user.username }} 的头像</h3>
+            <p class="mt-1 truncate text-xs text-stone-500">ID {{ avatar.id }} · {{ avatar.image }}</p>
+            <p class="text-xs text-stone-500">上传：{{ avatar.created_at|date:"Y-m-d H:i" }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">分类和菜品</span>
+        <span class="badge badge-outline">{{ counts.categories }} / {{ counts.dishes }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for category in categories %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ category.name }}</h2>
+                <p class="truncate text-xs text-stone-500">ID {{ category.id }} · {{ category.family.name }}</p>
+              </div>
+              <span class="badge badge-outline badge-sm">{{ category.get_meal_section_display }}</span>
+            </div>
+            <p class="mt-1 text-xs text-stone-500">排序 {{ category.sort_order }} · {{ category.created_at|date:"Y-m-d H:i" }}</p>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无分类。</p>
+        {% endfor %}
+        {% for dish in dishes %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ dish.name }}</h2>
+                <p class="truncate text-xs text-stone-500">ID {{ dish.id }} · {{ dish.family.name }}</p>
+              </div>
+              <span class="badge badge-outline badge-sm">{{ dish.meal_section_labels|join:", " }}</span>
+            </div>
+            <div class="grid gap-1 text-xs text-stone-500">
+              <div class="truncate">分类：{{ dish.category_labels|join:", "|default:"-" }}</div>
+              <div class="truncate">图片：{% if dish.image %}{{ dish.image }}{% else %}默认{% endif %}</div>
+              <div>创建人：{% if dish.created_by %}{{ dish.created_by.username }}{% else %}-{% endif %}</div>
+              <div class="flex flex-wrap gap-1">
+                {% if dish.supports_spice %}<span class="badge badge-outline badge-sm">辣度</span>{% endif %}
+                {% if dish.supports_ice %}<span class="badge badge-outline badge-sm">冰量</span>{% endif %}
+                {% if dish.supports_warm %}<span class="badge badge-outline badge-sm">温热</span>{% endif %}
+                {% if not dish.supports_spice and not dish.supports_ice and not dish.supports_warm %}<span>-</span>{% endif %}
+              </div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无菜品。</p>
+        {% endfor %}
+        {% for link in dish_section_links %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <h3 class="truncate text-sm font-bold">{{ link.dish.name }}</h3>
+            <p class="mt-1 truncate text-xs text-stone-500">关联 ID {{ link.id }} · {{ link.dish.family.name }}</p>
+            <p class="text-xs text-stone-500">大类：{{ link.get_meal_section_display }}</p>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无菜品大类关联。</p>
+        {% endfor %}
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">排餐和排餐项</span>
+        <span class="badge badge-outline">{{ counts.meal_plans }} / {{ counts.meal_items }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for plan in meal_plans %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ plan.family.name }}</h2>
+                <p class="text-xs text-stone-500">ID {{ plan.id }} · {{ plan.date|date:"Y-m-d" }}</p>
+              </div>
+              <span class="badge badge-outline badge-sm">{{ plan.get_meal_type_display }}</span>
+            </div>
+            <p class="mt-1 text-xs text-stone-500">项目 {{ plan.items.count }} · 更新 {{ plan.updated_at|date:"Y-m-d H:i" }}</p>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无排餐。</p>
+        {% endfor %}
+        {% for item in meal_items %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ item.dish.name }} x{{ item.quantity }}</h2>
+                <p class="truncate text-xs text-stone-500">{{ item.meal_plan.family.name }} · {{ item.meal_plan.date|date:"Y-m-d" }} {{ item.meal_plan.get_meal_type_display }}</p>
+              </div>
+              <span class="badge badge-outline badge-sm">ID {{ item.id }}</span>
+            </div>
+            <div class="grid gap-1 text-xs text-stone-500">
+              <div>选项：{{ item.spice_level_label|default:"" }} {{ item.ice_level_label|default:"" }} {{ item.warm_label|default:"" }}</div>
+              <div class="truncate">备注：{{ item.note|default:"-" }}</div>
+              <div>添加人：{% if item.created_by %}{{ item.created_by.username }}{% else %}-{% endif %}</div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无排餐项。</p>
+        {% endfor %}
+      </div>
+    </details>
+
+    <details open class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-3">
+        <span class="font-semibold">消息和邮件状态</span>
+        <span class="badge badge-outline">{{ counts.notifications }}</span>
+      </summary>
+      <div class="grid gap-2 border-t border-base-300 p-3">
+        {% for notification in notifications %}
+          <article class="rounded-lg border border-base-300 bg-base-100 p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h2 class="truncate text-sm font-bold">{{ notification.get_kind_display }}</h2>
+                <p class="truncate text-xs text-stone-500">ID {{ notification.id }} · {{ notification.family.name }}</p>
+              </div>
+              {% if notification.email_status %}
+                <span class="badge badge-sm {% if notification.email_status == notification.EMAIL_SENT %}badge-success{% elif notification.email_status == notification.EMAIL_FAILED %}badge-error{% elif notification.email_status == notification.EMAIL_SKIPPED %}badge-warning{% else %}badge-info{% endif %}">
+                  {{ notification.get_email_status_display }}
+                </span>
+              {% endif %}
+            </div>
+            <div class="grid gap-1 text-xs text-stone-500">
+              <div>发送人：{% if notification.actor %}{{ notification.actor.username }}{% else %}-{% endif %}</div>
+              <div>收件人：{% if notification.recipient %}{{ notification.recipient.username }}{% else %}家庭记录{% endif %}</div>
+              <div>{{ notification.meal_plan_date|date:"Y-m-d" }} {{ notification.meal_type_label }}</div>
+              <div class="line-clamp-2">{% if notification.is_family_message %}{{ notification.message_body }}{% else %}{{ notification.change_summary }}{% endif %}</div>
+              {% if notification.email_error %}<div class="truncate">错误：{{ notification.email_error }}</div>{% endif %}
+              <div>创建：{{ notification.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="py-4 text-center text-sm text-stone-500">暂无消息。</p>
+        {% endfor %}
+      </div>
+    </details>
+  </div>
+
+  <div class="hidden gap-4 md:grid">
+    <details open class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">用户账号</span>
+        <span class="badge badge-outline">{{ counts.users }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用户名</th>
+              <th>邮箱</th>
+              <th>状态</th>
+              <th>加入时间</th>
+              <th>最后登录</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for account in users %}
+              <tr>
+                <td>{{ account.id }}</td>
+                <td class="font-medium">{{ account.username }}</td>
+                <td>{{ account.email|default:"-" }}</td>
+                <td>
+                  {% if account.is_active %}<span class="badge badge-success badge-sm">启用</span>{% else %}<span class="badge badge-warning badge-sm">停用</span>{% endif %}
+                  {% if account.is_staff %}<span class="badge badge-outline badge-sm">staff</span>{% endif %}
+                  {% if account.is_superuser %}<span class="badge badge-outline badge-sm">superuser</span>{% endif %}
+                </td>
+                <td>{{ account.date_joined|date:"Y-m-d H:i" }}</td>
+                <td>{{ account.last_login|date:"Y-m-d H:i"|default:"-" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-stone-500">暂无用户。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">家庭和成员</span>
+        <span class="badge badge-outline">{{ counts.families }} / {{ counts.family_members }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>家主</th>
+              <th>邀请码</th>
+              <th>分类排序</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for family in families %}
+              <tr>
+                <td>{{ family.id }}</td>
+                <td class="font-medium">{{ family.name }}</td>
+                <td>{{ family.owner.username }}</td>
+                <td><code>{{ family.invite_code }}</code></td>
+                <td>{{ family.get_category_sort_mode_display }}</td>
+                <td>{{ family.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-stone-500">暂无家庭。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>成员</th>
+              <th>角色</th>
+              <th>加入时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in family_members %}
+              <tr>
+                <td>{{ member.id }}</td>
+                <td>{{ member.family.name }}</td>
+                <td class="font-medium">{{ member.user.username }}</td>
+                <td>{{ member.role }}</td>
+                <td>{{ member.joined_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="text-center text-stone-500">暂无成员。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">资料和头像</span>
+        <span class="badge badge-outline">{{ counts.profiles }} / {{ counts.avatars }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>手机号</th>
+              <th>系统头像</th>
+              <th>自定义头像</th>
+              <th>更新时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for profile in profiles %}
+              <tr>
+                <td class="font-medium">{{ profile.user.username }}</td>
+                <td>{{ profile.phone_number|default:"-" }}</td>
+                <td>{{ profile.default_avatar }}</td>
+                <td>{% if profile.custom_avatar %}{{ profile.custom_avatar.image }}{% else %}-{% endif %}</td>
+                <td>{{ profile.updated_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="text-center text-stone-500">暂无资料。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用户</th>
+              <th>图片路径</th>
+              <th>上传时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for avatar in avatars %}
+              <tr>
+                <td>{{ avatar.id }}</td>
+                <td>{{ avatar.user.username }}</td>
+                <td>{{ avatar.image }}</td>
+                <td>{{ avatar.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-center text-stone-500">暂无自定义头像。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">分类和菜品</span>
+        <span class="badge badge-outline">{{ counts.categories }} / {{ counts.dishes }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>分类</th>
+              <th>大类</th>
+              <th>排序</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+              <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ category.family.name }}</td>
+                <td class="font-medium">{{ category.name }}</td>
+                <td>{{ category.get_meal_section_display }}</td>
+                <td>{{ category.sort_order }}</td>
+                <td>{{ category.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-stone-500">暂无分类。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>菜品</th>
+              <th>大类</th>
+              <th>分类</th>
+              <th>能力</th>
+              <th>图片</th>
+              <th>创建人</th>
+              <th>更新时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dish in dishes %}
+              <tr>
+                <td>{{ dish.id }}</td>
+                <td>{{ dish.family.name }}</td>
+                <td class="font-medium">{{ dish.name }}</td>
+                <td>{{ dish.meal_section_labels|join:", " }}</td>
+                <td>{{ dish.category_labels|join:", "|default:"-" }}</td>
+                <td>
+                  {% if dish.supports_spice %}<span class="badge badge-outline badge-sm">辣度</span>{% endif %}
+                  {% if dish.supports_ice %}<span class="badge badge-outline badge-sm">冰量</span>{% endif %}
+                  {% if dish.supports_warm %}<span class="badge badge-outline badge-sm">温热</span>{% endif %}
+                  {% if not dish.supports_spice and not dish.supports_ice and not dish.supports_warm %}-{% endif %}
+                </td>
+                <td>{% if dish.image %}{{ dish.image }}{% else %}默认{% endif %}</td>
+                <td>{% if dish.created_by %}{{ dish.created_by.username }}{% else %}-{% endif %}</td>
+                <td>{{ dish.updated_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="9" class="text-center text-stone-500">暂无菜品。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>菜品</th>
+              <th>家庭</th>
+              <th>大类</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for link in dish_section_links %}
+              <tr>
+                <td>{{ link.id }}</td>
+                <td>{{ link.dish.name }}</td>
+                <td>{{ link.dish.family.name }}</td>
+                <td>{{ link.get_meal_section_display }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-center text-stone-500">暂无菜品大类关联。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">排餐和排餐项</span>
+        <span class="badge badge-outline">{{ counts.meal_plans }} / {{ counts.meal_items }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>日期</th>
+              <th>餐次</th>
+              <th>项目数</th>
+              <th>更新时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for plan in meal_plans %}
+              <tr>
+                <td>{{ plan.id }}</td>
+                <td>{{ plan.family.name }}</td>
+                <td>{{ plan.date|date:"Y-m-d" }}</td>
+                <td>{{ plan.get_meal_type_display }}</td>
+                <td>{{ plan.items.count }}</td>
+                <td>{{ plan.updated_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-stone-500">暂无排餐。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>家庭</th>
+              <th>日期</th>
+              <th>餐次</th>
+              <th>菜品</th>
+              <th>数量</th>
+              <th>选项</th>
+              <th>备注</th>
+              <th>添加人</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in meal_items %}
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.meal_plan.family.name }}</td>
+                <td>{{ item.meal_plan.date|date:"Y-m-d" }}</td>
+                <td>{{ item.meal_plan.get_meal_type_display }}</td>
+                <td class="font-medium">{{ item.dish.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                  {{ item.spice_level_label|default:"" }}
+                  {{ item.ice_level_label|default:"" }}
+                  {{ item.warm_label|default:"" }}
+                  {% if not item.spice_level_label and not item.ice_level_label and not item.warm_label %}-{% endif %}
+                </td>
+                <td class="max-w-xs truncate">{{ item.note|default:"-" }}</td>
+                <td>{% if item.created_by %}{{ item.created_by.username }}{% else %}-{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="9" class="text-center text-stone-500">暂无排餐项。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details open class="rounded-lg border border-base-300 bg-base-100 shadow-sm">
+      <summary class="flex items-center justify-between gap-3 p-4">
+        <span class="font-semibold">消息和邮件状态</span>
+        <span class="badge badge-outline">{{ counts.notifications }}</span>
+      </summary>
+      <div class="overflow-x-auto border-t border-base-300">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>类型</th>
+              <th>家庭</th>
+              <th>发送人</th>
+              <th>收件人</th>
+              <th>日期/餐次</th>
+              <th>摘要</th>
+              <th>邮件</th>
+              <th>隐藏</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for notification in notifications %}
+              <tr>
+                <td>{{ notification.id }}</td>
+                <td>{{ notification.get_kind_display }}</td>
+                <td>{{ notification.family.name }}</td>
+                <td>{% if notification.actor %}{{ notification.actor.username }}{% else %}-{% endif %}</td>
+                <td>{% if notification.recipient %}{{ notification.recipient.username }}{% else %}家庭记录{% endif %}</td>
+                <td>{{ notification.meal_plan_date|date:"Y-m-d" }} {{ notification.meal_type_label }}</td>
+                <td class="max-w-sm truncate">{% if notification.is_family_message %}{{ notification.message_body }}{% else %}{{ notification.change_summary }}{% endif %}</td>
+                <td>
+                  {% if notification.email_status %}
+                    <span class="badge badge-sm {% if notification.email_status == notification.EMAIL_SENT %}badge-success{% elif notification.email_status == notification.EMAIL_FAILED %}badge-error{% elif notification.email_status == notification.EMAIL_SKIPPED %}badge-warning{% else %}badge-info{% endif %}">
+                      {{ notification.get_email_status_display }}
+                    </span>
+                    {% if notification.email_error %}
+                      <span class="block max-w-xs truncate text-xs text-stone-500">{{ notification.email_error }}</span>
+                    {% endif %}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>{% if notification.recipient_deleted_at %}{{ notification.recipient_deleted_at|date:"Y-m-d H:i" }}{% else %}-{% endif %}</td>
+                <td>{{ notification.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="10" class="text-center text-stone-500">暂无消息。</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+{% endblock %}

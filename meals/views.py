@@ -1,6 +1,10 @@
+import secrets
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
@@ -18,11 +22,13 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .forms import (
     AvatarChoiceForm,
     AvatarUploadForm,
+    DataAdminPasswordForm,
     DishCategoryForm,
     DishForm,
     FamilyForm,
@@ -170,6 +176,27 @@ CATEGORY_SORT_MODE_SEQUENCE = [
     Family.CATEGORY_SORT_NAME_DESC,
     Family.CATEGORY_SORT_CUSTOM,
 ]
+DATA_ADMIN_SESSION_KEY = "famkitchen_data_admin_verified"
+
+
+def family_notification_visible_q(user):
+    return (
+        Q(recipient=user, recipient_deleted_at__isnull=True)
+        | Q(actor=user, recipient__isnull=False)
+        | Q(recipient__isnull=True)
+    )
+
+
+def is_data_admin_verified(request):
+    return bool(request.session.get(DATA_ADMIN_SESSION_KEY))
+
+
+def data_admin_password_matches(password):
+    configured_password = settings.DATA_ADMIN_PASSWORD
+    return bool(configured_password) and secrets.compare_digest(
+        password,
+        configured_password,
+    )
 
 
 def is_family_owner(user, family):
@@ -980,6 +1007,120 @@ def shopping_view(request):
     return render(request, "meals/shopping.html", {"family": family})
 
 
+def data_admin_context():
+    users = User.objects.order_by("id")
+    families = Family.objects.select_related("owner").order_by("id")
+    family_members = (
+        FamilyMember.objects.select_related("family", "user").order_by("family_id", "id")
+    )
+    profiles = (
+        UserProfile.objects.select_related("user", "custom_avatar").order_by("user_id")
+    )
+    avatars = UserAvatar.objects.select_related("user").order_by("-created_at", "-id")
+    categories = (
+        DishCategory.objects.select_related("family").order_by(
+            "family_id",
+            "meal_section",
+            "sort_order",
+            "name",
+        )
+    )
+    dishes = (
+        Dish.objects.select_related("family", "category", "created_by")
+        .prefetch_related("categories", "meal_section_links")
+        .order_by("family_id", "meal_section", "name")
+    )
+    dish_section_links = (
+        DishMealSection.objects.select_related("dish", "dish__family")
+        .order_by("dish_id", "meal_section")
+    )
+    meal_plans = (
+        MealPlan.objects.select_related("family")
+        .prefetch_related("items", "items__dish", "items__created_by")
+        .order_by("-date", "family_id", "meal_type")
+    )
+    meal_items = (
+        MealPlanItem.objects.select_related(
+            "meal_plan",
+            "meal_plan__family",
+            "dish",
+            "created_by",
+        )
+        .order_by("-meal_plan__date", "meal_plan__meal_type", "id")
+    )
+    notifications = (
+        FamilyNotification.objects.select_related("family", "actor", "recipient")
+        .order_by("-created_at", "-id")
+    )
+    counts = {
+        "users": users.count(),
+        "families": families.count(),
+        "family_members": family_members.count(),
+        "profiles": profiles.count(),
+        "avatars": avatars.count(),
+        "categories": categories.count(),
+        "dishes": dishes.count(),
+        "dish_section_links": dish_section_links.count(),
+        "meal_plans": meal_plans.count(),
+        "meal_items": meal_items.count(),
+        "notifications": notifications.count(),
+    }
+    return {
+        "counts": counts,
+        "users": users,
+        "families": families,
+        "family_members": family_members,
+        "profiles": profiles,
+        "avatars": avatars,
+        "categories": categories,
+        "dishes": dishes,
+        "dish_section_links": dish_section_links,
+        "meal_plans": meal_plans,
+        "meal_items": meal_items,
+        "notifications": notifications,
+    }
+
+
+@never_cache
+def data_admin_view(request):
+    if is_data_admin_verified(request):
+        return render(request, "meals/data_admin.html", data_admin_context())
+
+    form = DataAdminPasswordForm(request.POST or None)
+    password_configured = bool(settings.DATA_ADMIN_PASSWORD)
+    if request.method == "POST":
+        if not password_configured:
+            messages.error(request, "数据管理入口暂未启用，请联系管理员。")
+        elif form.is_valid() and data_admin_password_matches(
+            form.cleaned_data["password"]
+        ):
+            request.session[DATA_ADMIN_SESSION_KEY] = True
+            request.session.modified = True
+            messages.success(request, "已进入数据管理。")
+            return redirect("meals:data_admin")
+        else:
+            messages.error(request, "管理员授权码不正确，请重新输入。")
+
+    return render(
+        request,
+        "meals/data_admin_login.html",
+        {
+            "form": form,
+            "password_configured": password_configured,
+        },
+    )
+
+
+@never_cache
+@require_POST
+def data_admin_logout_view(request):
+    request.session.pop(DATA_ADMIN_SESSION_KEY, None)
+    messages.success(request, "已退出数据管理。")
+    if request.user.is_authenticated:
+        return redirect(settings.LOGIN_REDIRECT_URL)
+    return redirect("login")
+
+
 @login_required
 def family_notifications_view(request):
     family = get_current_family(request)
@@ -988,6 +1129,7 @@ def family_notifications_view(request):
 
     notifications = (
         FamilyNotification.objects.filter(family=family)
+        .filter(family_notification_visible_q(request.user))
         .select_related("actor", "recipient", "family")
         .order_by("-created_at", "-id")
     )
@@ -1010,11 +1152,15 @@ def family_notifications_clear_view(request):
     if not family:
         return redirect("meals:family_create")
 
-    deleted_count, _details = FamilyNotification.objects.filter(family=family).delete()
-    if deleted_count:
-        messages.success(request, "已清空家庭消息。")
+    hidden_count = FamilyNotification.objects.filter(
+        family=family,
+        recipient=request.user,
+        recipient_deleted_at__isnull=True,
+    ).update(recipient_deleted_at=timezone.now())
+    if hidden_count:
+        messages.success(request, "已清空你的收件箱消息。")
     else:
-        messages.info(request, "当前还没有家庭消息。")
+        messages.info(request, "当前没有需要清空的收件箱消息。")
     return redirect("meals:notifications")
 
 
@@ -1029,8 +1175,11 @@ def family_notification_delete_view(request, notification_id):
         FamilyNotification,
         id=notification_id,
         family=family,
+        recipient=request.user,
+        recipient_deleted_at__isnull=True,
     )
-    notification.delete()
+    notification.recipient_deleted_at = timezone.now()
+    notification.save(update_fields=["recipient_deleted_at"])
     messages.success(request, "已删除这条消息。")
     return redirect("meals:notifications")
 
@@ -1091,6 +1240,7 @@ def family_message_thread_view(request, thread_id):
             kind=FamilyNotification.KIND_MESSAGE,
             message_thread_id=thread_id,
         )
+        .filter(family_notification_visible_q(request.user))
         .select_related("actor", "recipient", "family")
         .order_by("created_at", "id")
     )

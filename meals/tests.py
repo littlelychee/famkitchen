@@ -43,6 +43,13 @@ def uploaded_test_image(name="test.png", image_format="PNG"):
 
 
 class LoginFeedbackTests(TestCase):
+    def test_login_page_links_to_data_admin_for_unauthed_users(self):
+        response = self.client.get(reverse("login"))
+
+        self.assertContains(response, "-&gt; 切换管理")
+        self.assertContains(response, "btn btn-outline btn-sm")
+        self.assertContains(response, reverse("meals:data_admin"))
+
     def test_invalid_credentials_use_toast_without_inline_error_box(self):
         User.objects.create_user(username="owner", password="correct-password")
 
@@ -561,6 +568,14 @@ class FamilySwitchingAndProfileUpdateTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, "new_owner")
 
+    def test_profile_links_to_data_admin_above_logout(self):
+        response = self.client.get(reverse("meals:profile"))
+        html = response.content.decode()
+
+        self.assertContains(response, "切换管理")
+        self.assertContains(response, reverse("meals:data_admin"))
+        self.assertLess(html.index("切换管理"), html.index("退出登录"))
+
     def test_owner_can_update_current_family_name(self):
         session = self.client.session
         session["current_family_id"] = self.second_family.id
@@ -575,10 +590,10 @@ class FamilySwitchingAndProfileUpdateTests(TestCase):
         self.second_family.refresh_from_db()
         self.assertEqual(self.second_family.name, "新的家名")
 
-    def test_top_header_shows_v15_version_and_rotating_logo(self):
+    def test_top_header_shows_v16_version_and_rotating_logo(self):
         response = self.client.get(reverse("meals:meal_plan"))
 
-        self.assertContains(response, "当前版本：v1.5")
+        self.assertContains(response, "当前版本：v1.6")
         self.assertContains(response, "images/logo-candidates/v14-02.svg")
 
 
@@ -1292,6 +1307,76 @@ class FamilyNotificationTests(TestCase):
             mail.outbox[0].body,
         )
 
+    def test_notification_email_status_records_sent_and_trims_address(self):
+        padded = User.objects.create_user(
+            username="padded",
+            password="password",
+            email=" padded@example.com ",
+        )
+        FamilyMember.objects.create(family=self.family, user=padded)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            create_family_notifications(
+                family=self.family,
+                actor=self.owner,
+                recipient_ids=[padded.id],
+                meal_plan_date=date(2026, 7, 11),
+                meal_type=MealPlan.LUNCH,
+                change_summary="2026-07-11 午餐：米饭",
+            )
+
+        notification = FamilyNotification.objects.get(recipient=padded)
+        self.assertEqual(notification.email_status, FamilyNotification.EMAIL_SENT)
+        self.assertEqual(notification.email_error, "")
+        self.assertIsNotNone(notification.email_sent_at)
+        self.assertEqual(mail.outbox[0].to, ["padded@example.com"])
+
+    def test_notification_email_status_records_invalid_email(self):
+        invalid = User.objects.create_user(
+            username="invalid",
+            password="password",
+            email="invalid-address",
+        )
+        FamilyMember.objects.create(family=self.family, user=invalid)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            create_family_notifications(
+                family=self.family,
+                actor=self.owner,
+                recipient_ids=[invalid.id],
+                meal_plan_date=date(2026, 7, 11),
+                meal_type=MealPlan.LUNCH,
+                change_summary="2026-07-11 午餐：米饭",
+            )
+
+        notification = FamilyNotification.objects.get(recipient=invalid)
+        self.assertEqual(notification.email_status, FamilyNotification.EMAIL_FAILED)
+        self.assertIn("邮箱格式无效", notification.email_error)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_notification_email_status_records_missing_email(self):
+        no_email = User.objects.create_user(
+            username="noemail",
+            password="password",
+            email="",
+        )
+        FamilyMember.objects.create(family=self.family, user=no_email)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            create_family_notifications(
+                family=self.family,
+                actor=self.owner,
+                recipient_ids=[no_email.id],
+                meal_plan_date=date(2026, 7, 11),
+                meal_type=MealPlan.LUNCH,
+                change_summary="2026-07-11 午餐：米饭",
+            )
+
+        notification = FamilyNotification.objects.get(recipient=no_email)
+        self.assertEqual(notification.email_status, FamilyNotification.EMAIL_SKIPPED)
+        self.assertIn("没有填写邮箱", notification.email_error)
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_notifications_keep_latest_fifty_per_family(self):
         for offset in range(55):
             create_family_notifications(
@@ -1332,6 +1417,24 @@ class FamilyNotificationTests(TestCase):
         self.assertNotContains(response, "最多保留 50 条")
         self.assertContains(response, f"{reverse('meals:meal_plan')}?date=2026-07-11")
 
+    def test_notifications_page_shows_email_status(self):
+        FamilyNotification.objects.create(
+            family=self.family,
+            actor=self.owner,
+            recipient=self.member,
+            meal_plan_date=date(2026, 7, 11),
+            meal_type=MealPlan.LUNCH,
+            change_summary="2026-07-11 午餐：米饭",
+            email_status=FamilyNotification.EMAIL_FAILED,
+            email_error="SMTP refused recipient",
+        )
+        self.client.force_login(self.member)
+
+        response = self.client.get(reverse("meals:notifications"))
+
+        self.assertContains(response, "邮件 发送失败")
+        self.assertContains(response, "SMTP refused recipient")
+
     def test_family_message_create_sends_email_and_opens_thread(self):
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.post(
@@ -1357,6 +1460,9 @@ class FamilyNotificationTests(TestCase):
         self.assertIn("法米狗私厨给的通知", mail.outbox[0].subject)
         self.assertIn("给你留了一条家庭消息", mail.outbox[0].subject)
         self.assertIn("今晚米饭多煮一点", mail.outbox[0].body)
+        notification.refresh_from_db()
+        self.assertEqual(notification.email_status, FamilyNotification.EMAIL_SENT)
+        self.assertIsNotNone(notification.email_sent_at)
 
         response = self.client.get(reverse("meals:notifications"))
         self.assertContains(response, "留言")
@@ -1397,7 +1503,7 @@ class FamilyNotificationTests(TestCase):
         self.assertEqual(str(reply.message_thread_id), str(initial.message_thread_id))
         self.assertEqual(len(mail.outbox), 1)
 
-    def test_family_member_can_delete_and_clear_notifications(self):
+    def test_family_member_can_hide_and_clear_own_inbox_notifications(self):
         first = FamilyNotification.objects.create(
             family=self.family,
             actor=self.owner,
@@ -1406,13 +1512,21 @@ class FamilyNotificationTests(TestCase):
             meal_type=MealPlan.LUNCH,
             change_summary="第一条",
         )
-        FamilyNotification.objects.create(
+        second = FamilyNotification.objects.create(
             family=self.family,
-            actor=self.member,
-            recipient=self.owner,
+            actor=self.owner,
+            recipient=self.member,
             meal_plan_date=date(2026, 7, 12),
             meal_type=MealPlan.DINNER,
             change_summary="第二条",
+        )
+        sent = FamilyNotification.objects.create(
+            family=self.family,
+            actor=self.member,
+            recipient=self.owner,
+            meal_plan_date=date(2026, 7, 13),
+            meal_type=MealPlan.LUNCH,
+            change_summary="我发出去的消息",
         )
         self.client.force_login(self.member)
 
@@ -1420,10 +1534,158 @@ class FamilyNotificationTests(TestCase):
             reverse("meals:notification_delete", args=[first.id])
         )
         self.assertRedirects(response, reverse("meals:notifications"))
-        self.assertFalse(FamilyNotification.objects.filter(id=first.id).exists())
-        self.assertEqual(FamilyNotification.objects.count(), 1)
+        first.refresh_from_db()
+        self.assertIsNotNone(first.recipient_deleted_at)
+        self.assertEqual(FamilyNotification.objects.count(), 3)
+
+        response = self.client.get(reverse("meals:notifications"))
+        self.assertNotContains(response, "第一条")
+        self.assertContains(response, "第二条")
+        self.assertContains(response, "我发出去的消息")
+
+        response = self.client.post(
+            reverse("meals:notification_delete", args=[sent.id])
+        )
+        self.assertEqual(response.status_code, 404)
+        sent.refresh_from_db()
+        self.assertIsNone(sent.recipient_deleted_at)
 
         response = self.client.post(reverse("meals:notifications_clear"))
 
         self.assertRedirects(response, reverse("meals:notifications"))
-        self.assertFalse(FamilyNotification.objects.exists())
+        second.refresh_from_db()
+        sent.refresh_from_db()
+        self.assertIsNotNone(second.recipient_deleted_at)
+        self.assertIsNone(sent.recipient_deleted_at)
+        self.assertEqual(FamilyNotification.objects.count(), 3)
+
+        response = self.client.get(reverse("meals:notifications"))
+        self.assertNotContains(response, "第二条")
+        self.assertContains(response, "我发出去的消息")
+
+
+@override_settings(DATA_ADMIN_PASSWORD="data-secret")
+class DataAdminAccessTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            username="owner",
+            password="password",
+            email="owner@example.com",
+        )
+        self.member = User.objects.create_user(
+            username="member",
+            password="password",
+            email="member@example.com",
+        )
+        self.family = Family.objects.create(name="测试家庭", owner=self.owner)
+        FamilyMember.objects.create(
+            family=self.family,
+            user=self.owner,
+            role="owner",
+        )
+        FamilyMember.objects.create(family=self.family, user=self.member)
+        self.category = DishCategory.objects.create(
+            family=self.family,
+            meal_section=DishCategory.LUNCH,
+            name="主食",
+        )
+        self.dish = Dish.objects.create(
+            family=self.family,
+            category=self.category,
+            meal_section=Dish.LUNCH,
+            name="米饭",
+            created_by=self.owner,
+        )
+        self.dish.categories.add(self.category)
+        meal_plan = MealPlan.objects.create(
+            family=self.family,
+            date=date(2026, 7, 15),
+            meal_type=MealPlan.LUNCH,
+        )
+        MealPlanItem.objects.create(
+            meal_plan=meal_plan,
+            dish=self.dish,
+            created_by=self.member,
+            quantity=2,
+            note="少盐",
+        )
+        FamilyNotification.objects.create(
+            family=self.family,
+            actor=self.owner,
+            recipient=self.member,
+            meal_plan_date=date(2026, 7, 15),
+            meal_type=MealPlan.LUNCH,
+            change_summary="米饭 x2",
+            email_status=FamilyNotification.EMAIL_SENT,
+        )
+
+    def test_data_admin_requires_password(self):
+        response = self.client.get(reverse("meals:data_admin"))
+
+        self.assertContains(response, "数据管理验证")
+        self.assertContains(response, "管理员授权码")
+        self.assertNotContains(response, ".env")
+        self.assertNotContains(response, "FAMKITCHEN_DATA_ADMIN_PASSWORD")
+        self.assertNotContains(response, "用户账号")
+
+    def test_data_admin_rejects_wrong_password(self):
+        response = self.client.post(
+            reverse("meals:data_admin"),
+            {"password": "wrong"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "管理员授权码不正确")
+        self.assertFalse(self.client.session.get("famkitchen_data_admin_verified"))
+
+    def test_data_admin_accepts_password_and_lists_backend_data(self):
+        response = self.client.post(
+            reverse("meals:data_admin"),
+            {"password": "data-secret"},
+        )
+
+        self.assertRedirects(response, reverse("meals:data_admin"))
+
+        response = self.client.get(reverse("meals:data_admin"))
+
+        self.assertContains(response, "数据管理")
+        self.assertContains(response, "用户账号")
+        self.assertContains(response, "md:hidden")
+        self.assertContains(response, "md:grid")
+        self.assertContains(response, "owner@example.com")
+        self.assertContains(response, "测试家庭")
+        self.assertContains(response, "米饭")
+        self.assertContains(response, "少盐")
+        self.assertContains(response, "已交给邮件服务器")
+        self.assertNotContains(response, "pbkdf2_")
+
+    def test_data_admin_logout_clears_access_and_returns_to_login(self):
+        self.client.post(reverse("meals:data_admin"), {"password": "data-secret"})
+
+        response = self.client.post(reverse("meals:data_admin_logout"))
+
+        self.assertRedirects(response, reverse("login"))
+        self.assertFalse(self.client.session.get("famkitchen_data_admin_verified"))
+        response = self.client.get(reverse("meals:data_admin"))
+        self.assertContains(response, "数据管理验证")
+
+    def test_data_admin_logout_returns_logged_in_user_to_main_page(self):
+        self.client.force_login(self.owner)
+        self.client.post(reverse("meals:data_admin"), {"password": "data-secret"})
+
+        response = self.client.post(reverse("meals:data_admin_logout"))
+
+        self.assertRedirects(response, reverse("meals:meal_plan"))
+        self.assertFalse(self.client.session.get("famkitchen_data_admin_verified"))
+        self.assertEqual(int(self.client.session["_auth_user_id"]), self.owner.id)
+
+
+@override_settings(DATA_ADMIN_PASSWORD="")
+class DataAdminUnconfiguredTests(TestCase):
+    def test_data_admin_is_disabled_without_env_password(self):
+        response = self.client.get(reverse("meals:data_admin"))
+
+        self.assertContains(response, "数据管理入口暂未启用")
+        self.assertNotContains(response, ".env")
+        self.assertNotContains(response, "FAMKITCHEN_DATA_ADMIN_PASSWORD")
+        self.assertContains(response, "disabled")

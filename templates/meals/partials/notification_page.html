@@ -11,6 +11,8 @@
       <div class="flex min-w-0 flex-wrap items-center gap-2">
         {% if notification.recipient_id == user.id %}
           <span class="badge badge-primary">{% if notification.is_family_message %}给你{% else %}提醒你{% endif %}</span>
+        {% elif notification.actor_id == user.id and notification.recipient %}
+          <span class="badge badge-outline">你发送</span>
         {% endif %}
         {% if notification.recipient %}
           <span class="badge badge-outline">给 {{ notification.recipient.username }}</span>
@@ -20,6 +22,14 @@
         <time class="text-xs font-medium text-stone-500" datetime="{{ notification.created_at|date:'c' }}">
           {{ notification.created_at|date:"Y-m-d H:i" }}
         </time>
+        {% if notification.email_status %}
+          <span
+            class="badge badge-sm {% if notification.email_status == notification.EMAIL_SENT %}badge-success{% elif notification.email_status == notification.EMAIL_FAILED %}badge-error{% elif notification.email_status == notification.EMAIL_SKIPPED %}badge-warning{% else %}badge-info{% endif %}"
+            {% if notification.email_error %}title="{{ notification.email_error }}"{% endif %}
+          >
+            邮件 {{ notification.get_email_status_display }}
+          </span>
+        {% endif %}
       </div>
       <p class="mt-1 text-sm font-semibold leading-snug">
         {% if notification.is_family_message %}
@@ -34,13 +44,15 @@
       {% endif %}
     </div>
     <div class="flex shrink-0 items-center gap-1">
-      <form method="post" action="{% url 'meals:notification_delete' notification.id %}">
-        {% csrf_token %}
-        <button class="btn btn-outline btn-xs icon-btn-sm" aria-label="删除这条消息" title="删除这条消息">
-          <i data-lucide="trash-2" aria-hidden="true"></i>
-          <span class="sr-only">删除</span>
-        </button>
-      </form>
+      {% if notification.recipient_id == user.id and not notification.recipient_deleted_at %}
+        <form method="post" action="{% url 'meals:notification_delete' notification.id %}">
+          {% csrf_token %}
+          <button class="btn btn-outline btn-xs icon-btn-sm" aria-label="删除这条消息" title="从你的收件箱删除">
+            <i data-lucide="trash-2" aria-hidden="true"></i>
+            <span class="sr-only">删除</span>
+          </button>
+        </form>
+      {% endif %}
       {% if notification.is_family_message %}
         <a href="{% url 'meals:notification_thread' notification.message_thread_id %}" class="btn btn-primary btn-xs icon-btn-sm" aria-label="查看留言" title="查看留言">
           <i data-lucide="chevron-right" aria-hidden="true"></i>
